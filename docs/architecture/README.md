@@ -2,11 +2,14 @@
 
 **Owner:** Ahmed Hamouda
 
-Two architectures are possible. They are identical except for **where the AI model runs**. The rest of this page describes Architecture A; [Architecture B](#architecture-b-ai-model-on-a-pc) is at the end.
+Two options are possible. They are identical except for **where the AI model runs**:
 
-## Architecture A: everything on the Raspberry Pi
+- **Option 1:** everything on the Raspberry Pi (main option)
+- **[Option 2](#option-2-ai-model-on-a-pc):** the AI model runs on a PC, and the Pi calls it over Wi-Fi
 
-![Nabta system architecture](architecture.svg)
+## Option 1: everything on the Raspberry Pi
+
+![Nabta architecture option 1](architecture.svg)
 
 Nabta runs on a **single Raspberry Pi** placed next to the plant. The sensors and the pump connect directly to it, and the same board stores the data, runs the AI assistant and serves the dashboard.
 
@@ -58,13 +61,13 @@ In phase 1 everything runs locally: **no internet connection is needed**.
 
 ---
 
-## Architecture B: AI model on a PC
+## Option 2: AI model on a PC
 
-![Nabta architecture B](architecture-pc.svg)
+![Nabta architecture option 2](architecture-pc.svg)
 
 Same system, but the **language model runs on a laptop/PC with a GPU** instead of on the Raspberry Pi. The Pi still reads the sensors, drives the pump, applies the safety rules, stores the data and serves the dashboard. When it needs the AI, the backend sends an **API request over Wi-Fi** to the model served on the PC (Ollama), and gets the proposed action back.
 
-### Watering decision in B
+### Watering decision in option 2
 1. The Pi's backend builds the context (readings, history, plant profile).
 2. It sends it as an API request to the model on the PC.
 3. The PC answers with a proposed action and an explanation.
@@ -75,13 +78,13 @@ Same system, but the **language model runs on a laptop/PC with a GPU** instead o
 - The safety layer and the pump timeout stay on the Pi, so the PC can never run the pump directly.
 
 ### Phase 2
-The cloud LLM API replaces the PC model, exactly like in Architecture A.
+The cloud LLM API replaces the PC model, exactly like in option 1.
 
 ---
 
-## A vs. B
+## Option 1 vs. option 2
 
-| | A – model on the Pi | B – model on a PC |
+| | Option 1 – model on the Pi | Option 2 – model on a PC |
 |---|---|---|
 | AI response time | Slower (CPU only) | Faster (GPU) |
 | Model size possible | Very small models only | Larger, smarter models |
@@ -89,4 +92,4 @@ The cloud LLM API replaces the PC model, exactly like in Architecture A.
 | Hardware cost | Needs a more powerful Pi | A smaller Pi is enough |
 | Closest to a real product | Yes | Good for development and demos |
 
-The backend talks to the model through the same API in both cases, so switching between A and B (or to the cloud API) is a configuration change, not a redesign.
+The backend talks to the model through the same API in both cases, so switching between the two options (or to the cloud API) is a configuration change, not a redesign.

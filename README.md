@@ -35,7 +35,7 @@ Sensors ──► Raspberry Pi ──► Dashboard + chat
 - **The AI assistant** decides whether to water, explains why, and answers questions. Hard safety rules always have the final word.
 - **Later phase:** the same assistant is connected to a cloud AI API and compared with the local model.
 
-See [`docs/architecture/`](docs/architecture/) for the detailed architecture.
+See [`docs/architecture/`](docs/architecture/) for the detailed architecture. A second option runs the AI model on a PC (with GPU) that the Raspberry Pi calls over Wi-Fi.
 
 ---
 

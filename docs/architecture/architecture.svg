@@ -9,7 +9,7 @@
   </defs>
   <rect width="1200" height="740" fill="#ffffff"/>
 
-  <text x="600" y="40" text-anchor="middle" font-size="24" font-weight="600" fill="#1F5FA8">Nabta – System Architecture</text>
+  <text x="600" y="40" text-anchor="middle" font-size="24" font-weight="600" fill="#1F5FA8">Nabta – Option 1: everything on the Raspberry Pi</text>
 
   <!-- Cloud API (phase 2) -->
   <rect x="660" y="60" width="220" height="50" rx="8" fill="#F5F5F3" stroke="#888" stroke-dasharray="6 4"/>
