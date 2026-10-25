@@ -2,7 +2,7 @@
 
 **Owner:** Aymen Saad
 
-Sensors, edge device, pump and wiring.
+Sensors, Raspberry Pi, pump and wiring.
 
 ## Folders
 
@@ -10,7 +10,7 @@ Sensors, edge device, pump and wiring.
 |---|---|
 | [`components/`](components/) | Final component list, prices and where to buy in Tunis |
 | [`wiring/`](wiring/) | Wiring diagrams and pin mapping |
-| [`firmware/`](firmware/) | Code that runs on the microcontroller / edge device |
+| [`firmware/`](firmware/) | Code that reads the sensors and drives the pump on the Raspberry Pi |
 
 ## Key requirement
 

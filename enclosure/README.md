@@ -16,5 +16,5 @@ The physical housing of Nabta, inspired by Sidi Bou Said architecture (white bas
 
 - Electronics kept separate from the water side
 - Visible water tank and screen window
-- Ventilation for the edge device
+- Ventilation for the Raspberry Pi
 - Printable in parts on a standard 3D printer

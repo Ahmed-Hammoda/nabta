@@ -24,13 +24,14 @@ Nabta senses the soil, air and light conditions of a plant, decides the right mo
 ## How it works (overview)
 
 ```
-Sensors ──► Edge device (runs a small language model) ──► Dashboard + chat
-   ▲                         │
-   └──────── Pump ◄──────────┘   (AI decision, checked by safety rules)
+Sensors ──► Raspberry Pi ──► Dashboard + chat
+               │   (small language model + safety rules)
+               ▼
+             Pump
 ```
 
 - **Sensors** measure soil moisture, temperature, humidity and light.
-- **The edge device** stores the data and runs a small language model locally, so the assistant works without internet.
+- **The Raspberry Pi** reads the sensors, stores the data and runs a small language model locally, so the assistant works without internet.
 - **The AI assistant** decides whether to water, explains why, and answers questions. Hard safety rules always have the final word.
 - **Later phase:** the same assistant is connected to a cloud AI API and compared with the local model.
 

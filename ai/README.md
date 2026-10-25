@@ -15,6 +15,6 @@ The brain of Nabta: it reads the plant's data, decides whether to water, explain
 
 ## Phases
 
-1. **Local:** a small language model running on the edge device.
+1. **Local:** a small language model running on the Raspberry Pi.
 2. **Cloud:** the same assistant connected to a cloud AI API.
 3. **Comparison:** both tested on the same scenarios (accuracy, response time, cost).
