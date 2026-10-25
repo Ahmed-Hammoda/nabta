@@ -1,4 +1,4 @@
-# Nabta (نبتة) – AI Smart Irrigation Assistant
+# Nabta – AI Smart Irrigation Assistant
 
 > A smart plant-care device that watches over a plant around the clock and waters it only when it truly needs it.
 
