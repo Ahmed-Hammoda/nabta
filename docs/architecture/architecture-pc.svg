@@ -1,0 +1,109 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 740" width="1200" height="740" font-family="Segoe UI, Helvetica, Arial, sans-serif">
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M1 1L9 5L1 9" fill="none" stroke="#444" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+    </marker>
+    <marker id="ag" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M1 1L9 5L1 9" fill="none" stroke="#888" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+    </marker>
+  </defs>
+  <rect width="1200" height="740" fill="#ffffff"/>
+
+  <text x="600" y="40" text-anchor="middle" font-size="24" font-weight="600" fill="#1F5FA8">Nabta – Architecture B: AI model on a PC</text>
+
+  <!-- Physical devices -->
+  <rect x="40" y="170" width="230" height="140" rx="8" fill="#E1F5EE" stroke="#0F6E56"/>
+  <text x="155" y="195" text-anchor="middle" font-size="14" font-weight="600" fill="#085041">Sensors</text>
+  <text x="58" y="222" font-size="12" fill="#085041">• Soil moisture (capacitive)</text>
+  <text x="58" y="242" font-size="12" fill="#085041">• Air temperature &amp; humidity</text>
+  <text x="58" y="262" font-size="12" fill="#085041">• Light level</text>
+  <text x="58" y="282" font-size="12" fill="#085041">• Water tank level</text>
+
+  <rect x="40" y="420" width="230" height="90" rx="8" fill="#E1F5EE" stroke="#0F6E56"/>
+  <text x="155" y="455" text-anchor="middle" font-size="14" font-weight="600" fill="#085041">Relay + 5 V pump</text>
+  <text x="155" y="478" text-anchor="middle" font-size="12" fill="#085041">Waters the plant</text>
+
+  <!-- Raspberry Pi container -->
+  <rect x="320" y="130" width="300" height="510" rx="16" fill="#EEEDFE" stroke="#534AB7"/>
+  <text x="470" y="157" text-anchor="middle" font-size="16" font-weight="600" fill="#3C3489">Raspberry Pi</text>
+
+  <rect x="345" y="175" width="250" height="100" rx="8" fill="#ffffff" stroke="#534AB7"/>
+  <text x="470" y="200" text-anchor="middle" font-size="14" font-weight="600" fill="#3C3489">Hardware control</text>
+  <text x="470" y="222" text-anchor="middle" font-size="12" fill="#333">Reads sensors · drives the pump</text>
+  <text x="470" y="250" text-anchor="middle" font-size="12" fill="#A32D2D">Pump timeout (failsafe)</text>
+
+  <rect x="345" y="310" width="250" height="90" rx="8" fill="#ffffff" stroke="#534AB7"/>
+  <text x="470" y="336" text-anchor="middle" font-size="14" font-weight="600" fill="#3C3489">Backend server</text>
+  <text x="470" y="359" text-anchor="middle" font-size="12" fill="#333">Decision scheduler</text>
+  <text x="470" y="377" text-anchor="middle" font-size="12" fill="#333">API for the dashboard</text>
+
+  <rect x="345" y="435" width="250" height="80" rx="8" fill="#FAECE7" stroke="#993C1D"/>
+  <text x="470" y="463" text-anchor="middle" font-size="14" font-weight="600" fill="#712B13">Safety layer</text>
+  <text x="470" y="485" text-anchor="middle" font-size="12" fill="#712B13">Hard rules · final say</text>
+
+  <rect x="345" y="550" width="250" height="70" rx="8" fill="#ffffff" stroke="#534AB7"/>
+  <text x="470" y="577" text-anchor="middle" font-size="14" font-weight="600" fill="#3C3489">Database</text>
+  <text x="470" y="598" text-anchor="middle" font-size="12" fill="#333">Readings · decisions · chat</text>
+
+  <!-- PC container -->
+  <rect x="690" y="130" width="280" height="270" rx="16" fill="#FAEEDA" stroke="#854F0B"/>
+  <text x="830" y="157" text-anchor="middle" font-size="16" font-weight="600" fill="#633806">Laptop / PC (GPU)</text>
+  <rect x="715" y="180" width="230" height="120" rx="8" fill="#ffffff" stroke="#854F0B"/>
+  <text x="830" y="205" text-anchor="middle" font-size="14" font-weight="600" fill="#633806">AI assistant</text>
+  <text x="830" y="229" text-anchor="middle" font-size="12" fill="#333">Small language model</text>
+  <text x="830" y="247" text-anchor="middle" font-size="12" fill="#333">served as an API (Ollama)</text>
+  <text x="830" y="271" text-anchor="middle" font-size="12" fill="#333">+ plant knowledge base</text>
+  <text x="830" y="345" text-anchor="middle" font-size="12" fill="#633806">Faster answers thanks</text>
+  <text x="830" y="363" text-anchor="middle" font-size="12" fill="#633806">to the GPU</text>
+
+  <!-- Cloud API (phase 2) -->
+  <rect x="715" y="540" width="230" height="60" rx="8" fill="#F5F5F3" stroke="#888" stroke-dasharray="6 4"/>
+  <text x="830" y="565" text-anchor="middle" font-size="14" font-weight="600" fill="#444">Cloud LLM API</text>
+  <text x="830" y="584" text-anchor="middle" font-size="12" fill="#666">phase 2 – replaces the PC model</text>
+  <line x1="830" y1="536" x2="830" y2="404" stroke="#888" stroke-width="1.5" stroke-dasharray="6 4" marker-start="url(#ag)" marker-end="url(#ag)"/>
+
+  <!-- Dashboard / user -->
+  <rect x="1010" y="290" width="165" height="105" rx="8" fill="#E6F1FB" stroke="#185FA5"/>
+  <text x="1092" y="318" text-anchor="middle" font-size="14" font-weight="600" fill="#0C447C">Web dashboard</text>
+  <text x="1092" y="342" text-anchor="middle" font-size="12" fill="#0C447C">Status · history</text>
+  <text x="1092" y="360" text-anchor="middle" font-size="12" fill="#0C447C">Watering log · chat</text>
+
+  <rect x="1010" y="470" width="165" height="60" rx="8" fill="#F5F5F3" stroke="#888"/>
+  <text x="1092" y="497" text-anchor="middle" font-size="14" font-weight="600" fill="#444">User</text>
+  <text x="1092" y="515" text-anchor="middle" font-size="12" fill="#666">Phone or laptop</text>
+
+  <!-- Sensors -> hardware control -->
+  <line x1="270" y1="225" x2="341" y2="225" stroke="#444" stroke-width="1.5" marker-end="url(#a)"/>
+  <text x="274" y="214" font-size="12" fill="#0F6E56">GPIO · I²C</text>
+  <!-- hardware control -> pump -->
+  <path d="M345 258 L300 258 L300 465 L274 465" fill="none" stroke="#444" stroke-width="1.5" marker-end="url(#a)"/>
+
+  <!-- hardware <-> backend -->
+  <line x1="470" y1="275" x2="470" y2="306" stroke="#444" stroke-width="1.5" marker-start="url(#a)" marker-end="url(#a)"/>
+  <!-- safety -> backend -->
+  <line x1="470" y1="435" x2="470" y2="404" stroke="#444" stroke-width="1.5" marker-end="url(#a)"/>
+  <!-- backend <-> database -->
+  <path d="M345 390 L332 390 L332 585 L341 585" fill="none" stroke="#444" stroke-width="1.5" marker-start="url(#a)" marker-end="url(#a)"/>
+
+  <!-- backend -> AI (Wi-Fi API request) -->
+  <path d="M595 335 L650 335 L650 240 L711 240" fill="none" stroke="#444" stroke-width="1.5" marker-end="url(#a)"/>
+  <text x="626" y="230" font-size="12" fill="#633806">API call</text>
+  <!-- AI -> safety (answer) -->
+  <path d="M715 280 L665 280 L665 470 L599 470" fill="none" stroke="#444" stroke-width="1.5" marker-end="url(#a)"/>
+  <text x="672" y="430" font-size="12" fill="#633806">proposed action</text>
+
+  <!-- backend <-> dashboard -->
+  <path d="M595 318 L607 318 L607 105 L1092 105 L1092 286" fill="none" stroke="#444" stroke-width="1.5" marker-start="url(#a)" marker-end="url(#a)"/>
+  <text x="866" y="96" text-anchor="middle" font-size="12" fill="#185FA5">live data · chat messages</text>
+  <!-- dashboard <-> user -->
+  <line x1="1092" y1="395" x2="1092" y2="466" stroke="#444" stroke-width="1.5" marker-start="url(#a)" marker-end="url(#a)"/>
+
+  <!-- Legend -->
+  <line x1="60" y1="690" x2="110" y2="690" stroke="#444" stroke-width="1.5" marker-end="url(#a)"/>
+  <text x="120" y="694" font-size="12" fill="#333">Data / commands</text>
+  <line x1="260" y1="690" x2="310" y2="690" stroke="#888" stroke-width="1.5" stroke-dasharray="6 4" marker-end="url(#ag)"/>
+  <text x="320" y="694" font-size="12" fill="#333">Phase 2 (cloud API comparison)</text>
+  <rect x="540" y="680" width="18" height="18" rx="3" fill="#FAECE7" stroke="#993C1D"/>
+  <text x="566" y="694" font-size="12" fill="#333">Safety-critical</text>
+  <text x="1170" y="694" text-anchor="end" font-size="12" fill="#888">Raspberry Pi and PC on the same Wi-Fi network</text>
+</svg>
