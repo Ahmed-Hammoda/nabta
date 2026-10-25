@@ -12,100 +12,88 @@
   <text x="600" y="40" text-anchor="middle" font-size="24" font-weight="600" fill="#1F5FA8">Nabta – System Architecture</text>
 
   <!-- Cloud API (phase 2) -->
-  <rect x="710" y="60" width="200" height="50" rx="8" fill="#F5F5F3" stroke="#888" stroke-dasharray="6 4"/>
-  <text x="810" y="82" text-anchor="middle" font-size="14" font-weight="600" fill="#444">Cloud LLM API</text>
-  <text x="810" y="100" text-anchor="middle" font-size="12" fill="#666">phase 2 – for comparison</text>
+  <rect x="660" y="60" width="220" height="50" rx="8" fill="#F5F5F3" stroke="#888" stroke-dasharray="6 4"/>
+  <text x="770" y="82" text-anchor="middle" font-size="14" font-weight="600" fill="#444">Cloud LLM API</text>
+  <text x="770" y="100" text-anchor="middle" font-size="12" fill="#666">phase 2 – for comparison</text>
 
-  <!-- Sensor node container -->
-  <rect x="30" y="130" width="300" height="510" rx="16" fill="#E1F5EE" stroke="#0F6E56"/>
-  <text x="180" y="157" text-anchor="middle" font-size="16" font-weight="600" fill="#085041">Sensor node (ESP32)</text>
+  <!-- Physical devices -->
+  <rect x="40" y="170" width="250" height="140" rx="8" fill="#E1F5EE" stroke="#0F6E56"/>
+  <text x="165" y="195" text-anchor="middle" font-size="14" font-weight="600" fill="#085041">Sensors</text>
+  <text x="60" y="222" font-size="12" fill="#085041">• Soil moisture (capacitive)</text>
+  <text x="60" y="242" font-size="12" fill="#085041">• Air temperature &amp; humidity</text>
+  <text x="60" y="262" font-size="12" fill="#085041">• Light level</text>
+  <text x="60" y="282" font-size="12" fill="#085041">• Water tank level</text>
 
-  <rect x="50" y="175" width="260" height="120" rx="8" fill="#ffffff" stroke="#0F6E56"/>
-  <text x="180" y="198" text-anchor="middle" font-size="14" font-weight="600" fill="#085041">Sensors</text>
-  <text x="70" y="222" font-size="12" fill="#333">• Soil moisture (capacitive)</text>
-  <text x="70" y="240" font-size="12" fill="#333">• Air temperature &amp; humidity</text>
-  <text x="70" y="258" font-size="12" fill="#333">• Light level</text>
-  <text x="70" y="276" font-size="12" fill="#333">• Water tank level</text>
+  <rect x="40" y="420" width="250" height="90" rx="8" fill="#E1F5EE" stroke="#0F6E56"/>
+  <text x="165" y="455" text-anchor="middle" font-size="14" font-weight="600" fill="#085041">Relay + 5 V pump</text>
+  <text x="165" y="478" text-anchor="middle" font-size="12" fill="#085041">Waters the plant</text>
 
-  <rect x="50" y="325" width="260" height="100" rx="8" fill="#ffffff" stroke="#0F6E56"/>
-  <text x="180" y="350" text-anchor="middle" font-size="14" font-weight="600" fill="#085041">ESP32 firmware</text>
-  <text x="180" y="373" text-anchor="middle" font-size="12" fill="#333">Reads sensors every 30 s</text>
-  <text x="180" y="391" text-anchor="middle" font-size="12" fill="#333">Executes pump commands</text>
-  <text x="180" y="409" text-anchor="middle" font-size="12" fill="#A32D2D">Local pump timeout (failsafe)</text>
+  <!-- Raspberry Pi container -->
+  <rect x="350" y="130" width="560" height="510" rx="16" fill="#EEEDFE" stroke="#534AB7"/>
+  <text x="630" y="157" text-anchor="middle" font-size="16" font-weight="600" fill="#3C3489">Raspberry Pi</text>
 
-  <rect x="50" y="460" width="260" height="80" rx="8" fill="#ffffff" stroke="#0F6E56"/>
-  <text x="180" y="490" text-anchor="middle" font-size="14" font-weight="600" fill="#085041">Relay + 5 V pump</text>
-  <text x="180" y="512" text-anchor="middle" font-size="12" fill="#333">Waters the plant</text>
+  <rect x="380" y="175" width="220" height="110" rx="8" fill="#ffffff" stroke="#534AB7"/>
+  <text x="490" y="200" text-anchor="middle" font-size="14" font-weight="600" fill="#3C3489">Hardware control</text>
+  <text x="490" y="223" text-anchor="middle" font-size="12" fill="#333">Reads sensors every 30 s</text>
+  <text x="490" y="241" text-anchor="middle" font-size="12" fill="#333">Drives the pump</text>
+  <text x="490" y="263" text-anchor="middle" font-size="12" fill="#A32D2D">Pump timeout (failsafe)</text>
 
-  <line x1="180" y1="295" x2="180" y2="321" stroke="#444" stroke-width="1.5" marker-end="url(#a)"/>
-  <line x1="180" y1="425" x2="180" y2="456" stroke="#444" stroke-width="1.5" marker-end="url(#a)"/>
+  <rect x="380" y="330" width="220" height="95" rx="8" fill="#ffffff" stroke="#534AB7"/>
+  <text x="490" y="356" text-anchor="middle" font-size="14" font-weight="600" fill="#3C3489">Backend server</text>
+  <text x="490" y="379" text-anchor="middle" font-size="12" fill="#333">Decision scheduler</text>
+  <text x="490" y="397" text-anchor="middle" font-size="12" fill="#333">API for the dashboard</text>
 
-  <!-- Edge hub container -->
-  <rect x="420" y="130" width="520" height="510" rx="16" fill="#EEEDFE" stroke="#534AB7"/>
-  <text x="680" y="157" text-anchor="middle" font-size="16" font-weight="600" fill="#3C3489">Edge hub (Raspberry Pi 5, 8 GB)</text>
+  <rect x="380" y="480" width="220" height="80" rx="8" fill="#ffffff" stroke="#534AB7"/>
+  <text x="490" y="508" text-anchor="middle" font-size="14" font-weight="600" fill="#3C3489">Database</text>
+  <text x="490" y="530" text-anchor="middle" font-size="12" fill="#333">Readings · decisions · chat</text>
 
-  <rect x="450" y="175" width="200" height="70" rx="8" fill="#ffffff" stroke="#534AB7"/>
-  <text x="550" y="203" text-anchor="middle" font-size="14" font-weight="600" fill="#3C3489">MQTT broker</text>
-  <text x="550" y="224" text-anchor="middle" font-size="12" fill="#333">Mosquitto</text>
+  <rect x="660" y="175" width="220" height="115" rx="8" fill="#ffffff" stroke="#534AB7"/>
+  <text x="770" y="200" text-anchor="middle" font-size="14" font-weight="600" fill="#3C3489">AI assistant</text>
+  <text x="770" y="224" text-anchor="middle" font-size="12" fill="#333">Small language model</text>
+  <text x="770" y="242" text-anchor="middle" font-size="12" fill="#333">(runs locally)</text>
+  <text x="770" y="266" text-anchor="middle" font-size="12" fill="#333">+ plant knowledge base</text>
 
-  <rect x="450" y="290" width="200" height="95" rx="8" fill="#ffffff" stroke="#534AB7"/>
-  <text x="550" y="315" text-anchor="middle" font-size="14" font-weight="600" fill="#3C3489">Backend server</text>
-  <text x="550" y="338" text-anchor="middle" font-size="12" fill="#333">FastAPI · scheduler</text>
-  <text x="550" y="356" text-anchor="middle" font-size="12" fill="#333">REST + WebSocket API</text>
-
-  <rect x="450" y="440" width="200" height="80" rx="8" fill="#ffffff" stroke="#534AB7"/>
-  <text x="550" y="468" text-anchor="middle" font-size="14" font-weight="600" fill="#3C3489">Database</text>
-  <text x="550" y="490" text-anchor="middle" font-size="12" fill="#333">Readings · decisions · chat</text>
-
-  <rect x="710" y="175" width="200" height="115" rx="8" fill="#ffffff" stroke="#534AB7"/>
-  <text x="810" y="200" text-anchor="middle" font-size="14" font-weight="600" fill="#3C3489">AI assistant</text>
-  <text x="810" y="224" text-anchor="middle" font-size="12" fill="#333">Small language model</text>
-  <text x="810" y="242" text-anchor="middle" font-size="12" fill="#333">(local, via Ollama)</text>
-  <text x="810" y="266" text-anchor="middle" font-size="12" fill="#333">+ plant knowledge base</text>
-
-  <rect x="710" y="330" width="200" height="90" rx="8" fill="#FAECE7" stroke="#993C1D"/>
-  <text x="810" y="356" text-anchor="middle" font-size="14" font-weight="600" fill="#712B13">Safety layer</text>
-  <text x="810" y="379" text-anchor="middle" font-size="12" fill="#712B13">Hard rules</text>
-  <text x="810" y="397" text-anchor="middle" font-size="12" fill="#712B13">always have the final say</text>
+  <rect x="660" y="330" width="220" height="90" rx="8" fill="#FAECE7" stroke="#993C1D"/>
+  <text x="770" y="356" text-anchor="middle" font-size="14" font-weight="600" fill="#712B13">Safety layer</text>
+  <text x="770" y="379" text-anchor="middle" font-size="12" fill="#712B13">Hard rules</text>
+  <text x="770" y="397" text-anchor="middle" font-size="12" fill="#712B13">always have the final say</text>
 
   <!-- Dashboard / user -->
-  <rect x="1000" y="290" width="175" height="105" rx="8" fill="#E6F1FB" stroke="#185FA5"/>
-  <text x="1087" y="318" text-anchor="middle" font-size="14" font-weight="600" fill="#0C447C">Web dashboard</text>
-  <text x="1087" y="342" text-anchor="middle" font-size="12" fill="#0C447C">Plant status · history</text>
-  <text x="1087" y="360" text-anchor="middle" font-size="12" fill="#0C447C">Watering log · chat</text>
+  <rect x="980" y="290" width="190" height="105" rx="8" fill="#E6F1FB" stroke="#185FA5"/>
+  <text x="1075" y="318" text-anchor="middle" font-size="14" font-weight="600" fill="#0C447C">Web dashboard</text>
+  <text x="1075" y="342" text-anchor="middle" font-size="12" fill="#0C447C">Plant status · history</text>
+  <text x="1075" y="360" text-anchor="middle" font-size="12" fill="#0C447C">Watering log · chat</text>
 
-  <rect x="1000" y="470" width="175" height="60" rx="8" fill="#F5F5F3" stroke="#888"/>
-  <text x="1087" y="497" text-anchor="middle" font-size="14" font-weight="600" fill="#444">User</text>
-  <text x="1087" y="515" text-anchor="middle" font-size="12" fill="#666">Phone or laptop</text>
+  <rect x="980" y="470" width="190" height="60" rx="8" fill="#F5F5F3" stroke="#888"/>
+  <text x="1075" y="497" text-anchor="middle" font-size="14" font-weight="600" fill="#444">User</text>
+  <text x="1075" y="515" text-anchor="middle" font-size="12" fill="#666">Phone or laptop</text>
 
-  <!-- ESP32 <-> broker -->
-  <path d="M310 345 L375 345 L375 195 L446 195" fill="none" stroke="#444" stroke-width="1.5" marker-end="url(#a)"/>
-  <text x="380" y="187" font-size="12" fill="#0F6E56">sensor data</text>
-  <path d="M450 225 L400 225 L400 400 L314 400" fill="none" stroke="#444" stroke-width="1.5" marker-end="url(#a)"/>
-  <text x="338" y="425" font-size="12" fill="#993C1D">commands</text>
-  <text x="338" y="441" font-size="12" fill="#666">(MQTT)</text>
+  <!-- Sensors -> hardware control -->
+  <line x1="290" y1="230" x2="376" y2="230" stroke="#444" stroke-width="1.5" marker-end="url(#a)"/>
+  <text x="296" y="220" font-size="12" fill="#0F6E56">GPIO · I²C</text>
+  <!-- hardware control -> pump -->
+  <path d="M380 265 L320 265 L320 465 L294 465" fill="none" stroke="#444" stroke-width="1.5" marker-end="url(#a)"/>
 
-  <!-- broker <-> backend, backend <-> db -->
-  <line x1="550" y1="245" x2="550" y2="286" stroke="#444" stroke-width="1.5" marker-start="url(#a)" marker-end="url(#a)"/>
-  <line x1="550" y1="385" x2="550" y2="436" stroke="#444" stroke-width="1.5" marker-start="url(#a)" marker-end="url(#a)"/>
+  <!-- hardware <-> backend, backend <-> db -->
+  <line x1="490" y1="285" x2="490" y2="326" stroke="#444" stroke-width="1.5" marker-start="url(#a)" marker-end="url(#a)"/>
+  <line x1="490" y1="425" x2="490" y2="476" stroke="#444" stroke-width="1.5" marker-start="url(#a)" marker-end="url(#a)"/>
 
   <!-- backend -> AI -->
-  <path d="M650 310 L680 310 L680 225 L706 225" fill="none" stroke="#444" stroke-width="1.5" marker-end="url(#a)"/>
+  <path d="M600 350 L630 350 L630 230 L656 230" fill="none" stroke="#444" stroke-width="1.5" marker-end="url(#a)"/>
   <!-- AI -> safety -->
-  <line x1="810" y1="290" x2="810" y2="326" stroke="#444" stroke-width="1.5" marker-end="url(#a)"/>
-  <text x="818" y="313" font-size="12" fill="#3C3489">proposed action</text>
+  <line x1="770" y1="290" x2="770" y2="326" stroke="#444" stroke-width="1.5" marker-end="url(#a)"/>
+  <text x="778" y="313" font-size="12" fill="#3C3489">proposed action</text>
   <!-- safety -> backend -->
-  <path d="M710 345 L654 345" fill="none" stroke="#444" stroke-width="1.5" marker-end="url(#a)"/>
+  <line x1="660" y1="395" x2="604" y2="395" stroke="#444" stroke-width="1.5" marker-end="url(#a)"/>
 
   <!-- cloud -> AI (phase 2) -->
-  <line x1="810" y1="110" x2="810" y2="171" stroke="#888" stroke-width="1.5" stroke-dasharray="6 4" marker-start="url(#ag)" marker-end="url(#ag)"/>
+  <line x1="770" y1="110" x2="770" y2="171" stroke="#888" stroke-width="1.5" stroke-dasharray="6 4" marker-start="url(#ag)" marker-end="url(#ag)"/>
 
   <!-- backend <-> dashboard -->
-  <path d="M650 372 L690 372 L690 470 L960 470 L960 345 L996 345" fill="none" stroke="#444" stroke-width="1.5" marker-start="url(#a)" marker-end="url(#a)"/>
-  <text x="825" y="462" text-anchor="middle" font-size="12" fill="#185FA5">live data · chat messages</text>
+  <path d="M600 412 L640 412 L640 600 L945 600 L945 345 L976 345" fill="none" stroke="#444" stroke-width="1.5" marker-start="url(#a)" marker-end="url(#a)"/>
+  <text x="792" y="590" text-anchor="middle" font-size="12" fill="#185FA5">live data · chat messages</text>
   <!-- dashboard <-> user -->
-  <line x1="1087" y1="395" x2="1087" y2="466" stroke="#444" stroke-width="1.5" marker-start="url(#a)" marker-end="url(#a)"/>
-
+  <line x1="1075" y1="395" x2="1075" y2="466" stroke="#444" stroke-width="1.5" marker-start="url(#a)" marker-end="url(#a)"/>
 
   <!-- Legend -->
   <line x1="60" y1="690" x2="110" y2="690" stroke="#444" stroke-width="1.5" marker-end="url(#a)"/>

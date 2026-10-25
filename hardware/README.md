@@ -14,7 +14,7 @@ Sensors, edge device, pump and wiring.
 
 ## Key requirement
 
-The main board must be able to run a **small language model locally** (e.g. Raspberry Pi 5, 8 GB).
+The main board must be able to run a **small language model locally** – a Raspberry Pi. Sensors and the pump connect directly to it.
 
 ## Measurements
 
