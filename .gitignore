@@ -1,0 +1,40 @@
+# Secrets
+.env
+*.env
+secrets.h
+credentials.json
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+.ipynb_checkpoints/
+
+# Node / dashboard
+node_modules/
+dist/
+build/
+.next/
+
+# Arduino / PlatformIO
+.pio/
+.vscode/
+*.elf
+*.bin
+
+# AI models (too large for git – share links instead)
+*.gguf
+*.safetensors
+models/
+
+# Data and databases
+*.db
+*.sqlite
+data/raw/
+
+# OS / editors
+.DS_Store
+Thumbs.db
+.idea/
+*.swp
