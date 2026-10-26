@@ -1,0 +1,51 @@
+{
+  "plant": {
+    "common_name": "Spearmint",
+    "local_name": "na3na3",
+    "scientific_name": "Mentha spicata",
+    "family": "Lamiaceae",
+    "status": "proposed",
+    "frozen_on": null
+  },
+  "moisture_index": {
+    "description": "Per-pot 0-100 index. 0 = raw reading in air-dry mix, 100 = reading 30 min after watering to drainage (container capacity).",
+    "water_trigger_below": 60,
+    "refill_target": [85, 90],
+    "refill_pulse_soak_minutes": 10,
+    "low_alarm": { "below": 40, "for_hours": 2 },
+    "high_alarm": { "above": 95, "for_hours": 24 },
+    "hard_block_above": 80
+  },
+  "dose_limits_ml": {
+    "max_per_watering": 150,
+    "max_per_day": 500
+  },
+  "block_when_tank_low": true,
+  "air_temperature_c": {
+    "ideal": [15, 25],
+    "tolerated": [10, 30],
+    "warning_below": 10,
+    "warning_above": 30,
+    "critical_below": 4,
+    "critical_above": 36
+  },
+  "air_humidity_rh": {
+    "ideal": [40, 70],
+    "tolerated": [30, 80],
+    "warning": { "above": 80, "for_hours": 12 }
+  },
+  "light": {
+    "hours_per_day": [12, 14],
+    "dli_mol_m2_day_min": 10,
+    "dli_mol_m2_day_tolerated": 6,
+    "target_lux_avg_14h": 14000,
+    "low_light_warning_lux_hours_per_day": 120000,
+    "lux_to_dli_factor_led": 0.00005
+  },
+  "soil": {
+    "ph_ideal": [6.0, 7.5],
+    "ph_tolerated": [5.5, 7.5],
+    "pot_volume_l": [2, 3],
+    "mix": "organic-rich potting mix with about 25% perlite"
+  }
+}
