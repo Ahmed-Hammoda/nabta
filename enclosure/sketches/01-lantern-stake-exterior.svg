@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="680" viewBox="0 0 680 565" role="img"><title>Plant sensor lantern stake, exterior view</title><desc>A decorative garden stake with a solar cap, faceted translucent lantern body, twist-lock joint and a ribbed bamboo-style stem pushed into soil next to a small plant.</desc>
+<style>.t{font:14px sans-serif;fill:#222}.ts{font:12px sans-serif;fill:#555}.leader{stroke:#888;stroke-width:.5;stroke-dasharray:3 3;fill:none}</style>
+<rect width="680" height="565" fill="#ffffff"/>
+<rect x="250" y="330" width="180" height="195" fill="#6b4a32"/>
+<rect x="250" y="330" width="180" height="8" fill="#4f7a3a"/>
+<circle cx="285" cy="380" r="3" fill="#8a6446"/><circle cx="395" cy="420" r="3" fill="#8a6446"/><circle cx="300" cy="460" r="4" fill="#5a3d28"/><circle cx="385" cy="490" r="3" fill="#8a6446"/><circle cx="275" cy="505" r="3" fill="#5a3d28"/>
+<path d="M275 330 Q274 305 270 288" fill="none" stroke="#3f7a33" stroke-width="3" stroke-linecap="round"/>
+<path d="M273 312 Q256 304 252 292 Q268 292 273 312Z" fill="#58a049"/>
+<path d="M271 298 Q284 292 290 280 Q276 278 271 298Z" fill="#6bb85a"/>
+<ellipse cx="340" cy="208" rx="70" ry="9" fill="#bfe8c8" opacity="0.35"/>
+<polygon points="275,112 405,112 375,230 305,230" fill="#e4f3f8" stroke="#7fa3b2" stroke-width="1"/>
+<ellipse cx="340" cy="172" rx="38" ry="46" fill="#9be7a8" opacity="0.55"/>
+<g fill="none" stroke="#7fa3b2" stroke-width="0.8">
+<polyline points="275,112 318,160 305,230"/>
+<polyline points="405,112 362,160 375,230"/>
+<polyline points="318,160 340,112 362,160"/>
+<polyline points="318,160 340,230 362,160"/>
+<polyline points="318,160 362,160"/>
+<polyline points="290,136 318,160"/>
+<polyline points="390,136 362,160"/>
+</g>
+<polygon points="318,160 340,112 362,160" fill="#ffffff" opacity="0.45"/>
+<polygon points="318,160 340,230 305,230" fill="#ffffff" opacity="0.25"/>
+<rect x="262" y="92" width="156" height="20" rx="4" fill="#2b2420"/>
+<rect x="268" y="108" width="144" height="4" rx="2" fill="#18130f"/>
+<circle cx="340" cy="101" r="4.5" fill="#bfe3f2" stroke="#6a8d9c" stroke-width="0.8"/>
+<polygon points="290,68 390,68 412,92 268,92" fill="#1f2a44" stroke="#3a4a72" stroke-width="1"/>
+<g stroke="#4a5f8f" stroke-width="0.8"><line x1="315" y1="68" x2="309" y2="92"/><line x1="340" y1="68" x2="340" y2="92"/><line x1="365" y1="68" x2="371" y2="92"/><line x1="283" y1="80" x2="397" y2="80"/></g>
+<rect x="302" y="230" width="76" height="14" rx="3" fill="#2b2420"/>
+<g fill="#3d342d"><rect x="328" y="244" width="24" height="226"/></g>
+<g fill="#5a4c40"><rect x="325" y="262" width="30" height="7" rx="2"/><rect x="325" y="302" width="30" height="7" rx="2"/><rect x="325" y="352" width="30" height="7" rx="2"/><rect x="325" y="392" width="30" height="7" rx="2"/><rect x="325" y="462" width="30" height="7" rx="2"/></g>
+<rect x="333" y="410" width="14" height="44" rx="3" fill="#1a1612" stroke="#c9a227" stroke-width="1" stroke-dasharray="3 2"/>
+<circle cx="340" cy="446" r="3" fill="#c9a227"/>
+<polygon points="328,470 352,470 340,512" fill="#3d342d"/>
+<ellipse cx="340" cy="331" rx="38" ry="7" fill="#2b2420"/>
+<ellipse cx="340" cy="329" rx="30" ry="4" fill="#45392f"/>
+<line class="leader" x1="288" y1="80" x2="235" y2="80"/>
+<text class="t" x="228" y="84" text-anchor="end">Solar panel</text>
+<line class="leader" x1="320" y1="170" x2="235" y2="170"/>
+<text class="t" x="228" y="174" text-anchor="end">Faceted diffuser</text>
+<line class="leader" x1="325" y1="268" x2="235" y2="268"/>
+<text class="t" x="228" y="272" text-anchor="end">Ribbed stem</text>
+<line class="leader" x1="346" y1="101" x2="450" y2="101"/>
+<text class="t" x="458" y="105">Light sensor window</text>
+<line class="leader" x1="378" y1="237" x2="450" y2="237"/>
+<text class="t" x="458" y="241">Twist-lock joint</text>
+<line class="leader" x1="378" y1="327" x2="450" y2="327"/>
+<text class="t" x="458" y="331">Soil-line collar</text>
+<line class="leader" x1="347" y1="432" x2="450" y2="432"/>
+<text class="t" x="458" y="436">Moisture + temp probe</text>
+<line class="leader" x1="346" y1="496" x2="450" y2="496"/>
+<text class="t" x="458" y="500">Tapered tip</text>
+</svg>
