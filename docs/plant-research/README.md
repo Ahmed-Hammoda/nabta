@@ -23,6 +23,8 @@ Status: proposed on 25 Oct 2026, to be confirmed by the team at the Week 2 meeti
 | [`thresholds-and-calibration.md`](thresholds-and-calibration.md) | Starting thresholds for the rules engine, firmware and alerts; calibration week plan (2 to 8 Nov) |
 | [`plant-profile.json`](plant-profile.json) | The same values in machine-readable form for the backend and safety layer |
 | [`references.md`](references.md) | All sources used, with what each one supports |
+| [`study-protocol.md`](study-protocol.md) | Pot A vs. Pot B study design: hypotheses, Pot B schedule, measurements, analysis plan, limits (draft for 2 Nov) |
+| [`related-work.md`](related-work.md) | Earlier studies on sensor-based irrigation, AI explanations and language models on a Raspberry Pi (starter draft) |
 
 ## Key numbers at a glance
 
