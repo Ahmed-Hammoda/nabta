@@ -32,7 +32,29 @@ The model gets the system prompt in [`../prompts/decision-v1.md`](../prompts/dec
 | [`config.json`](config.json) | Evaluation settings not in the plant profile (soak time, mL per index point, tank simulation) |
 | [`edge_cases.py`](edge_cases.py) | 30 hand-made situations: sensor faults, empty tank, daily cap, heat, cold, waterlogging, combinations |
 | [`build_testset.py`](build_testset.py) | Converts a sensor dataset, labels it, samples it and writes `testset.jsonl` |
-| `data/` | The source dataset (see below) |
+| [`data/`](data/) | The source dataset, its credit and the conversion choices |
+| [`testset.jsonl`](testset.jsonl) | **The test set: 124 scenarios** (94 from the dataset, 30 edge cases) |
+
+## Current test set
+
+Built with:
+
+```bash
+python build_testset.py data/Edge_IoT_Predictive_Irrigation_Dataset.xlsx --moisture-as-index --light-scale 20
+```
+
+| Correct decision | Scenarios |
+|---|---|
+| MOISTURE_OK (no watering) | 60 |
+| DRY_BELOW_MIN (water) | 33 |
+| RESERVOIR_EMPTY (dry, tank empty) | 24 |
+| SENSOR_FAULT | 5 |
+| SOAKING_WAIT | 1 |
+| DAILY_LIMIT_REACHED | 1 |
+
+Alerts: HEAT_STRESS 50, RESERVOIR_EMPTY 50, SENSOR_FAULT 5, COLD_STRESS 2, LOW_LIGHT 2, and 1 each of DRY_STRESS, WATERLOGGED, HEAT_CRITICAL, COLD_CRITICAL, HUMIDITY_HIGH.
+
+Rare situations (soak wait, daily cap, cold, waterlogging) have only one or two cases each, so a model's mistakes there should be read case by case, not as a percentage.
 
 Standard library only; `openpyxl` is needed only if the source is an `.xlsx` file.
 
@@ -44,11 +66,12 @@ Standard library only; `openpyxl` is needed only if the source is an `.xlsx` fil
 | `air_temp_c` | SHT31 | Yes |
 | `humidity_rh` | SHT31 | Yes |
 | `light_lux` | BH1750 | Yes |
-| `tank_ok` | Float switch | **Simulated**: 1 L tank, emptied by each watering, refilled 12 h after running low |
+| `tank_ok` | Float switch | **Simulated**: 1 L tank, emptied by each watering, refilled 24 h after running low |
 | `watering.*` (mL) | YF-S401 flow sensor | **Simulated**: each pump reading in the dataset = 120 mL |
 | `time` | Pi clock | Yes |
 
 ### Moisture index from the dataset
+For the current dataset the moisture column is already a 0–100 % on which our thresholds work, so it is used directly (`--moisture-as-index`). For a raw sensor dataset, the script rescales it:
 - **0** = the driest reading (1st percentile).
 - **100** = the typical reading right after the dataset's pump turned on (the container-capacity point in Yassine's calibration method).
 - The script detects whether the sensor reads higher or lower when the soil is wetter.

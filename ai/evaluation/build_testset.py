@@ -142,8 +142,18 @@ def percentile(values, p):
     return v[lo] + (v[hi] - v[lo]) * (k - lo)
 
 
-def add_moisture_index(series):
-    """0 = driest reading (1st percentile), 100 = typical reading right after watering."""
+def add_moisture_index(series, as_index=False):
+    """0 = driest reading (1st percentile), 100 = typical reading right after watering.
+
+    With as_index=True the moisture column is already a 0-100 % scale on which the
+    plant's thresholds make sense, so it is used directly.
+    """
+    if as_index:
+        for r in series:
+            raw = r["raw_moisture"]
+            r["moisture_index"] = None if raw is None else round(max(0.0, min(100.0, raw)), 1)
+        print("Moisture index: moisture column used directly (0-100 %)")
+        return
     raws = [r["raw_moisture"] for r in series if r["raw_moisture"] is not None]
     after_pump = [series[i + 1]["raw_moisture"] for i in range(len(series) - 1)
                   if series[i]["pump"] and series[i + 1]["raw_moisture"] is not None]
@@ -298,6 +308,8 @@ def main():
     ap.add_argument("--seed", type=int, default=42)
     ap.add_argument("--interval-min", type=float, default=30, help="used only if the file has no timestamps")
     ap.add_argument("--light-scale", type=float, default=1.0, help="multiply the light column to get lux")
+    ap.add_argument("--moisture-as-index", action="store_true",
+                    help="use the moisture column directly as the 0-100 index (it is already a %%)")
     ap.add_argument("--out", default=str(HERE / "testset.jsonl"))
     for key in COLUMN_HINTS:
         ap.add_argument(f"--col-{key}", help=f"name of the {key} column if auto-detection fails")
@@ -310,7 +322,7 @@ def main():
             sys.exit("Give a source file, or use --edge-only.")
         overrides = {k: getattr(args, f"col_{k}") for k in COLUMN_HINTS}
         series = load_series(args.source, overrides, args.interval_min, args.light_scale)
-        add_moisture_index(series)
+        add_moisture_index(series, args.moisture_as_index)
         add_watering_and_tank(series, config)
         scenarios += dataset_scenarios(series, profile, config, args.per_group, args.seed)
     scenarios += edge_scenarios(profile, config)

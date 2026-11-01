@@ -8,6 +8,6 @@
   "frozen_sensor_window_readings": 5,
   "tank_capacity_ml": 1000,
   "tank_empty_below_ml": 100,
-  "tank_refill_delay_hours": 12,
+  "tank_refill_delay_hours": 24,
   "dataset_dose_ml_per_pump_reading": 120
 }
