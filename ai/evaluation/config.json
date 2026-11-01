@@ -1,0 +1,13 @@
+{
+  "_comment": "Evaluation settings that are not in the plant profile. Change them here, then rebuild the test set.",
+  "soak_wait_minutes": 30,
+  "ml_per_index_point": 5,
+  "refill_target_index": 87.5,
+  "min_dose_ml": 20,
+  "sensor_valid_index_range": [0, 105],
+  "frozen_sensor_window_readings": 5,
+  "tank_capacity_ml": 1000,
+  "tank_empty_below_ml": 100,
+  "tank_refill_delay_hours": 12,
+  "dataset_dose_ml_per_pump_reading": 120
+}
