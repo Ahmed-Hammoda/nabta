@@ -6,6 +6,39 @@ Five research questions Nabta could answer, each in **14 days or less**, with **
 
 Dates assume the pots run from **9 to 22 Nov 2026** (14 days), with analysis and writing until the final demo on **4 Dec**. Options 2 to 4 do not need living plants, so they can run in the same two weeks in parallel.
 
+## Update 6 Nov 2026: the team's proposed question
+
+The team chose architecture **option 1** (everything on the Raspberry Pi) with **Qwen3.5 0.8B** as the local model, and a teammate proposed this question:
+
+> **How accurately can a small language model running on a Raspberry Pi make irrigation decisions from live sensor data, compared with a cloud-based LLM?**
+
+**Has it been done?** Not as a whole. See [`related-work.md`](related-work.md) section 5. The closest study, ElAlaoui et al. (2026) [ELA26], had a *cloud* model (GPT-5) advise irrigation from live sensors in pots, but did not test a small or local model and did not score the decisions against a reference. Mimir (2026) [MIM26] varied model size for irrigation decisions, but only in simulation, and found bigger was not steadily better. LEAF (2026) [LEAF26] timed small models on a Raspberry Pi, but not on an agricultural task. No one has scored a sub-1B model on a Pi against a cloud model on the same live irrigation decisions. That is a real gap, and a good fit for a 2-week study.
+
+**How to make it doable in 2 weeks (suggested design):**
+
+1. **Shadow mode, so the plant is never at risk.** The rules engine keeps watering Pot A (and Pot B stays on its schedule), as in [`study-protocol.md`](study-protocol.md). At every decision cycle (for example every 30 min) the same live context is sent to **Qwen3.5 0.8B on the Pi** and to **one cloud model**. Each answers `water` / `no_water` with mL in the JSON format of `ai/assistant-spec/`. Their answers are logged, never executed. This is the "shadow mode" [PAR26] uses before trusting a new policy.
+2. **Reference answer.** The rules engine's decision is the reference for each cycle. On top of that, two team members label a **held-out set of about 40 hard cases** (near the threshold, right after watering, sensor faults, tank empty) from the simulator, because live data from 14 days will be mostly easy "no water" cycles.
+3. **Repeats.** Each held-out case is sent 3 times to each model to measure stability, as in [PAR26].
+
+**Metrics:**
+
+| Metric | Why |
+|---|---|
+| Accuracy and Cohen's kappa against the reference, with a 95% Wilson interval | "How accurately"; kappa corrects for the many easy "no water" cycles |
+| Recall on "water" cycles (missed waterings) | The error that harms the plant |
+| Unsafe proposals (over the 150 mL dose cap, inside the 2 h gap, water while waterlogged) | Shows what the safety layer must block |
+| mL error on correct "water" decisions | Amount, not only yes/no |
+| Valid JSON rate | A 0.8B model often breaks the format |
+| Latency per decision on the Pi vs. the cloud (median, 90th percentile) | Practicality of option 1 |
+| Stability over 3 repeats | Same input, same answer? |
+| Decisions made while offline (Pi only) | The local model's advantage |
+
+**Hypothesis:** the cloud model agrees with the rules more often, but Qwen3.5 0.8B on the Pi reaches at least 85% accuracy with no missed waterings that the safety layer would not catch, and answers within the 30-minute decision cycle.
+
+**Zero-budget check:** Qwen3.5 0.8B runs free with Ollama on a Pi 5 (community reports of about 6 s per reply on a Pi 5 with 8 GB). For the cloud arm, use a free API tier or the course API key requested on 20 Nov; the held-out set can be run later if the key arrives late. The bench script `nabta_bench_llm.py` already logs latency, JSON validity and agreement with the rules.
+
+**What this changes:** it replaces options 2 and 3 below and runs alongside option 1, the water study, on the same pots. Option 1 still gives the plant and water result, and this question adds the AI result. If the team instead wants the LLM to *actually* water Pot A, the water study then measures the model and not the rules, so it needs the safety layer finished and tested before 9 Nov.
+
 ## At a glance
 
 | # | Question (short) | Type | Needs plants? | Main metric | Builds on |
