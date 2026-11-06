@@ -24,7 +24,9 @@ Status: proposed on 25 Oct 2026, to be confirmed by the team at the Week 2 meeti
 | [`plant-profile.json`](plant-profile.json) | The same values in machine-readable form for the backend and safety layer |
 | [`references.md`](references.md) | All sources used, with what each one supports |
 | [`study-protocol.md`](study-protocol.md) | Pot A vs. Pot B study design: hypotheses, Pot B schedule, measurements, analysis plan, limits (draft for 2 Nov) |
-| [`related-work.md`](related-work.md) | Earlier studies on sensor-based irrigation, AI explanations and language models on a Raspberry Pi (starter draft) |
+| [`related-work.md`](related-work.md) | Earlier studies on sensor-based irrigation, AI explanations and language models on a Raspberry Pi, plus the two papers from the professor |
+| [`paper-notes.md`](paper-notes.md) | Detailed notes on the professor's papers: CottonBot [KAN25] and the agent-based greenhouse architecture [PAR26] |
+| [`research-questions.md`](research-questions.md) | Research question options, each doable in 2 weeks with no budget, and the team's chosen question (small model on the Pi vs. cloud) with a novelty check and design |
 
 ## Key numbers at a glance
 
