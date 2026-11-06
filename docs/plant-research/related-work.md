@@ -4,7 +4,7 @@
 
 Earlier studies show that soil moisture sensors save water compared with timers without harming the plant, and that language models can explain agricultural decisions and run on a Raspberry Pi. Nabta combines the two, for a potted herb indoors, and compares a local model with a cloud model. This file lists what each source shows and where Nabta differs. It feeds the report's related-work chapter.
 
-Status: four sources read so far. The "To read next" list at the end is the remaining work.
+Status: six sources read so far, including the two papers the professor sent on 6 Nov 2026 (section 4, detailed notes in [`paper-notes.md`](paper-notes.md)). The "To read next" list at the end is the remaining work.
 
 ---
 
@@ -36,6 +36,17 @@ Status: four sources read so far. The "To read next" list at the end is the rema
 |---|---|---|---|
 | Nezami et al. (2024), [Generative AI on the edge: architecture and performance evaluation](https://arxiv.org/abs/2411.17712v1), arXiv:2411.17712 | Ran lightweight models (Yi, Phi, Llama 3) CPU-only on a Raspberry Pi 5 cluster | 5 to 12 tokens per second, using under 50% of CPU and RAM | Nabta uses one Pi, not a cluster; this gives a speed range to compare our own benchmark with |
 | Jang and Morabito (2025), [Edge-first language model inference: models, metrics, and tradeoffs](https://arxiv.org/abs/2505.16508v2), arXiv:2505.16508 | Compared small models on edge devices with cloud inference | Edge inference can match the cloud at lower cost in some cases; in others a cloud fallback is needed | Supports the RQ2 framing: local works offline, the cloud may answer better |
+
+---
+
+## 4. Language-model assistants with sensors in the loop (sent by the professor, 6 Nov 2026)
+
+| Source | What they did | What they found | How Nabta differs |
+|---|---|---|---|
+| Kandamali et al. (2025), [CottonBot: an AI-driven cotton farming assistant and irrigation advisor using LLM-RAG and agentic AI tools](https://doi.org/10.1016/j.atech.2025.101640), *Smart Agricultural Technology* 12, 101640 | Local open-weight models (Ollama) with RAG over a cotton guide, plus tools for soil moisture, weather and a deterministic irrigation rule (irrigate at 45 kPa); compared 7 local models and 6 embedding models | Llama 3.1 8B most faithful (0.97, 6.2 s per answer); Phi-3 and Gemma 3 twice as fast but less faithful (0.85 to 0.88); field trial of water saving still planned, not done | Same "rule decides, model explains" split as Nabta, but never tested on a real crop. Nabta tests it on a real pot against a fixed schedule |
+| Pardo-Pina et al. (2026), [An agent-based service architecture for smart greenhouses: telemetry analytics and decision support with RAG-grounded LLM agents](https://doi.org/10.1016/j.atech.2026.101872), *Smart Agricultural Technology* 13, 101872 | Raspberry Pi 4 + Home Assistant at the edge, cloud LLM agents for chat (RAG), sensor analysis and emergencies, with a safety gate and offline fallback; hydroponic hemp greenhouse | Chat 38/40 correct with GPT-5.2 vs. 32/40 with GPT-4o-mini; emergency agent 0.81 accuracy and 0.97 stability over 36 synthetic cases × 3 repeats, all alarms caught; lux-to-DLI exact over 13 days | Cloud models only, no water or plant-health outcome. Nabta can compare a local and a cloud model on the same tests and measure the plant |
+
+**Gap:** both papers keep a rule in charge of actuation and use the model to explain or advise, like Nabta. Neither measured water use or plant health with the system in the loop, and neither compared local and cloud models on the same task. Their evaluation recipe (small labelled test set, repeats, accuracy with a confidence interval) fits a two-week student study. Options built on this are in [`research-questions.md`](research-questions.md).
 
 ---
 
