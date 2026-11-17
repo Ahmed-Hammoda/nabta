@@ -1,0 +1,22 @@
+{
+  "_comment": "Frozen on day 0. Both LLMs (C3, C4) get exactly these params and prompt. TODO: confirm the Ollama tag (`ollama list`) and the ChatGPT model/price once the professor gives the key.",
+  "cycle_minutes": 30,
+  "params": {"temperature": 0, "top_p": 1, "max_tokens": 200, "seed": 42, "num_ctx": 4096, "timeout_s": 120},
+  "prompt_file": "prompt_system.txt",
+  "gate": {"apply_to_threshold": false},
+  "controllers": [
+    {"id": "C1", "kind": "threshold", "where": "pi", "actuates_pot": "B",
+     "_note": "single threshold: index < 60 -> 150 mL, no caps. Waters the real Pot B (v3, 16 Nov)."},
+    {"id": "C2", "kind": "multirule", "where": "pi", "actuates_pot": "A",
+     "_note": "full rules, waters the real Pot A, and is the reference for RQ2."},
+    {"id": "C3", "kind": "llm", "model": "qwen3.5:0.8b", "base_url": "http://localhost:11434/v1", "where": "pi",
+     "actuates_pot": null, "price_usd_per_1m": {"input": 0, "output": 0},
+     "_note": "offline on the Raspberry Pi, shadow mode only: never reaches the pump (v3, 16 Nov)."},
+    {"id": "C4", "kind": "llm", "model": "gpt-4o-mini", "base_url": "https://api.openai.com/v1", "where": "cloud",
+     "actuates_pot": null, "api_key_env": "OPENAI_API_KEY", "price_usd_per_1m": {"input": 0.15, "output": 0.60},
+     "_note": "ChatGPT API on the logged contexts once the key arrives. TODO: model name and price."}
+  ],
+  "plant_profile": {"water_below_index": 60, "refill_to_index": 88, "threshold_dose_ml": 150,
+                    "dose_cap_ml": 150, "day_cap_ml": 500, "min_gap_h": 2, "hard_block_above": 90,
+                    "band": [60, 90], "stress_below": 40, "pot_awc_ml": 600}
+}

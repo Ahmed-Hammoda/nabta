@@ -1,0 +1,220 @@
+% Nabta workshop paper: all references collected so far (16 Nov 2026).
+% Sources: docs/plant-research/references.md + related-work.md (repo, PR #4), the 31 Oct research doc,
+% and the professor's two papers. Metadata of every entry marked "verified" was checked on the
+% publisher or arXiv page on 16 Nov 2026. Entries with a "TODO verify" note keep the details we
+% recorded earlier and must be checked before submission. BibTeX only prints entries that are \cite'd.
+
+%% ---------------- Papers sent by the professor (verified) ----------------
+@article{KAN25,
+  author  = {Kandamali, Deus F. and Porter, Wesley M. and Porter, Erin and McLemore, Alex and Rains, Glen C.},
+  title   = {{CottonBot}: An {AI}-driven cotton farming assistant and irrigation advisor using {LLM-RAG} and agentic {AI} tools},
+  journal = {Smart Agricultural Technology}, volume = {12}, pages = {101640}, year = {2025},
+  doi     = {10.1016/j.atech.2025.101640}
+}
+@article{PAR26,
+  author  = {Pardo-Pina, Sof{\'i}a and Germer, J{\"o}rn and Suay-Cort{\'e}s, Ricardo and Platero-Horcajadas, Manuel and Ferr{\'a}ndez-Pastor, Francisco-Javier},
+  title   = {An agent-based service architecture for smart greenhouses: Telemetry analytics and decision support with {RAG}-grounded {LLM} agents},
+  journal = {Smart Agricultural Technology}, volume = {13}, pages = {101872}, year = {2026},
+  doi     = {10.1016/j.atech.2026.101872}
+}
+
+%% ---------------- LLMs deciding or advising irrigation (verified) ----------------
+@article{ELA26,
+  author  = {ElAlaoui, Ilyass and Monafii, Asmaa and Boumalik, Doha and Aourir, Younes and Tahiri, Assia and Gouddar, Ghoufrane and Hassani, Oussama},
+  title   = {Letting the Crop Speak: A Proof-of-Concept Sensor-Grounded Large Language Model Advisor for Potato Irrigation on a {Mediterranean} Vertisol},
+  journal = {AgriEngineering}, volume = {8}, number = {11}, pages = {468}, year = {2026},
+  doi     = {10.3390/agriengineering8110468}
+}
+@misc{MIM26,
+  author  = {Liu, Yimeng and Zhang, Mi and Dong, Younsuk and Cao, Zhichao},
+  title   = {Mimir: Physics-Grounded {LLM} Agents for Long-Horizon Irrigation Control},
+  howpublished = {arXiv:2610.02038}, year = {2026}, note = {Preprint}
+}
+@article{PARK26,
+  author  = {Park, Eungyu and Kim, Taeyu and Park, Jangwon},
+  title   = {{AquaAgent-OSPy}: an auditable {LLM} tool-agent system for simulation-grounded irrigation decision support},
+  journal = {Computers and Electronics in Agriculture}, volume = {254}, pages = {112267}, year = {2026},
+  doi     = {10.1016/j.compag.2026.112267}
+}
+
+%% ---------------- LLMs explaining or reading plant/sensor data (verified) ----------------
+@misc{ZHA24,
+  author  = {Zhang, Nan and Vergara-Marcillo, Christian and Diamantopoulos, Georgios and Shen, Jingran and Tziritas, Nikos and Bahsoon, Rami and Theodoropoulos, Georgios},
+  title   = {Large Language Models for Explainable Decisions in Dynamic Digital Twins},
+  howpublished = {arXiv:2405.14411}, year = {2024}, note = {Preprint}
+}
+@misc{LEE25,
+  author  = {Lee, Yeonju and Chen, Rui Qi and Oboamah, Joseph and Su, Po Nien and Liang, Wei-zhen and Shi, Yeyin and Gan, Lu and Chen, Yongsheng and Qiao, Xin and Li, Jing},
+  title   = {{SPADE}: A Large Language Model Framework for Soil Moisture Pattern Recognition and Anomaly Detection in Precision Agriculture},
+  howpublished = {arXiv:2509.18123}, year = {2025}, note = {Preprint}
+}
+@misc{AGA24,
+  author  = {Agarwal, Kriti and Ananthanarayanan, Samhruth and Srinivasan, Srinitish and S, Abirami},
+  title   = {Enhancing {IoT} based Plant Health Monitoring through Advanced Human Plant Interaction using Large Language Models and Mobile Applications},
+  howpublished = {arXiv:2409.15910}, year = {2024}, note = {Preprint}
+}
+@misc{YAM25,
+  author  = {Yamaguchi, Tomoaki and Zhou, Yutong and Ryo, Masahiro and Katsura, Keisuke},
+  title   = {Agentic Explainable Artificial Intelligence ({Agentic XAI}) Approach To Explore Better Explanation: A Case Study in Decision Support for Rice Cultivation in {Japan}},
+  howpublished = {arXiv:2512.21066}, year = {2025}, note = {Preprint}
+}
+
+%% ---------------- Language models on edge hardware (verified) ----------------
+@article{LEAF26,
+  author  = {Abdulkadhim, Mustafa and Repas, Sandor R.},
+  title   = {Introducing {LEAF}: {LLM} Edge Assessment Framework for Generative {AI} on the Edge},
+  journal = {Machine Learning and Knowledge Extraction}, volume = {8}, number = {2}, pages = {48}, year = {2026},
+  doi     = {10.3390/make8020048}
+}
+@misc{NEZ24,
+  author  = {Nezami, Zeinab and Hafeez, Maryam and Djemame, Karim and Zaidi, Syed Ali Raza},
+  title   = {Generative {AI} on the Edge: Architecture and Performance Evaluation},
+  howpublished = {arXiv:2411.17712}, year = {2024}, note = {Preprint}
+}
+@misc{JAN25,
+  author  = {Jang, SiYoung and Morabito, Roberto},
+  title   = {Edge-First Language Model Inference: Models, Metrics, and Tradeoffs},
+  howpublished = {arXiv:2505.16508}, year = {2025}, note = {Preprint}
+}
+@misc{STRAT,
+  author  = {{Stratosphere Laboratory}},
+  title   = {Research: Raspberry Pi {LLM} performance},
+  howpublished = {\url{https://stratospherelinuxips.readthedocs.io/en/develop/immune/research_rpi_llm_performance.html}},
+  note    = {Accessed 31 Oct 2026. Web page, not peer reviewed}
+}
+
+%% ---------------- Sensor-based and edge irrigation (verified unless noted) ----------------
+@article{CAR10,
+  author  = {Cardenas-Lailhacar, Bernardo and Dukes, Michael D. and Miller, Grady L.},
+  title   = {Sensor-Based Automation of Irrigation on Bermudagrass during Dry Weather Conditions},
+  journal = {Journal of Irrigation and Drainage Engineering}, volume = {136}, number = {3}, pages = {184--193}, year = {2010},
+  doi     = {10.1061/(ASCE)IR.1943-4774.0000153},
+  note    = {Title, journal, volume and issue verified; TODO verify author initials and pages}
+}
+@article{MON18,
+  author  = {Montesano, Francesco Fabiano and van Iersel, Marc W. and Boari, Francesca and Cantore, Vito and D'Amato, Giulio and Parente, Angelo},
+  title   = {Sensor-based irrigation management of soilless basil using a new smart irrigation system: Effects of set-point on plant physiological responses and crop performance},
+  journal = {Agricultural Water Management}, volume = {203}, pages = {20--29}, year = {2018},
+  doi     = {10.1016/j.agwat.2018.02.019}
+}
+@misc{TAU26,
+  author  = {Taueatsoala, Kamogelo and Daniels, Caitlyn and Ramsunar, Angelina J. and Bronkhorst, Petrus and Ezugwu, Absalom E.},
+  title   = {{TinyML}-Enabled {IoT} for Sustainable Precision Irrigation},
+  howpublished = {arXiv:2601.13054}, year = {2026}, note = {Preprint}
+}
+@article{BER26,
+  author  = {Bera, Somnath and Dey, Tanushree and Sengupta, Anirbit and Mukherjee, Anwesha and De, Debashis},
+  title   = {Ensemble learning-based soil moisture monitoring and sustainable irrigation management for {Internet} of Agricultural Things},
+  journal = {Frontiers in the Internet of Things}, volume = {5}, pages = {1870523}, year = {2026},
+  doi     = {10.3389/friot.2026.1870523}
+}
+@misc{KUN25,
+  author  = {Kunt, Yunus Emre},
+  title   = {Development of a Smart Autonomous Irrigation System Using {IoT} and {AI}},
+  howpublished = {arXiv:2506.11835}, year = {2025}, note = {Preprint}
+}
+@misc{UGA07,
+  author  = {{University of Georgia}},
+  title   = {{UGA} researchers find way to halve greenhouse water use},
+  howpublished = {\url{https://news.uga.edu/halve-greenhouse-water-use/}}, year = {2007},
+  note    = {Press release. TODO: replace with the journal paper (van Iersel et al.)}
+}
+@misc{UGA13,
+  author  = {{University of Georgia CAES}},
+  title   = {{UGA} study shows soil moisture sensor system slashes nursery water use by 70 percent},
+  howpublished = {\url{https://fieldreport.caes.uga.edu/uga-study-shows-soil-moisture-sensor-system-slashes-nursery-water-use-by-70-percent/}}, year = {2013},
+  note    = {Press release. TODO: replace with the journal paper}
+}
+
+%% ---------------- Other related systems (TODO verify: details as recorded on 31 Oct) ----------------
+@misc{MAS25,
+  author = {Masumori, Atsushi and others}, title = {Plantbot},
+  howpublished = {arXiv:2509.05338}, year = {2025}, note = {TODO verify title and authors}
+}
+@misc{NAB25,
+  author = {Nabaei and others}, title = {Tracking Anyplant},
+  howpublished = {arXiv:2503.21932}, year = {2025}, note = {TODO verify title and authors}
+}
+@misc{GON23,
+  author = {Gong and others}, title = {Soil drydown changepoint detection},
+  howpublished = {arXiv:2310.17546}, note = {TODO verify title, authors and year}
+}
+
+%% ---------------- Spearmint and herb water needs ----------------
+@article{OKW11,
+  author  = {Okwany, Romulus O. and Peters, Troy R. and Ringer, Kerry L. and Walsh, Douglas B. and Rubio, Maria},
+  title   = {Impact of sustained deficit irrigation on spearmint ({Mentha spicata} {L.}) biomass production, oil yield, and oil quality},
+  journal = {Irrigation Science}, year = {2011}, doi = {10.1007/s00271-011-0282-4},
+  note    = {TODO add volume and pages}
+}
+@misc{WSU14,
+  title = {Effect of deficit irrigation on yield, quality and costs of native spearmint}, year = {2014},
+  howpublished = {\url{https://repositorio.utb.edu.co/handle/20.500.12585/9062}}, note = {TODO verify authors and venue}
+}
+@misc{ZAN,
+  author = {{University of Zanjan}}, title = {{Mentha spicata} under deficit irrigation},
+  howpublished = {Iranian Journal of Horticultural Science, \url{https://ijhs.ut.ac.ir/article_78634.html}}, note = {TODO verify authors, year, volume}
+}
+@misc{AGR19,
+  title = {Substrate volumetric water content controls growth and development of containerized culinary herbs},
+  howpublished = {Agronomy 9(11):667}, year = {2019}, note = {TODO verify authors; found via Hortidaily summary}
+}
+@misc{FUM,
+  author = {{Ferdowsi University of Mashhad}}, title = {Soil moisture regimes and growth in {Mentha} species},
+  howpublished = {\url{https://jopp.gau.ac.ir/article_3159.html}}, note = {TODO verify authors and year}
+}
+@misc{NSW,
+  author = {{NSW Department of Primary Industries}}, title = {Mint growing},
+  howpublished = {\url{https://www.dpi.nsw.gov.au/agriculture/horticulture/vegetables/commodity-growing-guides/mint-growing}}, note = {Accessed Oct 2026}
+}
+@misc{OMAFRA,
+  author = {{Ontario Ministry of Agriculture, Food and Rural Affairs}}, title = {Mint crop profile},
+  howpublished = {\url{https://omafra.gov.on.ca/CropOp/en/herbs/culinary/mint.html}}, note = {Accessed Oct 2026}
+}
+@misc{ISWS,
+  author = {{Illinois State Water Survey}}, title = {Spearmint crop requirements},
+  howpublished = {\url{https://isws.illinois.edu/data/altcrops/cropreq.asp?crop=549}}, note = {Accessed Oct 2026}
+}
+@misc{UCCF,
+  author = {{UC CalFresh, UC Davis}}, title = {Mint fact sheet},
+  howpublished = {\url{https://uccalfresh.ucdavis.edu/sites/g/files/dgvnsk2286/files/inline-files/Mint_Fact%20Sheet.pdf}}, note = {Accessed Oct 2026}
+}
+@misc{PG,
+  author = {{Produce Grower}}, title = {Culinary herbs: balancing light and average daily temperature},
+  howpublished = {\url{https://www.producegrower.com/article/culinary-herbs-balancing-light-and-average-daily-temperature}}, note = {Accessed Oct 2026}
+}
+@misc{VT,
+  author = {{Virginia Cooperative Extension}}, title = {Scheduling irrigation from soil moisture sensor data ({BSE-339})},
+  howpublished = {\url{https://pubs.ext.vt.edu/BSE/BSE-339/BSE-339.html}}, note = {Accessed Oct 2026}
+}
+@misc{LF,
+  author = {{Lancaster Farming}}, title = {What's wrong with my mint? Tips from an expert to help a browning herb},
+  howpublished = {\url{https://www.lancasterfarming.com/whats-wrong-with-my-mint-tips-from-an-expert-to-help-a-browning-herb/article_62d9ad45-bad7-5fe7-b19c-92390e31151e.html}}, note = {Accessed Oct 2026}
+}
+@misc{W2T,
+  author = {{Weather2Travel}}, title = {Tunis climate},
+  howpublished = {\url{https://www.weather2travel.com/tunisia/tunis/climate/}}, note = {Accessed Oct 2026}
+}
+
+%% ---------------- Plant choice (other candidates; probably not cited in the paper) ----------------
+@misc{HD,   author = {{Hortidaily}}, title = {Preventing chilling injury in basil}, howpublished = {\url{https://hortidaily.com/article/6042068/preventing-chilling-injury-in-basil}}}
+@misc{CG22, author = {Cruz and G{\'o}mez}, title = {Indoor compact tomatoes under {LED} light}, howpublished = {Agronomy 12(7):1704, \url{https://www.mdpi.com/2073-4395/12/7/1704}}, year = {2022}, note = {TODO verify full title and authors}}
+@misc{CLEM, author = {{Clemson Cooperative Extension}}, title = {How to grow pothos indoors}, howpublished = {\url{https://hgic.clemson.edu/factsheet/how-to-grow-pothos-indoors-epipremnum-spp-care-cultivars-and-common-problems/}}}
+@misc{SAS,  author = {{Succulents and Sunshine}}, title = {How to water succulents}, howpublished = {\url{https://www.succulentsandsunshine.com/watering-succulents/}}}
+@misc{OTT,  author = {{Our Tunisian Table}}, title = {Tunisian mint tea}, howpublished = {\url{https://ourtunisiantable.com/home/2016/11/14/tunisian-mint-tea}}, year = {2016}}
+
+%% ---------------- Datasets ----------------
+@misc{DS_MEN, title = {Environmental Sensor Dataset for {LSTM}-Based Predictive Irrigation in Smart Home Gardening}, howpublished = {Mendeley Data, \url{https://data.mendeley.com/datasets/jtsyb593fy/1}}, year = {2026}, note = {CC BY 4.0}}
+@misc{DS_LEC, title = {Multi-sector precision irrigation farm, {Lecce}}, howpublished = {Mendeley Data, \url{https://data.mendeley.com/datasets/c837v6p8ph/2}}, year = {2026}, note = {CC BY 4.0}}
+@misc{DS_GAL, title = {Soil moisture time series for precision irrigation, {Gallipoli}}, howpublished = {Zenodo, \url{https://zenodo.org/records/20665025}}, year = {2026}, note = {CC BY 4.0}}
+@misc{DS_SIM, title = {{SIMPaCT} soil moisture}, howpublished = {Zenodo, \url{https://zenodo.org/records/16811020}}, year = {2025}, note = {CC BY 4.0}}
+@misc{DS_PP,  title = {{ProjectPlant} houseplant sensor data}, howpublished = {\url{https://github.com/jeffschwane/ProjectPlant}}, note = {No license stated}}
+@misc{DS_TS,  title = {Smart flowerpot, {ThingSpeak} channel 1359457}, howpublished = {\url{https://thingspeak.mathworks.com/channels/1359457}}}
+
+%% ---------------- Open-source projects and products ----------------
+@misc{MYCODO, title = {Mycodo: environmental monitoring and regulation system}, howpublished = {\url{https://github.com/kizniche/Mycodo}}, note = {GPL-3.0}}
+@misc{TOMATO, author = {Reed, Matt}, title = {Talking tomato plant ({Hackster} news: A fruitful conversation)}, howpublished = {\url{https://hackster.io/news/a-fruitful-conversation-f9372d777e73}}}
+@misc{GARDYN, author = {{Gardyn}}, title = {Gardyn technology and the {Kelby} {AI} assistant}, howpublished = {\url{https://mygardyn.com/technology/}}}
+@misc{CLICKGROW, author = {{Click \& Grow}}, title = {Smart Garden}, howpublished = {\url{https://www.protein.xyz/click-grow/}}}
+@misc{LETPOT, author = {{LetPot}}, title = {30-day watering-free smart garden}, howpublished = {\url{https://letpot.com/blogs/letpot-news-and-other-information/celebrating-the-success-of-letpot-our-30-day-watering-free-smart-garden}}}
+@misc{MIFLORA, author = {{Xiaomi}}, title = {Flower Care / Mi Flora plant sensor}, howpublished = {\url{https://home-assistant-guide.com/product/xiaomi-mi-flora}}}
