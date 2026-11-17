@@ -1,0 +1,11 @@
+# Abstract (draft v3, 16 Nov 2026)
+
+**Working title:** Rules, a 0.8B model on a Raspberry Pi, or a cloud LLM? Comparing four irrigation controllers on the same live sensor data from a potted spearmint plant
+
+> About 230 words. Numbers in [brackets] are filled in only from `experiment/metrics.py` on the real logs. TODO: pick the workshop and adjust length.
+
+---
+
+Language models are increasingly proposed as decision layers in smart irrigation, but existing systems either keep a fixed rule in charge and use the model only to explain it, or rely on large cloud models behind a safety gate. No study has compared a sub-1B model running offline on edge hardware against both rule-based baselines and a cloud LLM on the watering decision itself, using the same live sensor inputs. We present **Nabta**, a low-cost smart pot in which a Raspberry Pi 5 logs soil moisture, air temperature, humidity, light and tank level of a spearmint (*Mentha spicata*) plant every 30 minutes. Four controllers act on identical contexts: a single-threshold controller, a multi-rule controller with dose, daily and interval limits, Qwen3.5 0.8B running offline on the Pi, and a cloud LLM (ChatGPT). Both language models use the same frozen prompt and decoding settings (temperature 0) and pass the same safety gate. In the deployed pot only rules reach the pump and the local model explains each decision through a validator. Over [14] days the two rule controllers water two real pots, while both language models decide on the same live contexts in shadow mode and are replayed in closed loop on the logged conditions. We measure irrigation precision (time in the 60 to 90 moisture band, under- and over-watering events, water use), decision reliability against the rule reference (accuracy, Cohen's kappa, recall of needed waterings, unsafe proposals, valid output, stability on near-threshold cases), and operational cost (latency, cost per decision, offline availability). [Results: in-band time X/Y/Z/W %; kappa A for Qwen vs. B for ChatGPT; latency C s vs. D s; cost 0 vs. E USD per decision.] We release the hardware list, prompts, logs and code.
+
+**Keywords:** smart irrigation, small language models, edge AI, Raspberry Pi, IoT, LLM evaluation, precision agriculture
