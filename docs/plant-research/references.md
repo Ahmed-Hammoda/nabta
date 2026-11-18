@@ -1,6 +1,6 @@
 # References
 
-All sources used in the plant research, with the key used in the other files and what each one supports. Accessed October 2026.
+All sources used in the plant research, with the key used in the other files and what each one supports. Accessed October and November 2026.
 
 | Key | Source | Used for |
 |---|---|---|
@@ -17,6 +17,11 @@ All sources used in the plant research, with the key used in the other files and
 | [CLEM] | Clemson Cooperative Extension, Home & Garden Information Center, [How to grow pothos indoors](https://hgic.clemson.edu/factsheet/how-to-grow-pothos-indoors-epipremnum-spp-care-cultivars-and-common-problems/) | Pothos watering and light tolerance |
 | [SAS] | Succulents and Sunshine, [How to water succulents](https://www.succulentsandsunshine.com/watering-succulents/) | Indoor succulent watering interval (14 to 21 days) |
 | [W2T] | Weather2Travel, [Tunis climate](https://www.weather2travel.com/tunisia/tunis/climate/?Units=0) | Tunis average lows: 11 °C in November, 8 °C in December |
+| [KAN25] | Kandamali et al. (2025), [CottonBot: an AI-driven cotton farming assistant and irrigation advisor using LLM-RAG and agentic AI tools](https://doi.org/10.1016/j.atech.2025.101640), *Smart Agricultural Technology* 12, 101640 | Rule decides irrigation, local model explains; local model comparison (faithfulness, speed); RAG retrieval metrics. Sent by the professor, notes in [paper-notes](paper-notes.md) |
+| [PAR26] | Pardo-Pina et al. (2026), [An agent-based service architecture for smart greenhouses](https://doi.org/10.1016/j.atech.2026.101872), *Smart Agricultural Technology* 13, 101872 | Safety gate and offline fallback on a Raspberry Pi; evaluation recipe (40 questions, 36 cases × 3 repeats, Wilson interval); lux to DLI. Sent by the professor, notes in [paper-notes](paper-notes.md) |
+| [ELA26] | ElAlaoui et al. (2026), [Letting the crop speak: a proof-of-concept sensor-grounded LLM advisor for potato irrigation on a Mediterranean Vertisol](https://www.mdpi.com/2624-7402/8/11/468), *AgriEngineering* 8(11), 468 | Closest prior work to the team's RQ: cloud GPT-5 advises irrigation from live sensor data in pots |
+| [MIM26] | Liu et al. (2026), [Mimir: physics-grounded LLM agents for long-horizon irrigation control](https://arxiv.org/abs/2610.02038v1), arXiv:2610.02038 | LLM size did not steadily improve irrigation decisions (simulation) |
+| [LEAF26] | Abdulkadhim and Repas (2026), [LEAF: LLM edge assessment framework](https://www.mdpi.com/2504-4990/8/2/48), *Machine Learning and Knowledge Extraction* 8(2), 48 | Small-model latency on Raspberry Pi 4 and 5 |
 | [OTT] | Our Tunisian Table, [Tunisian mint tea](https://ourtunisiantable.com/home/2016/11/14/tunisian-mint-tea) | Local relevance of mint in Tunisia |
 
 ## Our own work (not from a source)
