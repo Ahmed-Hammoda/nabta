@@ -1,21 +1,23 @@
-rows: 6600 (train 5940, val 660); dropped 0 duplicates of the test set or of each other
+rows: 6900 (train 6210, val 690); dropped 0 duplicates of the test set or of each other
 
 [val]
-  parts:  realistic 227, uniform 247, boundary 156, fault 30
-  water:  yes 328, no 332
-  alerts: DRY_DANGER 121, TOO_WET 40, HEAT_DANGER 77, COLD_DANGER 75, LOW_LIGHT 282, none 215
-  faults: SENSOR_ERROR 31
-  moisture_level: acceptable 190, danger_dry 141, dry 212, optimal 76, too_wet 41
-  temp_level: acceptable 298, danger 152, optimal 210
-  light_level: acceptable 120, low 282, optimal 258
-  humidity_level: optimal 133, outside_optimal 527
+  parts:  realistic 243, uniform 241, boundary 171, fault 35
+  water:  yes 254, no 436
+  light:  on 245, off 445  (switched vs. light_on: 206)
+  alerts: DRY_DANGER 121, TOO_WET 32, HEAT_DANGER 81, COLD_DANGER 89, LOW_LIGHT 266, TANK_LOW 107, none 208
+  faults: SENSOR_ERROR 38
+  moisture_level: acceptable 229, danger_dry 148, dry 226, optimal 55, too_wet 32
+  temp_level: acceptable 305, danger 170, optimal 215
+  light_level: acceptable 148, low 266, optimal 276
+  humidity_level: optimal 127, outside_optimal 563
 
 [train]
-  parts:  realistic 2173, uniform 2153, boundary 1344, fault 270
-  water:  yes 3005, no 2935
-  alerts: DRY_DANGER 1183, TOO_WET 292, HEAT_DANGER 626, COLD_DANGER 679, LOW_LIGHT 2595, none 1824
-  faults: SENSOR_ERROR 293
-  moisture_level: acceptable 1833, danger_dry 1371, dry 1888, optimal 553, too_wet 295
-  temp_level: acceptable 2715, danger 1305, optimal 1920
-  light_level: acceptable 1008, low 2595, optimal 2337
-  humidity_level: optimal 1317, outside_optimal 4623
+  parts:  realistic 2157, uniform 2159, boundary 1629, fault 265
+  water:  yes 2248, no 3962
+  light:  on 2235, off 3975  (switched vs. light_on: 1916)
+  alerts: DRY_DANGER 1255, TOO_WET 271, HEAT_DANGER 685, COLD_DANGER 705, LOW_LIGHT 2578, TANK_LOW 1180, none 1652
+  faults: SENSOR_ERROR 286
+  moisture_level: acceptable 1934, danger_dry 1429, dry 2059, optimal 512, too_wet 276
+  temp_level: acceptable 2904, danger 1390, optimal 1916
+  light_level: acceptable 1248, low 2578, optimal 2384
+  humidity_level: optimal 1248, outside_optimal 4962

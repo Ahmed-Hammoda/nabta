@@ -15,6 +15,8 @@ Output: ../train_data/colab/
 
     python make_replay_data.py            # about 10-15 min on the laptop
     python make_replay_data.py --n 50     # quick try
+    python make_replay_data.py --mix-only # no Ollama: reuse the kept explanations, rebuild the mix and the zip
+                                          # (use this after make_train_data.py changed the decision rows)
 """
 import argparse, csv, json, os, random, socket, sys, time, urllib.error, urllib.request, zipfile
 
@@ -54,6 +56,7 @@ def new_readings(n, rnd):
     while len(out) < n:
         ln, lh = mtd.lux_pair()
         r = mtd.row(rnd.uniform(3, 100), rnd.uniform(-2, 42), rnd.uniform(20, 95), ln, lh)
+        r = {c: r[c] for c in mtd.COLS[:5]}           # the explanation task uses the 5 sensor values only
         if not rules_v2.decide(r)["faults"]:
             out.append(r)
     return out
@@ -63,6 +66,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--n", type=int, default=1800, help="readings to try (about 70-80 %% pass the checks)")
     ap.add_argument("--val", type=int, default=150)
+    ap.add_argument("--mix-only", action="store_true", help="skip Ollama, reuse replay_partial.jsonl")
     a = ap.parse_args()
     rnd = random.Random(2030)
     mtd.rnd.seed(2030)
@@ -81,7 +85,7 @@ def main():
     if kept:
         print(f"resuming: {len(kept)} already kept")
     part = open(PARTIAL, "a", encoding="utf-8")
-    for r in new_readings(a.n, rnd):
+    for r in ([] if a.mix_only else new_readings(a.n, rnd)):
         if (r["soil_moisture_index"], r["air_temp_c"]) in test_inputs:
             continue
         k = rules_v2.label(r["soil_moisture_index"], r["air_temp_c"], r["humidity_rh"], r["light_lux_hours_24h"])
@@ -100,7 +104,7 @@ def main():
         if tried % 200 == 0:
             print(f"  {tried} tried, {len(kept)} kept, {time.time() - t0:.0f} s")
     part.close()
-    print(f"explanations: {tried} tried, {len(kept)} kept ({100 * len(kept) / max(tried, 1):.0f} %)")
+    print(f"explanations: {tried} tried now, {len(kept)} kept in total")
 
     rnd.shuffle(kept)
     val_ex, train_ex = kept[:a.val], kept[a.val:]
@@ -123,7 +127,7 @@ def main():
             zf.write(os.path.join(OUT, n), n)
     share = 100 * len(train_ex) / len(mix)
     info = (f"train_mix: {len(mix)} rows = {len(decision)} decision + {len(train_ex)} explanation replay ({share:.0f} %)\n"
-            f"val_decision: 660 rows; val_explain: {len(val_ex)} rows\nupload: {z}\n")
+            f"val_decision: {sum(1 for _ in open(os.path.join(OUT, 'val_decision.jsonl'), encoding='utf-8'))} rows; val_explain: {len(val_ex)} rows\nupload: {z}\n")
     print(info)
     open(os.path.join(OUT, "info.txt"), "w", encoding="utf-8").write(info)
 

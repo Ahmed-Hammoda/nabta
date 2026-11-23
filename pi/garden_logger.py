@@ -4,6 +4,7 @@ Raspberry Pi 4 sensor logger
   - BH1750  light sensor        (I2C 0x23 or 0x5C)
   - BME280  temp/humidity       (I2C 0x76 or 0x77)
   - Soil moisture sensor on ADS1115 channel A0 (I2C 0x48)
+  - Float switch (water tank level) on GPIO 17 and GND, internal pull-up
 
 Install (once):
     sudo apt install -y python3-pip i2c-tools
@@ -41,6 +42,11 @@ SOIL_CHANNEL = 0              # soil sensor on A0 (0-3)
 BH_ADDRS = (0x23, 0x5C)       # BH1750 (ADDR low / high)
 BME_ADDRS = (0x76, 0x77)      # BME280 (SDO low / high)
 
+FLOAT_PIN = 17                # float switch: one wire to GPIO 17 (pin 11), the other to GND (pin 9)
+FLOAT_LOW_VALUE = 0           # pin value when the float is DOWN (tank low). Tested 24 Nov 2026:
+                              # float UP = 1, float DOWN = 0. (None = not set: tank_low stays empty.)
+FLOAT_VOTES = 6               # tank_low in the 30-min row = majority of the last 6 readings (1 min)
+
 DEFAULT_INTERVAL_S = 10       # raw log period
 DEFAULT_AVG_S = 30 * 60       # averaged row period
 HOURS_WINDOW_S = 24 * 3600    # light-total window
@@ -51,9 +57,9 @@ sys.path.insert(0, BASE_DIR)
 import nabta_paths as paths   # logs/<YYYY-MM>/raw_log.csv and log_30min.csv (one folder per month)
 
 AVG_HEADER = ["timestamp", "soil_moisture_index", "air_temp_c",
-              "humidity_rh", "light_lux_now", "light_lux_hours_24h", "samples"]
+              "humidity_rh", "light_lux_now", "light_lux_hours_24h", "tank_low", "samples"]
 RAW_HEADER = ["timestamp", "soil_raw", "soil_moisture_index", "air_temp_c",
-              "humidity_rh", "light_lux_now", "light_lux_hours_24h"]
+              "humidity_rh", "light_lux_now", "light_lux_hours_24h", "float_raw", "tank_low"]
 
 CAL_STEPS = [
     ("dry_air",   "DRY AIR  - sensor held in the air, touching nothing"),
@@ -84,6 +90,7 @@ def mean_or_none(values):
 
 
 def append_row(path, header, row):
+    paths.ensure_header(path, header)          # an older file gets the new columns once
     new_file = (not os.path.exists(path)) or os.path.getsize(path) == 0
     with open(path, "a", newline="") as f:
         writer = csv.writer(f)
@@ -123,7 +130,37 @@ def next_boundary(t, period_s):
     return (int(t // period_s) + 1) * period_s
 
 
+def tank_low_from(float_raw):
+    """Pin value -> 1 (tank low) / 0 (tank OK) / None (float not read or FLOAT_LOW_VALUE not set)."""
+    if float_raw is None or FLOAT_LOW_VALUE is None:
+        return None
+    return int(float_raw == FLOAT_LOW_VALUE)
+
+
 # ------------------------------------------------------------------ sensors
+class FloatSwitch:
+    """The float switch: a plain contact between GPIO 17 and GND, read with the internal pull-up."""
+
+    def __init__(self, pin=FLOAT_PIN):
+        self.pin, self.gpio = pin, None
+        try:
+            import RPi.GPIO as GPIO
+            GPIO.setwarnings(False)
+            GPIO.setmode(GPIO.BCM)
+            GPIO.setup(pin, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+            self.gpio = GPIO
+        except Exception as e:  # noqa: BLE001 - not on a Pi, or no GPIO access
+            print("[warn] float switch not available:", e, file=sys.stderr)
+
+    def read(self):
+        return None if self.gpio is None else int(self.gpio.input(self.pin))
+
+
+class SimFloat:
+    def read(self):
+        return 1
+
+
 class RealSensors:
     def __init__(self):
         try:
@@ -363,6 +400,8 @@ def rebuild_lux_history(interval_s):
 def run(args):
     cal = load_calibration()
     sensors = SimSensors() if args.simulate else RealSensors()
+    float_switch = SimFloat() if args.simulate else FloatSwitch()
+    tank_votes = deque(maxlen=FLOAT_VOTES)
     interval = args.interval
     avg_s = args.avg_seconds
 
@@ -390,6 +429,10 @@ def run(args):
         bme = safe_read(sensors.read_bme, "BME280")
         temp, rh = bme if bme else (None, None)
         idx = soil_index(soil_raw, cal)
+        float_raw = float_switch.read()
+        tank_low = tank_low_from(float_raw)
+        if tank_low is not None:
+            tank_votes.append(tank_low)
 
         # 24 h light total: sum of lux x hours over the last 24 h
         if lux is not None:
@@ -403,7 +446,8 @@ def run(args):
         samples += 1
         append_row(paths.raw_file(), RAW_HEADER, [
             now_iso(), fmt(soil_raw, 1), fmt(idx, 1), fmt(temp, 2),
-            fmt(rh, 1), fmt(lux, 1), fmt(lux_hours_24h, 2)])
+            fmt(rh, 1), fmt(lux, 1), fmt(lux_hours_24h, 2),
+            "" if float_raw is None else float_raw, "" if tank_low is None else tank_low])
 
         for key, val in (("soil", idx), ("temp", temp),
                          ("rh", rh), ("lux", lux)):
@@ -418,7 +462,9 @@ def run(args):
                     fmt(mean_or_none(window["temp"]), 2),
                     fmt(mean_or_none(window["rh"]), 1),
                     fmt(mean_or_none(window["lux"]), 1),
-                    fmt(lux_hours_24h, 2), samples])
+                    fmt(lux_hours_24h, 2),
+                    int(sum(tank_votes) * 2 > len(tank_votes)) if tank_votes else "",
+                    samples])
                 print("[%s] averaged row saved (%d samples)" % (now_iso(), samples))
             window = {"soil": [], "temp": [], "rh": [], "lux": []}
             samples = 0

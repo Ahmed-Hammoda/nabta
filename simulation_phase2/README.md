@@ -8,13 +8,15 @@ Starts from the real sensor test of 15 Nov 2026 and the new calibration
 | `real_sensor_test/` | qwen3.5:0.8b explaining the 17 rows of the real 30-min log (first check on real data, old rules) |
 | `draft_v1/` | First 30-day simulation with the old rules. Superseded: the unplugged sensor flooded the pot. |
 | `code/rules_v2.py` | **Rules v2**: TOO_WET at 98+, and a sensor/pump fault check before every decision |
+| `code/rules_v3.py`, `RULES_v3.md` | **Rules v3** = v2 + water tank (float switch) + grow light: the answer key of the fine-tuning data |
+| `code/simulate_30days_v3.py`, `dataset_v3/` | 30-day log with the grow light and the tank; the fine-tuned model's test set |
 | `code/simulate_30days_v2.py` | Builds the dataset (seed 2026) |
 | `dataset/` | **The phase 2 dataset**: 1,440 rows (sensor file + answer key). See `dataset/README.md`. |
 | `code/sim_bench_v2.py` | Tests the models on the dataset |
 | `results/` | Model results and `summary.txt` / `summary.csv` |
 | `code/think_subset.py` | Thinking-on test on 82 of the 255 cases; results in `results/think_subset/` |
 | `code/make_train_data.py` | Builds the fine-tuning data |
-| `train_data/` | **Fine-tuning data** for qwen3.5:0.8b: 5,940 train + 660 val rows. See `train_data/README.md`. |
+| `train_data/` | **Fine-tuning data** for qwen3.5:0.8b (rules v3): 6,210 train + 690 val rows. See `train_data/README.md`. |
 
 ## Tests
 

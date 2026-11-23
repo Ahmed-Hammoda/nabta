@@ -323,7 +323,7 @@ const RP={GND:V(9.7,1.9,-8.0),IN1:V(9.7,1.9,-7.75),IN2:V(9.7,1.9,-7.5),VCC:V(9.7
     g.textAlign="right";
     [["NO",-9.0],["COM",-8.5],["NC",-8.0],["NO",-6.6],["COM",-6.1],["NC",-5.6]].forEach(([t,z])=>g.fillText(t,412,(z+8.9)*100));
     g.textAlign="center"; g.font="700 26px IBM Plex Sans, sans-serif";
-    g.fillText("K1 pump",250,22); g.fillText("K2 light",250,362);
+    g.fillText("K1 light",250,22); g.fillText("K2 pump",250,362);
     g.font="600 18px IBM Plex Mono, monospace"; g.fillText("JD-VCC jumper ON",150,190);
   });
   const bm=std(0x1d4f9a);
@@ -473,8 +473,8 @@ const W=[
  ["w20","signal","white","Pi pin 11 · GPIO 17","Hole i55",PIN(11),H(55,"i"),["pi","float"],"Tank level input. The code turns on the Pi's internal pull-up."],
  ["w21","signal","white","Float switch wire 1","Hole j55",FLOAT_A,H(55,"j"),["float","bb"],"Either float wire can go here; the switch has no polarity.",[V(34.6,14,3.5),V(20,15,2.6)]],
  ["w22","signal","black","Float switch wire 2","Front − rail, column 56",FLOAT_B,RL("f-",56),["float","bb"],"",[V(35.1,14.2,3.4),V(20.4,15.3,3)]],
- ["w26","signal","purple","Pi pin 16 · GPIO 23","Relay IN1 (pump)",PIN(16),RP.IN1,["pi","relay"],"Turns relay K1 on to run the pump."],
- ["w27","signal","grey","Pi pin 18 · GPIO 24","Relay IN2 (light)",PIN(18),RP.IN2,["pi","relay"],"Turns relay K2 on to run the grow light."],
+ ["w26","signal","purple","Pi pin 16 · GPIO 23","Relay IN1 (grow light)",PIN(16),RP.IN1,["pi","relay"],"Turns relay K1 on to run the grow light (not connected yet)."],
+ ["w27","signal","grey","Pi pin 18 · GPIO 24","Relay IN2 (pump)",PIN(18),RP.IN2,["pi","relay"],"Turns relay K2 on to run the pump. Tested on the Pi: the pump runs."],
  ["w28","power","orange","Pi pin 2 · 5 V","Front + rail (5 V), column 1",PIN(2),RL("f+",1),["pi","bb"],"5 V for the relay board only."],
  ["w29","power","black","Pi pin 14 · GND","Front − rail, column 2",PIN(14),RL("f-",2),["pi","bb"],""],
  ["w30","power","orange","Relay VCC","Front + rail (5 V), column 60",RP.VCC,RL("f+",60),["relay","bb"],""],
@@ -483,9 +483,9 @@ const W=[
  ["w35","power","black","Case fan black","Pi pin 6 · GND",V(-16.4,2.9,2.6),PIN(6),["fan","pi"],""],
  ["w36","load","red","DC jack +","Relay K1 COM",DC.P,RP.COM1,["dcjack","relay"],"5 V from the 2.5 A adapter, not from the Pi."],
  ["w37","load","red","Relay K1 COM","Relay K2 COM",RP.COM1,RP.COM2,["relay"],"Shares the adapter's 5 V with both relays."],
- ["w38","load","red","Relay K1 NO","Pump + (through the diode's striped end)",RP.NO1,PUMP_P,["relay","pump","diode"],"NO = the pump runs only while the relay is on.",[V(20,9,-9.5),V(27.2,12.6,-4.6),V(27.2,12.2,-4.5),V(28.9,11.8,-4.4),V(29.0,3,-1.5)]],
+ ["w38","load","red","Relay K2 NO","Pump + (through the diode's striped end)",RP.NO2,PUMP_P,["relay","pump","diode"],"NO = the pump runs only while the relay is on.",[V(20,9,-9.5),V(27.2,12.6,-4.6),V(27.2,12.2,-4.5),V(28.9,11.8,-4.4),V(29.0,3,-1.5)]],
  ["w39","load","black","Pump −","DC jack −",PUMP_N,DC.N,["pump","diode","dcjack"],"Passes the plain end of the diode.",[V(29.1,3,1.2),V(28.9,11.8,-3.3),V(27.2,12.2,-3.5),V(27.2,12.6,-3.4),V(20,8,-12)]],
- ["w40","load","red","Relay K2 NO","Grow light +",RP.NO2,LEDP.P,["relay","led"],"",[V(16,3,-4),V(18.4,1.4,0.4),V(18.35,15,0.45),V(18.3,28.4,1.0)]],
+ ["w40","load","red","Relay K1 NO","Grow light +",RP.NO1,LEDP.P,["relay","led"],"",[V(16,3,-4),V(18.4,1.4,0.4),V(18.35,15,0.45),V(18.3,28.4,1.0)]],
  ["w41","load","black","Grow light −","DC jack −",LEDP.N,DC.N,["led","dcjack"],"",[V(17.7,28.4,1.0),V(17.65,15,0.45),V(17.6,1.4,0.4),V(14,2.5,-10)]]
 ];
 
@@ -528,18 +528,18 @@ const INFO={
   bme:["BME280 (temperature, humidity)","I²C address 0x76. Pins in c3–c6: VIN, GND, SCL, SDA. Powered from 3.3 V."],
   bh:["BH1750 (light)","I²C address 0x23 because ADDR goes to GND. Pins in c10–c14: VCC, GND, SCL, SDA, ADDR."],
   ads:["ADS1115 (analog to digital)","Reads the soil probe on A0. I²C address 0x48 because ADDR goes to GND. Pins in c19–c28."],
-  relay:["2-relay module","IN1 (GPIO 23) switches K1 for the pump, IN2 (GPIO 24) switches K2 for the light. Screw terminals: COM gets the adapter's 5 V, NO goes to the load. NC stays empty, so a crash or reboot leaves the pump off."],
+  relay:["2-relay module","IN2 (GPIO 24) switches K2 for the pump (tested), IN1 (GPIO 23) switches K1 for the grow light. The board switches ON when IN is LOW. Screw terminals: COM gets the adapter's 5 V, NO goes to the load. NC stays empty, so a crash or reboot leaves the pump off."],
   dcjack:["DC jack to screw terminal","Takes the 5 V 2.5 A adapter's plug. + goes to the relays' COM, − goes straight to the pump and the light."],
   adapter:["5 V 2.5 A adapter","Only for the pump and the grow light. Keeping them off the Pi's supply stops the pump motor from causing undervoltage."],
   tank:["Water tank, about 3–4 L","The pump sits on the bottom. Keep the water below the jar's top so it can't siphon."],
-  pump:["Mini pump, USB 5 V","Cut the USB cable: red goes to the relay K1 NO, black to the DC jack −. Water is measured by time: about 120 L/h, so 150 mL takes 4–5 s. Measure your own pump with a cup and set PUMP_SECONDS."],
+  pump:["Mini pump, USB 5 V","Cut the USB cable: red goes to the relay K2 NO, black to the DC jack −. Water is measured by time: about 120 L/h, so 150 mL takes 4–5 s. Measure your own pump with a cup and set PUMP_SECONDS."],
   diode:["1N4007 diode","Across the pump: striped end on the pump +, plain end on the pump −. It absorbs the spike when the motor stops."],
   float:["Float switch (reed)","No power of its own: one wire to GPIO 17 (through hole j55/i55), the other to GND. Mount it so the float drops when about 1 L is left."],
   tube:["Silicone tube","Pump → over the tank rim → into the jar. Keep the tank water lower than the jar's top so it can't siphon after the pump stops."],
   jar:["Spearmint jar","The soil probe goes in up to the line on its blade, never deeper."],
   probe:["Capacitive soil probe","AOUT to ADS1115 A0, VCC to 3.3 V, GND to GND. Calibrated: air = 16,700, water = 7,886.8."],
   mint:["Spearmint","Watered when the soil index is 70 or below."],
-  led:["Grow light (USB 5 V strip)","Cut the USB cable: + to relay K2 NO, − to the DC jack −. Keep it 10–15 cm above the leaves and away from water."]
+  led:["Grow light (USB 5 V strip)","Cut the USB cable: + to relay K1 NO, − to the DC jack −. Keep it 10–15 cm above the leaves and away from water."]
 };
 
 /* ---------- panel ---------- */

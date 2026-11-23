@@ -82,7 +82,7 @@ if not os.path.exists("data/train_mix.jsonl"):
     files.upload()
     !unzip -o nabta_colab_upload.zip -d data
 !wc -l data/*.jsonl
-# Expected: train_mix 7493 lines, val_decision 660, val_explain 150
+# Expected: train_mix 7763 lines, val_decision 690, val_explain 150
 """)
 
 code("""
@@ -215,8 +215,8 @@ def generate(msgs, max_new=120):
     out = model.generate(**enc, max_new_tokens=max_new, do_sample=False)
     return tok.decode(out[0][enc["input_ids"].shape[1]:], skip_special_tokens=True).strip()
 
-keys = ["moisture_level", "temp_level", "light_level", "humidity_level", "faults", "alerts", "water"]
-n = water = alerts = both = exact = bad_json = over = missed = 0
+keys = ["moisture_level", "temp_level", "light_level", "humidity_level", "faults", "alerts", "water", "light"]
+n = water = alerts = light = both = exact = bad_json = over = missed = 0
 mistakes = []
 for ex in random.Random(2).sample(val_dec, 20 if DRY_RUN else 300):
     want = json.loads(ex["messages"][-1]["content"])
@@ -228,14 +228,16 @@ for ex in random.Random(2).sample(val_dec, 20 if DRY_RUN else 300):
     n += 1
     w = got.get("water") == want["water"]
     a = set(got.get("alerts") or []) == set(want["alerts"])
-    water += w; alerts += a; both += w and a
+    l = got.get("light") == want["light"]
+    water += w; alerts += a; light += l; both += w and a and l
     exact += all(got.get(k) == want[k] for k in keys)
     over += want["water"] == "no" and got.get("water") == "yes"
     missed += want["water"] == "yes" and got.get("water") != "yes"
-    if not (w and a) and len(mistakes) < 8:
+    if not (w and a and l) and len(mistakes) < 8:
         mistakes.append((ex["messages"][-2]["content"], text))
-summary = (f"water {100*water/n:.1f} %  alerts {100*alerts/n:.1f} %  both {100*both/n:.1f} %  "
-           f"all 7 keys {100*exact/n:.1f} %  overwater {over}  missed {missed}  bad JSON {bad_json}  (of {n})")
+summary = (f"water {100*water/n:.1f} %  light {100*light/n:.1f} %  alerts {100*alerts/n:.1f} %  "
+           f"all three {100*both/n:.1f} %  all 8 keys {100*exact/n:.1f} %  overwater {over}  missed {missed}  "
+           f"bad JSON {bad_json}  (of {n})")
 print(summary)
 for q, t in mistakes:
     print("\\nIN :", q, "\\nOUT:", t)

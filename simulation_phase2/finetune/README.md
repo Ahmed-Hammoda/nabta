@@ -1,6 +1,7 @@
 # Fine-tuning qwen3.5:0.8b for Nabta: step by step
 
-Goal: the model makes the pot decision itself (levels, faults, alerts, water) and **keeps** its skill
+Goal: the model makes the pot decision itself (levels, faults, alerts, **pump** and **grow light**, with the
+water tank; rules v3, see `../RULES_v3.md`) and **keeps** its skill
 of explaining the decision and chatting.
 
 > **Status:** the notebook has **not been run yet**. Its install, loading and saving code follows
@@ -14,13 +15,13 @@ of explaining the decision and chatting.
 | 3 | Laptop | Download the GGUF and import it into Ollama | To do (10 min) |
 | 4 | Laptop | `python eval_finetuned.py --ft nabta-qwen3.5` | Base half done; fine-tuned half to do (about 15 min) |
 
-## Step 1 (done): the upload file
+## Step 1 (done, rebuilt 23 Nov 2026 for rules v3): the upload file
 `nabta_colab_upload.zip` contains:
 
 | File | Rows | What |
 |---|---|---|
-| `train_mix.jsonl` | 7,493 | 5,940 decision rows + 1,553 explanation **replay** rows (21 %) |
-| `val_decision.jsonl` | 660 | Decision rows not trained on |
+| `train_mix.jsonl` | 7,763 | 6,210 decision rows + 1,553 explanation **replay** rows (20 %) |
+| `val_decision.jsonl` | 690 | Decision rows not trained on |
 | `val_explain.jsonl` | 150 | Explanation rows not trained on |
 
 **Replay** rows are the base model's own explanations (prompt e3) on new readings:
@@ -53,12 +54,12 @@ and run `python make_replay_data.py`.
 | 1 | Installs Unsloth and transformers 5.2 (official install cell) | Prints nothing (3-5 min) |
 | 2 | Checks the GPU | It must show "Tesla T4" and transformers 5.x |
 | 3 | Connects Google Drive | Allow access; results are saved there |
-| 4 | Upload | Choose `nabta_colab_upload.zip`; it should show 7493 / 660 / 150 lines |
+| 4 | Upload | Choose `nabta_colab_upload.zip`; it should show 7763 / 690 / 150 lines |
 | 5-6 | Loads `unsloth/Qwen3.5-0.8B` and adds LoRA to the language layers | About 1-2 % of the weights are trainable |
 | 7 | Shows the chat format | It must end with `<\|im_start\|>assistant` and an empty `<think></think>` |
 | 8 | Prepares the data | The model learns only the answers, not the prompts |
 | 9 | **Trains**, then saves the LoRA to Drive | `eval_loss` should fall and stay low |
-| 10 | Decision check on 300 unseen rows | Target: water 99 % or more, alerts 98 % or more |
+| 10 | Decision check on 300 unseen rows | Target: water 99 % or more, light 99 % or more, alerts 98 % or more |
 | 11 | Explanation check | "AFTER" should read like "BEFORE" |
 | 12 | Saves the merged model and the **GGUF** to Drive | You need the `nabta_gguf` folder |
 
@@ -95,7 +96,7 @@ Both models get the same tests and settings: temperature 0, seed 1, thinking off
 
 | Test | Cases | What it shows |
 |---|---|---|
-| Decision (prompt `ft`) | 255 (30-day dataset) | Water, alerts, levels, overwatering, missed watering, broken sensor (watered? SENSOR_ERROR?), false faults |
+| Decision (prompt `ft`, rules v3) | 308 (v3 30-day dataset) | Water, light, alerts, levels, overwatering, missed watering, light switches, light at night, tank low watered, broken sensor, false faults |
 | Explanation e3 | 184 (phase 1) | Same action, no invented numbers, all alerts, no fake alert, short |
 | Chat v2 | 240 | Phase 1 free chat |
 | Chat v3.1 | 240 | Phase 1 router + safety net (96 % before) |
@@ -109,7 +110,7 @@ Results go to `../results/finetune_eval/compare_*.txt`.
 | Explanation e3, all pass | 97.8 % (the official qwen3.5:0.8b scores the same 97.8 % with this rule) |
 | Chat v2 | 85.8 % |
 | Chat v3.1 | 96.2 % |
-| Decision, prompt `ft` | 0 % water (the untrained model invents its own JSON format, which is expected) |
+| Decision, prompt `ft` | 0 % water on the v2 test (the untrained model invents its own JSON format, which is expected); the v3 test is measured in step 4 |
 
 **"Skill kept"** means the fine-tuned model scores at most 2 points below `nabta-base` on the
 explanation and chat tests. If a skill is lost:
@@ -125,7 +126,7 @@ explanation and chat tests. If a skill is lost:
   both correct.
 
 ## Limits
-- The training **bakes in the rules v2 limits**, including 285,000 lux-hours (flagged in
+- The training **bakes in the rules v3 limits**, including 285,000 lux-hours (flagged in
   `../LIMITS_CHECK_and_REFERENCES.txt`) and "soil 2 or below = broken sensor" (not measured yet).
   If either changes, rebuild the data and train again.
 - The training data is simulated. The real 17-row log is still to be tested.
