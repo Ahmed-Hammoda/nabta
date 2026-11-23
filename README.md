@@ -10,7 +10,7 @@ Nabta looks after one jar of spearmint. Sensors measure the soil, light, air tem
 |---|---|
 | [`pi/`](pi/) | The code that runs on the Raspberry Pi: sensor logger, rules, controller, chat, systemd services, soil calibration. Start with [`pi/README.md`](pi/README.md). |
 | [`app/`](app/) | The phone app (Expo / React Native). Sensor data is simulated until the Pi server is ready. See [`app/README.md`](app/README.md). |
-| [`cad/sensor_stake/`](cad/sensor_stake/) | 3D-printed sensor stake: v1 (STEP, STL, parametric script) and the new v2 parts in [`v2/`](cad/sensor_stake/v2/). |
+| [`cad/sensor_stake/`](cad/sensor_stake/) | 3D-printed sensor stake, new hexagon design (STEP parts, print notes). |
 | [`cad/plexiglass_hexagon/`](cad/plexiglass_hexagon/) | Laser-cut plexiglass hexagon (DXF, SVG). |
 | [`docs/diagrams/`](docs/diagrams/) | System diagram (PNG + PSD source, with photo credits) and the interactive system map. |
 | [`docs/designs/`](docs/designs/) | Interactive 3D pages: the breadboard wiring and the prototype box with the printed light holder (all sizes in mm). |
