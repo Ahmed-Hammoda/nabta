@@ -19,6 +19,7 @@ Nabta looks after one jar of spearmint. Sensors measure the soil, light, air tem
 | [`docs/diagrams/`](docs/diagrams/) | System diagram (PNG + PSD source, with photo credits) and the interactive system map. |
 | [`docs/designs/`](docs/designs/) | Interactive 3D pages: the breadboard wiring and the prototype box with the printed light holder (all sizes in mm). |
 | [`docs/project_overview/`](docs/project_overview/) | Bills of materials and the early build simulators. |
+| [`docs/report/`](docs/report/) | Short project report: [`Nabta_report.pdf`](docs/report/Nabta_report.pdf) (LaTeX source and pictures beside it). |
 | [`docs/team_notes/`](docs/team_notes/) | Notes for team members (app, sensors). |
 | [`paper/`](paper/) | The paper (coming soon). |
 | [`simulation_phase1/`](simulation_phase1/) | First model tests: decision, explanation and chat benchmarks. |
