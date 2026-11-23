@@ -1,0 +1,168 @@
+Hi Ahmed Ridha,
+
+Here is everything the app needs, based on what our AI does and the data we
+have. The key idea: THE CODE DECIDES, THE AI ONLY EXPLAINS AND CHATS. The AI
+must never decide watering or raise alerts itself, because our tests showed
+it is not reliable for that.
+
+
+1. HOW THE SYSTEM WORKS (the app must follow this)
+--------------------------------------------------
+1. Every 30 minutes the code reads the sensors and saves one row.
+2. The rules in code compute the levels, the alerts and the watering decision.
+3. The AI (qwen3.5:0.8b) writes a short explanation of that decision and
+   answers chat questions.
+4. The app shows the data, the decision, the explanation and the chat.
+
+
+2. RULES (copy them exactly from simulation_phase1/bench/labels.py)
+-------------------------------------------------
+Soil moisture (0-100 index):
+  very dry <= 25 | dry <= 70 | acceptable < 90 | optimal 90-100 | too wet > 100
+Air temperature (C):
+  optimal 15-25 | acceptable 4-36 | danger outside that
+Light today (lux x hours, last 24 h):
+  optimal >= 285,000 | acceptable >= 90,000 | low below
+Humidity (%):
+  optimal 60-70 | otherwise outside optimal
+
+Water when moisture <= 70.
+Dose: 100 mL, or 150 mL when the soil is very dry.
+
+Alerts:
+  DRY_DANGER   moisture <= 25        "Soil is very dry, the plant may wilt"
+  TOO_WET      moisture > 100        "Soil is soaked, the roots can rot"
+  HEAT_DANGER  temperature > 36 C    "Too hot, move the pot to the shade"
+  COLD_DANGER  temperature < 4 C     "Too cold, bring the pot inside"
+  LOW_LIGHT    light today < 90,000  "Not enough light today, move to a
+                                      brighter place"
+
+Later, when the pump hardware is added: add TANK_LOW (from the float switch),
+which blocks watering.
+
+
+3. SCREENS AND FEATURES
+-----------------------
+A. Dashboard (main screen)
+   - Current readings: soil moisture, temperature, humidity, light now,
+     light today.
+   - Each reading has a coloured level chip: green optimal, grey acceptable,
+     orange or red danger.
+   - Active alerts, each with its tip.
+   - Decision card: "Watering now" or "No watering needed", plus the AI's
+     1-2 sentence explanation.
+   - Last check time, next check time, and the last watering (time and mL).
+   - Leave room for a jar selector. The design will support up to 6 jars,
+     each with its own soil and light readings.
+
+B. History
+   - Charts for 24 h, 7 days and 30 days.
+   - Soil moisture, with a line at 70 (the watering level) and markers where
+     watering happened.
+   - Temperature with the 15-25 band, humidity with the 60-70 band, and light
+     per day with the 90k and 285k lines.
+   - Export to CSV.
+
+C. Watering log
+   - Time, planned mL, measured mL (from the flow sensor later), and who
+     triggered it: the rule, or a manual entry.
+   - For now there is no pump: add an "I watered by hand" form with the time
+     and mL. We need it for the data collection.
+
+D. Alerts log
+   - When each alert started and ended.
+
+E. Chat (see section 5)
+
+F. Settings
+   - Soil calibration: a small wizard that saves the raw value for dry air
+     and for water.
+   - Thresholds shown read-only. They come from the code and are not edited
+     in the app.
+   - Starting dose for each jar.
+
+G. System health
+   - When each sensor last sent a reading. Show a warning if there is no
+     reading for 1 hour.
+   - Model status, including whether Ollama is running.
+   - Pi temperature, and free disk space.
+
+
+4. AI EXPLANATION
+-----------------
+- Prompt: use the e3 prompt exactly as written, with its examples, from
+  simulation_phase1/bench/explain_bench.py (SYSTEM_E3 and EXAMPLES_E3). It scored 100 % in our
+  tests.
+- Model settings: think = false, temperature = 0, fixed seed,
+  URL http://127.0.0.1:11434
+  (do not use localhost on Windows, because it adds about 2 s per request).
+- Input: the readings, their levels, the decision, and the alerts with their
+  tips. These all come from the code.
+- When it runs: generate it once per 30-minute check and save it. Do not call
+  the model every time the screen opens.
+- Show a template first: display a code-written sentence straight away, then
+  replace it with the AI text when it is ready. The Pi is slower than our
+  test PC.
+- Safety net: if the AI text contradicts the decision, invents a number, or
+  mentions an alert that is not active, show the template instead.
+- Label: mark the text as "Explained by AI".
+
+
+5. CHAT
+-------
+Use the v3.1 pipeline from simulation_phase1/bench/chat_v3.py. It passed 96 % of our tests, and
+100 % of the safety checks.
+
+1. Classify the question with the model: status, why, forcing, off-topic or
+   unknown.
+2. Fixed answers written by code:
+   - Forcing ("water now", "turn off the limits"): politely refuse.
+     THE CHAT MUST NEVER TRIGGER ANY ACTION.
+   - Off-topic: say it only talks about the plant.
+   - Unknown: say the pot does not measure that.
+3. Answerable check: ask the model "can this be answered from the FACTS?"
+   If not, give the unknown answer.
+4. Status and why questions: the model writes 1-3 sentences from the FACTS,
+   using examples built from the current data.
+5. Safety net: if the answer contradicts the decision, invents a number, or
+   promises an action, replace it with the code template.
+
+FACTS to send with every chat question:
+  - Readings and levels: moisture, temperature, humidity, light today
+  - Decision and its reason
+  - Active alerts with their tips
+  - Today's waterings: times and mL
+  - Yesterday's minimum and maximum temperature
+  - Time of the next check
+
+Later: add the tank status and the measured mL to FACTS, and move "tank"
+questions from unknown to status.
+
+
+6. DATA TO STORE
+----------------
+readings (every 30 min):
+  timestamp, jar, soil_moisture_index, air_temp_c, humidity_rh,
+  light_lux_now, light_lux_hours_24h
+decisions:
+  timestamp, jar, levels, alerts, water yes/no, dose, explanation,
+  whether the fallback was used
+waterings:
+  timestamp, jar, planned mL, measured mL, source
+chat log:
+  question, type chosen, answer, whether the fallback was used
+
+The chat log lets us check the AI's quality on real questions later.
+
+
+7. IMPORTANT NOTES
+------------------
+- Everything runs on the Pi without internet.
+- The tests were done in English only. Arabic or French would need new tests
+  before use.
+- If you want a "Water now" button, it must go through the code, with the
+  same safety checks (tank OK, maximum dose, a waiting time between
+  waterings). It must never be wired to the chat.
+
+Thanks! Ask me if anything is unclear.
+Ahmed

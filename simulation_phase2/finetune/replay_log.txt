@@ -1,0 +1,14 @@
+  200 tried, 188 kept, 77 s
+  400 tried, 375 kept, 160 s
+  600 tried, 563 kept, 239 s
+  800 tried, 755 kept, 347 s
+  1000 tried, 946 kept, 428 s
+  1200 tried, 1136 kept, 512 s
+  1400 tried, 1323 kept, 594 s
+  1600 tried, 1511 kept, 675 s
+  1800 tried, 1703 kept, 759 s
+explanations: 1800 tried, 1703 kept (95 %)
+train_mix: 7493 rows = 5940 decision + 1553 explanation replay (21 %)
+val_decision: 660 rows; val_explain: 150 rows
+upload: C:\Users\hamou\Desktop\test models\simulation_phase2\finetune\..\train_data\colab\nabta_colab_upload.zip
+

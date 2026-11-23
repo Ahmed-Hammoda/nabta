@@ -1,0 +1,35 @@
+Hi Ayman,
+
+The sensor readings look stable, nice work. Before we collect data for the AI test, can you fix these:
+
+1. CALIBRATE THE SOIL SENSOR
+   - Record the raw value in dry air, in a glass of water, and in our soil
+     when it is dry, moist and wet.
+   - Use the dry-air and water values to convert raw to 0-100
+     (dry = 0, water = 100).
+   - Send me all five values. "Water at 70 or below" has to make sense on
+     our real soil.
+
+2. LIGHT PLACEMENT
+   - Light reads only 2.5-5 lux. Put the sensor where the plant actually
+     gets its light.
+   - Quick check: shine a phone light on it, and it should read hundreds of
+     lux or more.
+
+3. LOGGING FORMAT
+   - Keep the 10 s raw log if you want, but also save one averaged row every
+     30 minutes.
+   - Add a 24-hour light total: the sum of lux x hours over the last 24 h.
+   - Use these column names:
+       timestamp, soil_moisture_index, air_temp_c, humidity_rh,
+       light_lux_now, light_lux_hours_24h
+   - Pressure is not needed for the AI, so put it in a separate column or
+     remove it.
+
+4. COLLECTION
+   - Run it for at least 1-2 weeks, and let the soil dry out properly
+     between waterings.
+   - We water by hand, so log each watering: time and mL given.
+
+Thanks!
+Ahmed

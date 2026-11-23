@@ -1,0 +1,50 @@
+{
+  "expo": {
+    "name": "Nabta",
+    "slug": "nabta-app",
+    "scheme": "nabta",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "ios": {
+      "supportsTablet": true
+    },
+    "web": {
+      "favicon": "./assets/favicon.png",
+      "output": "static"
+    },
+    "android": {
+      "package": "tn.medtech.nabta",
+      "adaptiveIcon": {
+        "backgroundColor": "#E6F4FE",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      }
+    },
+    "plugins": [
+      "expo-router",
+      "expo-status-bar",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Nabta uses your photos for the weekly plant check.",
+          "cameraPermission": "Nabta uses the camera to photograph your plant for the weekly check.",
+          "microphonePermission": false
+        }
+      ],
+      "expo-font"
+    ],
+    "extra": {
+      "router": {
+        "asyncRoutes": {
+          "web": true
+        }
+      },
+      "eas": {
+        "projectId": "4806f5e6-4460-43ca-82db-9c4586bb6408"
+      }
+    }
+  }
+}

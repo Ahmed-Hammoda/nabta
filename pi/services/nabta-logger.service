@@ -1,0 +1,14 @@
+[Unit]
+Description=Nabta sensor logger (logs/<YYYY-MM>/raw_log.csv and log_30min.csv)
+After=network-online.target time-sync.target
+Wants=network-online.target
+
+[Service]
+User=footsteps
+WorkingDirectory=/home/footsteps/nabta
+ExecStart=/usr/bin/python3 -u /home/footsteps/nabta/garden_logger.py
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target

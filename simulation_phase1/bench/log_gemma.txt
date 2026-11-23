@@ -1,0 +1,88 @@
+  gemma3:1b v0_baseline:A 25/184 water ok 13/25
+  gemma3:1b v0_baseline:A 50/184 water ok 24/50
+  gemma3:1b v0_baseline:A 75/184 water ok 33/75
+  gemma3:1b v0_baseline:A 100/184 water ok 40/100
+  gemma3:1b v0_baseline:A 125/184 water ok 45/125
+  gemma3:1b v0_baseline:A 150/184 water ok 70/150
+  gemma3:1b v0_baseline:A 175/184 water ok 83/175
+saved results\gemma3_1b__v0_baseline_A.jsonl
+  gemma3:1b v0_baseline:B 25/184 water ok 13/25
+  gemma3:1b v0_baseline:B 50/184 water ok 24/50
+  gemma3:1b v0_baseline:B 75/184 water ok 33/75
+  gemma3:1b v0_baseline:B 100/184 water ok 40/100
+  gemma3:1b v0_baseline:B 125/184 water ok 45/125
+  gemma3:1b v0_baseline:B 150/184 water ok 70/150
+  gemma3:1b v0_baseline:B 175/184 water ok 83/175
+saved results\gemma3_1b__v0_baseline_B.jsonl
+  gemma3:1b v1_numbers:A 25/184 water ok 13/25
+  gemma3:1b v1_numbers:A 50/184 water ok 24/50
+  gemma3:1b v1_numbers:A 75/184 water ok 33/75
+  gemma3:1b v1_numbers:A 100/184 water ok 40/100
+  gemma3:1b v1_numbers:A 125/184 water ok 45/125
+  gemma3:1b v1_numbers:A 150/184 water ok 70/150
+  gemma3:1b v1_numbers:A 175/184 water ok 83/175
+saved results\gemma3_1b__v1_numbers_A.jsonl
+  gemma3:1b v1_numbers:B 25/184 water ok 13/25
+  gemma3:1b v1_numbers:B 50/184 water ok 24/50
+  gemma3:1b v1_numbers:B 75/184 water ok 33/75
+  gemma3:1b v1_numbers:B 100/184 water ok 40/100
+  gemma3:1b v1_numbers:B 125/184 water ok 45/125
+  gemma3:1b v1_numbers:B 150/184 water ok 70/150
+  gemma3:1b v1_numbers:B 175/184 water ok 83/175
+saved results\gemma3_1b__v1_numbers_B.jsonl
+  gemma3:1b v2_schema:A 25/184 water ok 13/25
+  gemma3:1b v2_schema:A 50/184 water ok 24/50
+  gemma3:1b v2_schema:A 75/184 water ok 33/75
+  gemma3:1b v2_schema:A 100/184 water ok 40/100
+  gemma3:1b v2_schema:A 125/184 water ok 45/125
+  gemma3:1b v2_schema:A 150/184 water ok 70/150
+  gemma3:1b v2_schema:A 175/184 water ok 83/175
+saved results\gemma3_1b__v2_schema_A.jsonl
+  gemma3:1b v2_schema:B 25/184 water ok 13/25
+  gemma3:1b v2_schema:B 50/184 water ok 24/50
+  gemma3:1b v2_schema:B 75/184 water ok 33/75
+  gemma3:1b v2_schema:B 100/184 water ok 40/100
+  gemma3:1b v2_schema:B 125/184 water ok 44/125
+  gemma3:1b v2_schema:B 150/184 water ok 58/150
+  gemma3:1b v2_schema:B 175/184 water ok 69/175
+saved results\gemma3_1b__v2_schema_B.jsonl
+  gemma3:1b v3_fewshot:A 25/184 water ok 11/25
+  gemma3:1b v3_fewshot:A 50/184 water ok 21/50
+  gemma3:1b v3_fewshot:A 75/184 water ok 30/75
+  gemma3:1b v3_fewshot:A 100/184 water ok 38/100
+  gemma3:1b v3_fewshot:A 125/184 water ok 43/125
+  gemma3:1b v3_fewshot:A 150/184 water ok 56/150
+  gemma3:1b v3_fewshot:A 175/184 water ok 72/175
+saved results\gemma3_1b__v3_fewshot_A.jsonl
+  gemma3:1b v3_fewshot:B 25/184 water ok 13/25
+  gemma3:1b v3_fewshot:B 50/184 water ok 24/50
+  gemma3:1b v3_fewshot:B 75/184 water ok 33/75
+  gemma3:1b v3_fewshot:B 100/184 water ok 40/100
+  gemma3:1b v3_fewshot:B 125/184 water ok 52/125
+  gemma3:1b v3_fewshot:B 150/184 water ok 63/150
+  gemma3:1b v3_fewshot:B 175/184 water ok 76/175
+saved results\gemma3_1b__v3_fewshot_B.jsonl
+  gemma3:1b v4_reasoning:A 25/184 water ok 12/25
+  gemma3:1b v4_reasoning:A 50/184 water ok 26/50
+  gemma3:1b v4_reasoning:A 75/184 water ok 42/75
+  gemma3:1b v4_reasoning:A 100/184 water ok 60/100
+  gemma3:1b v4_reasoning:A 125/184 water ok 80/125
+  gemma3:1b v4_reasoning:A 150/184 water ok 80/150
+  gemma3:1b v4_reasoning:A 175/184 water ok 92/175
+saved results\gemma3_1b__v4_reasoning_A.jsonl
+  gemma3:1b v4_reasoning:B 25/184 water ok 12/25
+  gemma3:1b v4_reasoning:B 50/184 water ok 26/50
+  gemma3:1b v4_reasoning:B 75/184 water ok 42/75
+  gemma3:1b v4_reasoning:B 100/184 water ok 60/100
+  gemma3:1b v4_reasoning:B 125/184 water ok 77/125
+  gemma3:1b v4_reasoning:B 150/184 water ok 78/150
+  gemma3:1b v4_reasoning:B 175/184 water ok 89/175
+saved results\gemma3_1b__v4_reasoning_B.jsonl
+  gemma3:1b v5_levels_rules:B 25/184 water ok 12/25
+  gemma3:1b v5_levels_rules:B 50/184 water ok 26/50
+  gemma3:1b v5_levels_rules:B 75/184 water ok 42/75
+  gemma3:1b v5_levels_rules:B 100/184 water ok 60/100
+  gemma3:1b v5_levels_rules:B 125/184 water ok 80/125
+  gemma3:1b v5_levels_rules:B 150/184 water ok 82/150
+  gemma3:1b v5_levels_rules:B 175/184 water ok 95/175
+saved results\gemma3_1b__v5_levels_rules_B.jsonl

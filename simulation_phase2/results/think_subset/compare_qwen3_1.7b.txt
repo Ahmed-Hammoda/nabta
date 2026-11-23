@@ -1,0 +1,10 @@
+qwen3:1.7b prompt p5, same 82 cases (77 normal + 5 fault)
+                          thinking off     thinking on
+water correct                   59.7 %          75.3 %
+waters when needed       33.3 % (4/12)  83.3 % (10/12)
+no overwater                    64.6 %          73.8 %
+alerts correct                  53.2 %          71.4 %
+both correct                    29.9 %          51.9 %
+fault rows watered                 0/5             0/5
+empty answers                        0               0
+s per answer                       0.5             6.5

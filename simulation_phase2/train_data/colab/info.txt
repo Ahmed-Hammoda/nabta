@@ -1,0 +1,3 @@
+train_mix: 7493 rows = 5940 decision + 1553 explanation replay (21 %)
+val_decision: 660 rows; val_explain: 150 rows
+upload: C:\Users\hamou\Desktop\test models\simulation_phase2\finetune\..\train_data\colab\nabta_colab_upload.zip

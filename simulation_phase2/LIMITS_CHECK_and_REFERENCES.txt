@@ -1,0 +1,206 @@
+NABTA - CHECK OF THE DECISION LIMITS AGAINST TRUSTED SOURCES
+Checked: 16 Nov 2026. Limits checked: rules v2 (simulation_phase2/code/rules_v2.py and
+simulation_phase1/bench/labels.py).
+
+Verdicts:
+  CONFIRMED      a trusted source gives the same value
+  PARTLY         a source supports it, but the evidence is weak or indirect
+  CHANGE?        the sources point to a different value (the team must decide)
+  NOT CHECKABLE  no source can give this value; it must be measured on our pot
+  DESIGN         our own engineering choice; say so in the paper
+
+=====================================================================
+1. AIR TEMPERATURE                                           CONFIRMED
+=====================================================================
+Our limits: optimal 15-25 C | acceptable 4-36 C | HEAT_DANGER above 36 | COLD_DANGER below 4
+
+Source: the FAO ECOCROP data sheet for Mentha spicata var. crispa gives
+  optimal min 15, optimal max 25, absolute min 4, absolute max 36  [R1]
+  killing temperature: -8 C during rest, -1 C during early growth  [R1]
+These are exactly our numbers, so the limits most likely came from ECOCROP.
+
+Notes for the paper:
+- ECOCROP lists the variety "crispa", not plain Mentha spicata. Say so.
+- In a greenhouse, hydroponic study, spearmint fresh mass was highest at a mean daily
+  temperature of 27.8-30.4 C [R2]. So 15-25 C is a conservative "optimal"; it is not
+  the point of fastest growth.
+
+=====================================================================
+2. LIGHT (light_lux_hours_24h)                                 CHANGE?
+=====================================================================
+Our limits: optimal >= 285,000 lux-h | acceptable >= 90,000 | LOW_LIGHT below 90,000
+
+Plant scientists measure light per day as the DLI (daily light integral) in mol/m2/day.
+Conversion for sunlight: 1 lux = about 0.0185 umol/m2/s [R6], so
+  DLI = lux-hours x 0.0185 x 3600 / 1,000,000 = lux-hours / 15,000
+  285,000 lux-h = about 19 mol/m2/day
+   90,000 lux-h = about  6 mol/m2/day
+
+What the sources say:
+- Mint fresh mass rose with DLI up to about 15-16 mol/m2/day, then fell [R3, R4].
+- Mint is a "medium light" crop (10-20 mol/m2/day) [R4].
+- Spearmint was studied at DLIs from about 5 to 19 mol/m2/day [R2].
+
+Verdict:
+- LOW_LIGHT below about 6 mol (90,000 lux-h): PARTLY. It is the bottom of the range studied.
+- Optimal at 19 mol or more (285,000 lux-h): CHANGE? It is above the point where mint
+  grows best (15-16 mol).
+  Suggestion: optimal >= 225,000 lux-h (= 15 mol).
+- The conversion holds for SUNLIGHT only. Under an LED grow light the factor is different
+  (about 0.012-0.020) [R6], so the same lux reading means a different DLI.
+
+=====================================================================
+3. AIR HUMIDITY                                                 PARTLY
+=====================================================================
+Our limit: optimal 60-70 % (no alert, only the humidity_level label)
+
+Source: Japanese mint (Mentha arvensis) grew well in a greenhouse kept at 60-70 % RH [R5].
+No source gives a humidity optimum for spearmint itself. The evidence is weak, but the
+risk is low, because humidity triggers no alert and no watering.
+
+=====================================================================
+4. SOIL MOISTURE (soil_moisture_index)                   NOT CHECKABLE
+=====================================================================
+Our limits: water at 70 or below | DRY_DANGER 25 or below | optimal 90-98 | TOO_WET 98 or above
+
+Why no source can confirm these numbers:
+- Our index is a sensor scale (dry air = 0, probe in water = 100). It is not the real
+  water content of the soil.
+- Capacitive probes must be calibrated for each soil or potting mix [R9, R10].
+
+What the sources do give is a METHOD:
+- FAO-56 Table 22, mint: depletion fraction p = 0.40 [R7]. This means water when 40 % of
+  the available water has been used, where available water is the water between field
+  capacity (FC) and wilting point (WP).
+- In hot, dry weather, p is 10-25 % smaller [R7]. Water a little earlier.
+- Spearmint tolerates drier soil better than peppermint and other mints [R8, R11].
+
+How to set our limits from the sources (needs 2 measurements on the real pot, section 7):
+  water threshold = FC - 0.40 x (FC - WP)
+  DRY_DANGER      = at or near the WP reading
+  TOO_WET         = above the FC reading (water standing in the soil)
+Example: if FC reads 94 and WP reads 30, then 94 - 0.40 x 64 = 68.4.
+That is close to our 70, but it must be measured, not assumed.
+
+=====================================================================
+5. FAULT LIMITS                                         DESIGN + DATASHEETS
+=====================================================================
+Sensor limits from the datasheets:
+- BME280: works from -40 to 85 C and 0-100 % RH. Humidity accuracy is +-3 % only between
+  20 and 80 % RH [R12].
+- BH1750: measures 1-65,535 lux in its normal mode, with about +-20 % variation [R13].
+  Direct sun can reach about 100,000 lux, so outdoors the sensor can stop at 65,535.
+
+Our limits (all DESIGN; none comes from a plant source):
+- SENSOR_ERROR if temperature is outside -10..60 C. This is narrower than what the BME280
+  can measure; a pot in Tunis should never read outside it.
+- SENSOR_ERROR if humidity is outside 1..100 %.
+- SENSOR_ERROR if light is below 0.
+- SENSOR_ERROR if soil is 2 or below (probe in air or unplugged). Not measured yet.
+- SENSOR_ERROR if soil falls more than 15 points in 30 min; PUMP_FAULT if it rises more
+  than 10 points with the pump off. Both use rates from our simulation, not measurements.
+- TOO_WET at 98: DESIGN, chosen from the calibration (see RULES_v2.md).
+
+=====================================================================
+6. SUMMARY TABLE
+=====================================================================
+Limit                         Ours           Sources say                  Verdict
+Temp optimal                  15-25 C        15-25 C [R1]                 CONFIRMED
+Temp acceptable/alerts        4-36 C         4-36 C [R1]                  CONFIRMED
+Light low                     < 90,000 lx-h  ~6 mol = bottom of study     PARTLY
+Light optimal                 >= 285,000     peak at ~15-16 mol (~225k)   CHANGE?
+Humidity optimal              60-70 %        60-70 % (another mint) [R5]  PARTLY
+Water at                      index <= 70    FAO p = 0.40 method [R7]     NOT CHECKABLE (measure FC, WP)
+DRY_DANGER                    index <= 25    near wilting point           NOT CHECKABLE (measure WP)
+TOO_WET                       index >= 98    above field capacity         DESIGN, then measure FC
+Fault limits                  see section 5  datasheets [R12, R13]        DESIGN
+
+If ANY limit changes: update rules_v2.py and RULES_v2.md, run make_train_data.py again,
+and rebuild the 30-day test key before training.
+
+=====================================================================
+7. WHAT TO TELL YOUR FRIEND (sensor side)
+=====================================================================
+A. Changes to the sensor code
+ 1. Calibration (agreed): index = (16650 - raw) / 9000 x 100, limited to 0-100.
+ 2. BH1750 in strong sun:
+    - Use a mode or measurement-time setting that reads up to about 100,000 lux [R13].
+    - If a reading is exactly 65535, log it as "saturated".
+    - Otherwise the 24 h light sum reads too low outdoors, and the model gives a false
+      LOW_LIGHT.
+ 3. light_lux_hours_24h:
+    - Sum the readings over the last 24 h only: lux each minute / 60, over 1,440 minutes.
+    - Save the sum to a file so it survives a reboot. Otherwise it starts again from 0
+      and the model says LOW_LIGHT.
+ 4. Rows: read about once a minute; log the 30-minute average as one row.
+ 5. Same column names, units and rounding as now: soil 1 decimal, temp 2, humidity 1,
+    lux now 1, lux-hours 2.
+ 6. Send numbers, not text, in the JSON to the model.
+ 7. Never hide or skip strange readings. Log what the sensor really reads.
+ 8. Keep the BME280 out of direct sun (in a shaded, ventilated spot). In the sun it
+    reads much hotter than the air and gives false HEAT_DANGER alerts.
+    (This is general practice for air-temperature sensors, not taken from R1-R13.)
+
+B. Measurements needed (they set the soil limits, section 4)
+ 1. Unplugged probe: the reading with the probe unplugged, and with it in air.
+ 2. Field capacity (FC):
+    - Water the pot until water runs out of the bottom.
+    - Let it drain for 1-2 hours.
+    - Record the reading.
+ 3. Wilting point (WP):
+    - Let a pot dry with no watering, and record the reading when the mint starts to wilt.
+    - If you cannot wait for that, record the reading when the soil is dry to the touch
+      at 3-5 cm depth.
+ 4. Drying speed: points lost per hour on a warm day and on a cool day.
+ 5. Settle point: where the reading settles about 1 h after one normal pump run.
+ 6. Under a grow lamp: note the lamp model; the lux-to-DLI factor depends on it [R6].
+
+=====================================================================
+REFERENCES
+=====================================================================
+[R1]  FAO ECOCROP. Mentha spicata var. crispa, data sheet (id 7710). Food and Agriculture
+      Organization of the United Nations.
+      https://ecocrop.apps.fao.org/ecocrop/srv/en/dataSheet?id=7710
+[R2]  Walters, K.J., Tarr, S., Lopez, R.G. (2023). Modeling purple basil, sage, spearmint,
+      and sweet basil responses to daily light integral and mean daily temperature.
+      PLoS ONE 18(11): e0294905. https://doi.org/10.1371/journal.pone.0294905
+[R3]  Kohler, A.E., Lopez, R.G. (2021). Daily light integral influences rooting of
+      herbaceous stem-tip culinary herb cuttings. HortScience 56(4): 431-438.
+      https://doi.org/10.21273/HORTSCI15482-20
+      (Its introduction cites Litvin-Zabal 2019: mint shoot fresh weight rose up to a DLI
+      of about 14.9 mol/m2/day, then fell.)
+[R4]  Produce Grower (trade magazine, Iowa State University work). Hydroponic production
+      primer: improve culinary herb yields. (Secondary source: cite R2/R3 first.)
+      https://producegrower.com/article/hydroponic-production-primer-improve-culinary-herb-yields
+[R5]  Frontiers in Sustainable Food Systems (2022). Japanese mint (Mentha arvensis) in an
+      evaporative-cooling greenhouse at 60-70 % RH.
+      https://doi.org/10.3389/fsufs.2021.808327
+[R6]  Thimijan, R.W., Heins, R.D. (1983). Photometric, radiometric, and quantum light
+      units of measure: a review of procedures for interconversion. HortScience 18(6):
+      818-822. Sunlight factor ~0.0185 umol/m2/s per lux.
+      (One web source prints the year as 1982; check it on the HortScience site.)
+      https://hortamericas.com/grower-resources/conversion-ppfd-to-lux/
+[R7]  Allen, R.G., Pereira, L.S., Raes, D., Smith, M. (1998). Crop evapotranspiration:
+      guidelines for computing crop water requirements. FAO Irrigation and Drainage
+      Paper 56, Chapter 8, Table 22 (mint: root depth 0.4-0.8 m, p = 0.40).
+      https://www.fao.org/4/x0490e/x0490e0e.htm
+[R8]  Effect of soil moisture regimes under controlled conditions on growth and biomass in
+      Mentha species. Journal of Plant Production (Gorgan University).
+      https://jopp.gau.ac.ir/article_3159.html?lang=en
+[R9]  Maker Portal (2020). Capacitive soil moisture sensor calibration with Arduino.
+      https://makersportal.com/blog/2020/5/26/capacitive-soil-moisture-calibration-with-arduino
+[R10] METER Group. Method A: soil-specific calibrations for METER soil moisture sensors.
+      https://publications.metergroup.com/Sales%20and%20Support/METER%20Environment/Website%20Articles/Method_a_soil_specific_calibrations_for_meter_soil_moisture_sensors.pdf
+[R11] Effect of sustained deficit irrigation on hay and oil yield of native spearmint
+      (Mentha spicata). Colorado State University, Mountain Scholar.
+      https://mountainscholar.org/handle/10217/207083
+[R12] Bosch Sensortec. BME280 combined humidity and pressure sensor, datasheet
+      BST-BME280-DS001.
+      https://www.bosch-sensortec.com/products/environmental-sensors/humidity-sensors-bme280
+      (copy: https://cdn.sparkfun.com/assets/5/3/0/f/7/BME280_Datasheet.pdf)
+[R13] ROHM. BH1750FVI digital 16-bit serial output ambient light sensor IC, datasheet.
+      https://wemos-docs.readthedocs.io/en/latest/_static/files/bh1750fvi-tr.pdf
+
+Reliability: R1, R2, R3, R6, R7, R12 and R13 are primary, trusted sources. R4, R9 and R10
+are secondary or technical notes. R5, R8 and R11 are single studies; check their full
+author lists before citing them in the paper.

@@ -1,0 +1,937 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>:root{box-sizing:border-box}body{margin:0;font:14px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
+</head>
+<body>
+<title>Nabta Build Simulator</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+/* Layout: a workbench. The 3D stage and its control panel sit on top; below it, the wiring sheet reads like a build manual. */
+:root{
+  --paper:#eef3f0; --card:#ffffff; --ink:#15201a; --ink-2:#34433b; --muted:#5f6f66; --line:#d0dad4; --chip:#e6ede9;
+  --accent:#1b7a52; --accent-soft:#d5ece1; --copper:#b0602f; --stage:#dbe4df; --table:#c4cfc8;
+  --ok:#2b8a3e; --warn:#d9480f; --bad:#c92a2a; --gnd:#1f2428;
+  --f-display:"Barlow Semi Condensed","Arial Narrow",sans-serif;
+  --f-body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --paper:#0d1411; --card:#141d19; --ink:#e2ebe6; --ink-2:#bccac2; --muted:#8c9d94; --line:#26332d; --chip:#1c2722;
+  --accent:#4cc38a; --accent-soft:#16342a; --copper:#de8d5c; --stage:#17201c; --table:#222d28;
+  --ok:#51cf66; --warn:#ff8a4c; --bad:#ff6b6b; --gnd:#d6dde2; color-scheme:dark } }
+:root[data-theme="dark"]{
+  --paper:#0d1411; --card:#141d19; --ink:#e2ebe6; --ink-2:#bccac2; --muted:#8c9d94; --line:#26332d; --chip:#1c2722;
+  --accent:#4cc38a; --accent-soft:#16342a; --copper:#de8d5c; --stage:#17201c; --table:#222d28;
+  --ok:#51cf66; --warn:#ff8a4c; --bad:#ff6b6b; --gnd:#d6dde2; color-scheme:dark }
+
+*{box-sizing:border-box}
+body{background:var(--paper);color:var(--ink);font:15px/1.55 var(--f-body)}
+.wrap{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));max-width:1440px;margin:0 auto}
+h1,h2,h3{font-family:var(--f-display);text-wrap:balance;margin:0;line-height:1.1}
+.mono{font-family:var(--f-mono)}
+header.top{padding-block:22px 14px;display:flex;flex-wrap:wrap;align-items:flex-end;gap:10px 28px;justify-content:space-between}
+header.top h1{font-size:clamp(28px,4vw,40px);font-weight:700;letter-spacing:.01em}
+header.top h1 span{color:var(--accent)}
+header.top p{margin:4px 0 0;color:var(--muted);max-width:68ch}
+.specline{display:flex;flex-wrap:wrap;gap:6px 16px;font:500 12px var(--f-mono);color:var(--ink-2)}
+.specline b{color:var(--accent);font-weight:600}
+
+/* stage */
+.stage{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:14px;padding-block:0 18px}
+@media (max-width:980px){.stage{grid-template-columns:minmax(0,1fr)}}
+.viewport{position:relative;height:clamp(440px,72vh,780px);border-radius:10px;overflow:hidden;background:var(--stage);border:1px solid var(--line);touch-action:none}
+.viewport canvas{display:block;width:100%;height:100%;cursor:grab}
+.viewport canvas:active{cursor:grabbing}
+.tb{position:absolute;display:flex;flex-wrap:wrap;gap:6px;z-index:3}
+.tb.tl{top:10px;left:10px;max-width:calc(100% - 20px)}
+.tb.bl{bottom:10px;left:10px;right:10px;align-items:center;justify-content:space-between}
+.grp{display:flex;gap:2px;background:color-mix(in srgb,var(--card) 88%,transparent);border:1px solid var(--line);border-radius:8px;padding:3px;backdrop-filter:blur(6px)}
+.btn{font:500 12.5px var(--f-body);color:var(--ink);background:transparent;border:0;border-radius:6px;padding:6px 10px;cursor:pointer;white-space:nowrap}
+.btn:hover{background:var(--chip)}
+.btn[aria-pressed="true"]{background:var(--accent);color:#fff}
+.btn:focus-visible,.tab:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.btn.solid{background:var(--accent);color:#fff}
+.btn.solid:hover{filter:brightness(1.08)}
+.openctl{display:flex;align-items:center;gap:8px;padding:4px 10px}
+.openctl label{font:500 12px var(--f-body);color:var(--ink-2)}
+.openctl input{width:min(220px,34vw);accent-color:var(--accent)}
+.hint{font:12px var(--f-body);color:var(--muted);background:color-mix(in srgb,var(--card) 80%,transparent);padding:4px 8px;border-radius:6px}
+#labels{position:absolute;inset:0;pointer-events:none;z-index:2;overflow:hidden}
+.lbl{position:absolute;transform:translate(-50%,-100%);font:600 11px var(--f-body);color:var(--ink);background:color-mix(in srgb,var(--card) 90%,transparent);border:1px solid var(--line);padding:2px 6px;border-radius:5px;white-space:nowrap;pointer-events:auto;cursor:pointer}
+.lbl::after{content:"";position:absolute;left:50%;top:100%;width:1px;height:10px;background:var(--muted)}
+.lbl.sel{background:var(--accent);color:#fff;border-color:var(--accent)}
+#tip{position:absolute;z-index:4;pointer-events:none;font:600 12px var(--f-body);background:var(--ink);color:var(--paper);padding:4px 8px;border-radius:5px;transform:translate(12px,12px)}
+.loading{position:absolute;inset:0;display:grid;place-items:center;color:var(--muted);font:500 14px var(--f-body)}
+
+/* panel */
+.panel{background:var(--card);border:1px solid var(--line);border-radius:10px;display:flex;flex-direction:column;min-width:0;max-height:clamp(440px,72vh,780px)}
+@media (max-width:980px){.panel{max-height:none}}
+.tabs{display:flex;border-bottom:1px solid var(--line)}
+.tab{flex:1;font:600 14px var(--f-display);letter-spacing:.04em;text-transform:uppercase;padding:11px 8px;background:none;border:0;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent}
+.tab[aria-selected="true"]{color:var(--accent);border-bottom-color:var(--accent)}
+.pane{padding:14px;overflow:auto;display:flex;flex-direction:column;gap:14px;min-height:0}
+/* inspector */
+.insp h3{font-size:22px}
+.insp .where{color:var(--muted);font-size:13px;margin-top:2px}
+.insp p{margin:8px 0 0;font-size:13.5px}
+.insp table{width:100%;border-collapse:collapse;font-size:12.5px;margin-top:10px}
+.insp th{font:600 11px var(--f-body);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);text-align:left;padding:4px 6px;border-bottom:1px solid var(--line)}
+.insp td{padding:5px 6px;border-bottom:1px solid var(--line);vertical-align:top}
+.insp td.pn{font:600 12px var(--f-mono);white-space:nowrap}
+.sw{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;vertical-align:-1px;border:1px solid color-mix(in srgb,var(--ink) 25%,transparent)}
+.buy{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:10px;font-size:13px}
+.buy a{color:var(--accent);font-weight:600}
+.empty{color:var(--muted);font-size:13.5px}
+.note{font-size:12.5px;color:var(--ink-2);background:var(--chip);border-radius:6px;padding:7px 9px;margin-top:8px}
+
+/* sheet */
+section.sheet{padding-block:26px 8px;border-top:1px solid var(--line)}
+section.sheet h2{font-size:clamp(24px,3vw,30px);font-weight:700}
+section.sheet .lede{color:var(--muted);margin:6px 0 14px;max-width:75ch}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;font:500 12px var(--f-mono);margin-bottom:10px}
+.legend i{display:inline-block;width:18px;height:4px;border-radius:2px;margin-right:6px;vertical-align:middle}
+.scrollx{overflow-x:auto;border:1px solid var(--line);border-radius:10px;background:var(--card)}
+#diagram{display:block;min-width:980px;width:100%;height:auto}
+#diagram text{font-family:var(--f-mono)}
+table.wires{width:100%;border-collapse:collapse;font-size:13px;min-width:760px}
+table.wires th{font:600 11px var(--f-body);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);text-align:left;padding:8px;border-bottom:1px solid var(--line);background:var(--card);position:sticky;top:0}
+table.wires td{padding:7px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+table.wires td.id{font:600 12px var(--f-mono);white-space:nowrap}
+table.wires tr.g td{background:var(--chip);font:600 13px var(--f-display);letter-spacing:.04em;text-transform:uppercase;color:var(--ink-2);padding-top:9px}
+table.wires tr.opt td{color:var(--muted)}
+table.wires tbody tr:not(.g):hover td{background:var(--accent-soft);cursor:pointer}
+.cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr));gap:18px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px;min-width:0}
+.card h3{font-size:19px;margin-bottom:8px}
+.card ol,.card ul{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px;font-size:14px}
+.card code{font:500 12.5px var(--f-mono);background:var(--chip);padding:1px 5px;border-radius:4px}
+table.pins{width:100%;border-collapse:collapse;font-size:13px}
+table.pins td,table.pins th{padding:6px 8px;border-bottom:1px solid var(--line);text-align:left}
+table.pins th{font:600 11px var(--f-body);letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+footer{padding-block:24px 40px;color:var(--muted);font-size:12.5px}
+@media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div>
+      <h1>Nabta <span>build simulator</span></h1>
+      <p>Every part from the BOM, placed and wired pin by pin inside the planter base from the GitHub sketch. Drag to turn it, open the case, and click any part to see its pins.</p>
+    </div>
+    <div class="specline">
+      <span>Base <b>26 × 26 × 12 cm</b></span><span>Tank <b>≈2.5 L</b></span><span>Pot <b>Ø15 cm</b></span><span>I²C <b>0x23 · 0x3C · 0x44 · 0x48</b></span>
+    </div>
+  </header>
+
+  <section class="stage">
+    <div class="viewport" id="vp">
+      <div class="loading" id="loading">Loading the 3D model…</div>
+      <div id="labels"></div>
+      <div id="tip" hidden></div>
+      <div class="tb tl">
+        <div class="grp" role="group" aria-label="Camera view">
+          <button class="btn" data-view="iso">3/4</button>
+          <button class="btn" data-view="front">Front</button>
+          <button class="btn" data-view="back">Back</button>
+          <button class="btn" data-view="left">Left</button>
+          <button class="btn" data-view="right">Right</button>
+          <button class="btn" data-view="top">Top</button>
+          <button class="btn" data-view="bay">Bay</button>
+          <button class="btn" data-view="stake">Stake</button>
+        </div>
+        <div class="grp" role="group" aria-label="Display">
+          <button class="btn" id="t-xray" aria-pressed="false">X-ray</button>
+          <button class="btn" id="t-wires" aria-pressed="true">Wires</button>
+          <button class="btn" id="t-labels" aria-pressed="true">Labels</button>
+        </div>
+      </div>
+      <div class="tb bl">
+        <div class="grp openctl">
+          <button class="btn solid" id="openBtn">Open case</button>
+          <label for="openR">Closed</label><input id="openR" type="range" min="0" max="100" value="0"><label for="openR">Open</label>
+        </div>
+        <span class="hint">Drag to rotate · scroll or pinch to zoom · right-drag to pan · click a part</span>
+      </div>
+    </div>
+
+    <aside class="panel">
+      <div class="tabs" role="tablist">
+        <button class="tab" role="tab" id="tab-part" aria-selected="true">Part</button>
+      </div>
+      <div class="pane insp" id="pane-part">
+        <p class="empty" id="inspEmpty">Click a part in the 3D view (or a label) to see its pins and where each wire goes.</p>
+        <div id="insp"></div>
+      </div>
+    </aside>
+  </section>
+
+  <section class="sheet">
+    <h2>Wiring diagram</h2>
+    <p class="lede">Every pin from the 3D model, drawn as a schematic. A dot means a connection; lines that cross without a dot are not connected. Pin names match the silkscreen on each module. Dashed lines are optional.</p>
+    <div class="legend" id="legend"></div>
+    <div class="scrollx"><svg id="diagram" role="img" aria-label="Pin-level wiring diagram of Nabta"></svg></div>
+  </section>
+
+  <section class="sheet">
+    <h2>Wire list, in build order</h2>
+    <p class="lede">One row per physical wire or part, in the order to build. Hover over a row to light up that wire in the 3D view. Breadboard rows are numbered 1–63 and holes a–j, as printed on the board.</p>
+    <div class="scrollx"><table class="wires" id="wireTable"></table></div>
+  </section>
+
+  <section class="sheet">
+    <div class="cols">
+      <div class="card">
+        <h3>Raspberry Pi pins used</h3>
+        <table class="pins" id="pinTable"></table>
+      </div>
+      <div class="card">
+        <h3>Check before the first power-on</h3>
+        <ol>
+          <li>On the relay board, <b>remove the JD-VCC jumper</b>. VCC goes to Pi 3.3 V (pin 17); JD-VCC goes to the 5 V adapter. The relay coils then never load the Pi.</li>
+          <li>The 5 V adapter's <b>+</b> never touches a Pi 5 V pin. Only the grounds are joined (the back and front GND rails are linked).</li>
+          <li>With the pump adapter on, measure the Pi end of the flow wire (row 44): it must stay <b>below 3.3 V</b>. If the yellow wire reads 0 V when idle, the sensor has no pull-up: replace the divider with a 10 kΩ pull-up to 3.3 V.</li>
+          <li>Diode band (cathode) goes to <b>pump +</b> (row 56), not to GND.</li>
+          <li>Some 830-point breadboards have rails split in the middle (a gap in the red/blue line). If yours does, bridge each rail you use across the gap.</li>
+          <li>The OLED pin order varies (some boards have VCC first). Follow the printed labels, not the position.</li>
+          <li>Push the soil sensor into the soil only up to its line. Its electronics stay above the soil, inside the stake. Power it from 3.3 V, never 5 V, because the ADS1115 runs on 3.3 V.</li>
+          <li>Turn on I²C (<code>raspi-config</code>), then <code>i2cdetect -y 1</code> must show <code>23 3c 44 48</code>.</li>
+          <li>Relay inputs are on GPIO5/6, which are pulled high at boot, so the pump stays <b>off</b> while the Pi starts. Your code must set them HIGH (off) first.</li>
+          <li>Leave about 10 cm of slack on the lid wires (screen and stake port) so the lid opens.</li>
+        </ol>
+      </div>
+      <div class="card">
+        <h3>Small parts missing from the BOM</h3>
+        <ul>
+          <li>Resistors: 10 kΩ and 20 kΩ (or three 10 kΩ) for the flow-signal divider</li>
+          <li>About 10 male–male and 4 female–female jumpers (the BOM has only 40 male–female)</li>
+          <li>GX16 5-pin panel connector + plug (sensor stake port)</li>
+          <li>1 m of 5-core cable (stake to base)</li>
+          <li>3 rubber grommets: sealed wall, USB-C, barrel jack</li>
+          <li>Small perfboard for the splice inside the stake, heat-shrink, 22 AWG solid wire for the screw terminals</li>
+          <li>M2.5 standoffs and screws, PETG filament (plus clear PETG for the lantern)</li>
+          <li>Grow light: still not chosen. The relay CH2 output and the LIGHT socket are ready for it.</li>
+        </ul>
+        <p class="note">Tank: the sketch said about 1 L, but a 1 L tank with this footprint is only 3 cm deep, which is just what the submersible pump needs to stay under water. At about 2.5 L (8 cm deep) the tank gives about 1.5 L of usable water, or 10–15 doses.</p>
+      </div>
+    </div>
+  </section>
+  <footer>Parts and prices come from <span class="mono">Nabta_BOM.xlsx</span>. Sizes are placeholders until the pot and parts are fixed.</footer>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/controls/OrbitControls.js"></script>
+<script>
+(function(){
+'use strict';
+if(!window.THREE){document.getElementById('loading').textContent='The 3D library could not load. Check your connection and reload.';return;}
+
+/* ================================================================ DATA */
+const PI_NAMES=['','3V3','5V','GPIO2 SDA','5V','GPIO3 SCL','GND','GPIO4','GPIO14 TXD','GND','GPIO15 RXD','GPIO17','GPIO18','GPIO27','GND','GPIO22','GPIO23','3V3','GPIO24','GPIO10 MOSI','GND','GPIO9 MISO','GPIO25','GPIO11 SCLK','GPIO8 CE0','GND','GPIO7 CE1','ID_SD','ID_SC','GPIO5','GND','GPIO6','GPIO12','GPIO13','GND','GPIO19','GPIO16','GPIO26','GPIO20','GND','GPIO21'];
+const NET={'3V3':'#f08c00','5V':'#e03131',GND:'#2a2f33',SDA:'#1c7ed6',SCL:'#f2c230',SOIL:'#15aabf',FLOAT:'#2f9e44',FLOW:'#ae3ec9',IN1:'#9a5b32',IN2:'#8a949c',PUMP:'#f06595',LIGHT:'#cc5de8',CABLE:'#1d1d1d'};
+const NETNAME={'3V3':'3.3 V','5V':'5 V (pump supply)',GND:'Ground',SDA:'I²C data (SDA)',SCL:'I²C clock (SCL)',SOIL:'Soil sensor signal',FLOAT:'Float switch → GPIO17',FLOW:'Flow pulses → GPIO27',IN1:'Pump relay → GPIO5',IN2:'Light relay → GPIO6',PUMP:'Switched 5 V to pump',LIGHT:'Switched 5 V to light'};
+const RAILNAME={'W+':'back 3.3 V rail','W-':'back GND rail','F+':'front 5 V rail','F-':'front GND rail'};
+
+const BOM={
+  pi:['Raspberry Pi 5 4 GB + 27 W PSU + case + 32 GB card',608.9,'HobbyStart / Little Son','https://hobbystart.tn/?p=4935'],
+  bb:['Breadboard 830 points',5.5,'Didactico','https://didactico.tn/produit/plaque-essai-830-points/'],
+  ads:['ADS1115 16-bit ADC',20,'Souilah','https://souilah-electronique.tn/modules-et-capteurs/122-module-ads1115-16-bit-adc-4-ch-avec-amplificateur.html'],
+  relay:['2-channel 5 V relay module',9,'Souilah','https://souilah-electronique.tn/accueil/372-module-2-relais-5v.html'],
+  jack:['DC jack module + 5 V 2 A adapter',15,'Little Son / Souilah','https://little-son.tn/accueil/1456-module-adaptateur-courant-dc-fiche-jack-pour-arduino.html'],
+  oled:['OLED 0.96" I²C SSD1306 (blue/yellow)',17.5,'Souilah','https://souilah-electronique.tn/modules-et-capteurs/377-afficheur-12864-lcd-oled-ssd1306-i2c-096-bleu-et-jaune.html'],
+  pump:['Mini water pump DC 3–6 V',9,'Little Son','https://little-son.tn/accueil/1666-mini-pompe-a-eau-dc-3-6-v-avec-2-orifices-pour-arduino.html'],
+  flow:['YF-S401 water flow sensor',17,'Little Son','https://little-son.tn/accueil/252-capteur-de-debit-d-eau-yf-s401.html'],
+  float:['P35 float switch',8,'Didactico','https://didactico.tn/produit/capteur-niveau-eau-p35/'],
+  soil1:['Capacitive soil moisture sensor',10,'Souilah','https://souilah-electronique.tn/modules-et-capteurs/97--module-capteur-d-humidite-du-sol-capacitif-pour-arduino.html'],
+  sht:['SHT31 temperature & humidity',36,'Souilah','https://souilah-electronique.tn/accueil/1223-module-sht31-capteur-de-temperature-et-d-humidite-.html'],
+  bh:['GY-302 BH1750 light sensor',7,'Souilah','https://souilah-electronique.tn/accueil/2255-gy-302-bh1750-module-capteur-de-lumiere.html'],
+  d1:['1N4007 diode',0.1,'Little Son','https://little-son.tn/accueil/1075-diode-1n4007.html'],
+  tube:['Silicone tube 7×10 mm',4,'Little Son (out of stock)','https://little-son.tn/accueil/901-tuyau-pour-pompe-a-eau-710mm-au-metre.html']
+};
+
+const INFO={
+  pi:{name:'Raspberry Pi 5 (4 GB)',short:'Pi',where:'Electronics bay, left · official case, lid has a slot over the GPIO header',does:'Runs the rules, the sensor code, the dashboard and qwen3.5:0.8b. Powered only by its own 27 W USB-C supply.'},
+  bb:{name:'Breadboard 830',short:'Breadboard',where:'Electronics bay floor, against the sealed wall',does:'Joins everything. Back rails: 3.3 V (red) and GND (blue) from the Pi. Front rails: 5 V and GND from the pump adapter. The two GND rails are linked.'},
+  ads:{name:'ADS1115 ADC',short:'ADS1115',where:'Breadboard rows 10–19, hole c',does:'Turns the soil sensor voltage into a number (the Pi has no analog input). ADDR to GND gives address 0x48. Use the ±4.096 V range.',rows:{VDD:10,GND:11,SCL:12,SDA:13,ADDR:14,ALRT:15,A0:16,A1:17,A2:18,A3:19}},
+  relay:{name:'2-channel relay module',short:'Relay',where:'Electronics bay floor, front',does:'CH1 switches the pump and CH2 the grow light. Active LOW: GPIO LOW = relay on. JD-VCC jumper removed: the input side runs on Pi 3.3 V and the coils on the 5 V adapter.'},
+  jack:{name:'DC jack module',short:'DC jack',where:'Front right corner · barrel plug through the right wall',does:'Brings the 5 V 2 A adapter onto the front breadboard rails. It feeds the pump, the relay coils and the flow sensor, never the Pi.'},
+  oled:{name:'OLED 0.96" SSD1306',short:'OLED',where:'Under the window in the tilted lid',does:'Shows the time, soil moisture, temperature and humidity, and the pump status. I²C address 0x3C. The top 16 pixel rows are yellow, the rest blue.'},
+  port:{name:'GX16 5-pin stake port',short:'Stake port',where:'Tilted lid, next to the pot',does:'Connects the sensor stake cable. Pins: 1 = 3.3 V, 2 = GND, 3 = SDA, 4 = SCL, 5 = soil signal. Not in the BOM.'},
+  pump:{name:'Mini submersible pump 3–6 V',short:'Pump',where:'Tank floor, under water',does:'Pushes water up the tube to the drip ring. It must stay under water, so the float switch blocks it when the tank is low.'},
+  flow:{name:'YF-S401 flow sensor',short:'Flow sensor',where:'Inside the tank, above the water line, in the tube after the pump',does:'Gives about 5,880 pulses per litre, so the code knows the real mL given. Its 5 V signal goes through a 10k/20k divider to reach 3.3 V.'},
+  float:{name:'P35 float switch',short:'Float',where:'Hangs inside the tank from the front wall',does:'Closed = enough water (above ≈1.0 L). Open = empty, and the pump is blocked. A broken wire also reads as empty, so it fails safe. Flip the float on the stem if your switch closes the other way.'},
+  light:{name:'Grow-light output',short:'LIGHT socket',where:'Right wall',does:'Relay CH2 output for the grow light. The light itself is not chosen yet; check its voltage and current before using this 5 V supply.'},
+  soil1:{name:'Capacitive soil sensor (Pot A)',short:'Soil sensor',where:'Sensor stake, blade in the soil',does:'Analog signal into ADS1115 A0. Push it in only up to the printed line; the electronics stay dry inside the stake. Pot B (study) uses A1.'},
+  sht:{name:'SHT31 temperature & humidity',short:'SHT31',where:'Inside the vented lantern of the stake, away from the Pi heat',does:'Air temperature and humidity over I²C, address 0x44 (ADR low).'},
+  bh:{name:'BH1750 light sensor (GY-302)',short:'BH1750',where:'Under the clear window in the stake cap',does:'Lux over I²C at address 0x23 (ADDR open). The code adds lux × hours into "light today".'},
+  splice:{name:'Splice board',short:'Splice',where:'Inside the stake housing',does:'Small perfboard where the 5-core cable splits to the three sensors. Solder joints, covered in heat-shrink.'},
+  stake:{name:'Sensor stake',short:'Stake',where:'Stands in the pot',does:'3D-printed stake from concept 1, wired instead of wireless: cap with light window, vented lantern (SHT31, BH1750), stem, housing for the soil sensor electronics. A 5-core cable runs to the port on the lid.'},
+  pot:{name:'Pot with spearmint',short:'Pot',where:'On the tank lid',does:'Ø15 cm pot. Drain holes let extra water drip back into the tank. The drip ring spreads each dose around the roots.'},
+  tank:{name:'Water tank',short:'Tank',where:'Back of the base, under the pot',does:'About 2.5 L when filled to 8 cm. Clear side window to see the level. Filled from the cap on the lid.'},
+  enclosure:{name:'Planter base',short:'Base',where:'26 × 26 × 12 cm, printed in PETG',does:'Dry electronics bay at the front, water tank at the back, a sealed wall between them with one rubber grommet for the wet-side wires. The tilted lid opens to reach the electronics.'},
+  r1:{name:'R1 10 kΩ',short:'R1',where:'Breadboard row 40 f → row 44 f',does:'Top half of the flow-signal divider (5 V → 3.3 V). Bands: brown black orange gold.'},
+  r2:{name:'R2 20 kΩ',short:'R2',where:'Breadboard row 44 g → front GND rail',does:'Bottom half of the divider: 5 V × 20 / 30 = 3.3 V. Bands: red black orange gold.'},
+  d1:{name:'D1 1N4007',short:'D1',where:'Front GND rail → row 56 i (band)',does:'Flyback diode across the pump. It absorbs the voltage spike when the pump switches off. The band (cathode) goes to pump +.'},
+  psu:{name:'USB-C 27 W cable',short:'USB-C',where:'Left wall grommet',does:'Official Raspberry Pi 5 supply (5 V 5 A). The Pi needs it to run the language model under load.'},
+  tube:{name:'Silicone tube and drip ring',short:'Tube',where:'Pump → flow sensor → through the lid → drip ring',does:'7×10 mm tube that fits the mini pump. The ring spreads the water around the plant.'}
+};
+
+/* Physical wires. ea/eb = end type: f female dupont, m male dupont, s stripped (screw), d soldered */
+const WIRES=[
+ {id:'W1',grp:'A',a:'pi:1',b:'bb:W+@2',net:'3V3',kind:'F–M jumper',ea:'f',eb:'m'},
+ {id:'W2',grp:'A',a:'pi:9',b:'bb:W-@3',net:'GND',kind:'F–M jumper',ea:'f',eb:'m'},
+ {id:'W16',grp:'A',a:'bb:W-@62',b:'bb:F-@62',net:'GND',kind:'M–M jumper',note:'Links the two GND rails (common ground)'},
+ {id:'W26',grp:'A',a:'jack:+',b:'bb:F+@63',net:'5V',kind:'22 AWG wire',ea:'s',eb:'m'},
+ {id:'W27',grp:'A',a:'jack:-',b:'bb:F-@63',net:'GND',kind:'22 AWG wire',ea:'s',eb:'m'},
+ {id:'P1',grp:'B',part:'ads',text:'Plug the ADS1115 header into rows 10–19, hole c (VDD in row 10)'},
+ {id:'W3',grp:'B',a:'pi:3',b:'bb:3e',net:'SDA',kind:'F–M jumper',ea:'f',eb:'m',note:'Row 3 = SDA bus'},
+ {id:'W4',grp:'B',a:'pi:5',b:'bb:4e',net:'SCL',kind:'F–M jumper',ea:'f',eb:'m',note:'Row 4 = SCL bus'},
+ {id:'W11',grp:'B',a:'bb:10b',b:'bb:W+@10',net:'3V3',kind:'M–M jumper',note:'ADS1115 VDD'},
+ {id:'W12',grp:'B',a:'bb:11b',b:'bb:W-@11',net:'GND',kind:'M–M jumper',note:'ADS1115 GND'},
+ {id:'W13',grp:'B',a:'bb:12b',b:'bb:4d',net:'SCL',kind:'M–M jumper',note:'ADS1115 SCL'},
+ {id:'W14',grp:'B',a:'bb:13b',b:'bb:3d',net:'SDA',kind:'M–M jumper',note:'ADS1115 SDA'},
+ {id:'W15',grp:'B',a:'bb:14b',b:'bb:W-@14',net:'GND',kind:'M–M jumper',note:'ADDR to GND → address 0x48'},
+ {id:'W22',grp:'C',a:'oled:GND',b:'bb:W-@8',net:'GND',kind:'F–M jumper',ea:'f',eb:'m'},
+ {id:'W23',grp:'C',a:'oled:VCC',b:'bb:W+@8',net:'3V3',kind:'F–M jumper',ea:'f',eb:'m'},
+ {id:'W24',grp:'C',a:'oled:SCL',b:'bb:4c',net:'SCL',kind:'F–M jumper',ea:'f',eb:'m'},
+ {id:'W25',grp:'C',a:'oled:SDA',b:'bb:3c',net:'SDA',kind:'F–M jumper',ea:'f',eb:'m'},
+ {id:'W17',grp:'D',a:'port:1',b:'bb:W+@6',net:'3V3',kind:'Soldered → male pin',ea:'d',eb:'m'},
+ {id:'W18',grp:'D',a:'port:2',b:'bb:W-@6',net:'GND',kind:'Soldered → male pin',ea:'d',eb:'m'},
+ {id:'W19',grp:'D',a:'port:3',b:'bb:3b',net:'SDA',kind:'Soldered → male pin',ea:'d',eb:'m'},
+ {id:'W20',grp:'D',a:'port:4',b:'bb:4b',net:'SCL',kind:'Soldered → male pin',ea:'d',eb:'m'},
+ {id:'W21',grp:'D',a:'port:5',b:'bb:16b',net:'SOIL',kind:'Soldered → male pin',ea:'d',eb:'m',note:'Into ADS1115 A0 row'},
+ {id:'C1',grp:'D',a:'stake:cable',b:'port:top',net:'CABLE',kind:'5-core cable + GX16 plug',ea:'d',eb:'s',r:.2,note:'Cores: orange 3.3 V, black GND, blue SDA, yellow SCL, cyan soil'},
+ {id:'S1',grp:'E',a:'splice:3V3',b:'soil1:VCC',net:'3V3',kind:'Soldered',ea:'d',eb:'d',r:.035,arc:.35},
+ {id:'S2',grp:'E',a:'splice:GND',b:'soil1:GND',net:'GND',kind:'Soldered',ea:'d',eb:'d',r:.035,arc:.45},
+ {id:'S3',grp:'E',a:'splice:SOIL',b:'soil1:AOUT',net:'SOIL',kind:'Soldered',ea:'d',eb:'d',r:.035,arc:.55},
+ {id:'S4',grp:'E',a:'splice:3V3',b:'sht:VIN',net:'3V3',kind:'Soldered',ea:'d',eb:'d',r:.035,stem:-.16},
+ {id:'S5',grp:'E',a:'splice:GND',b:'sht:GND',net:'GND',kind:'Soldered',ea:'d',eb:'d',r:.035,stem:-.08},
+ {id:'S6',grp:'E',a:'splice:SCL',b:'sht:SCL',net:'SCL',kind:'Soldered',ea:'d',eb:'d',r:.035,stem:0},
+ {id:'S7',grp:'E',a:'splice:SDA',b:'sht:SDA',net:'SDA',kind:'Soldered',ea:'d',eb:'d',r:.035,stem:.08},
+ {id:'S8',grp:'E',a:'splice:3V3',b:'bh:VCC',net:'3V3',kind:'Soldered',ea:'d',eb:'d',r:.035,stem:-.2},
+ {id:'S9',grp:'E',a:'splice:GND',b:'bh:GND',net:'GND',kind:'Soldered',ea:'d',eb:'d',r:.035,stem:-.12},
+ {id:'S10',grp:'E',a:'splice:SCL',b:'bh:SCL',net:'SCL',kind:'Soldered',ea:'d',eb:'d',r:.035,stem:.12},
+ {id:'S11',grp:'E',a:'splice:SDA',b:'bh:SDA',net:'SDA',kind:'Soldered',ea:'d',eb:'d',r:.035,stem:.2},
+ {id:'W7',grp:'F',a:'pi:17',b:'relay:VCC',net:'3V3',kind:'F–F jumper',ea:'f',eb:'f'},
+ {id:'W8',grp:'F',a:'pi:25',b:'relay:GND',net:'GND',kind:'F–F jumper',ea:'f',eb:'f'},
+ {id:'W9',grp:'F',a:'pi:29',b:'relay:IN1',net:'IN1',kind:'F–F jumper',ea:'f',eb:'f',note:'GPIO5, pump. HIGH = off'},
+ {id:'W10',grp:'F',a:'pi:31',b:'relay:IN2',net:'IN2',kind:'F–F jumper',ea:'f',eb:'f',note:'GPIO6, light. HIGH = off'},
+ {id:'W28',grp:'F',a:'relay:JD-VCC',b:'bb:F+@60',net:'5V',kind:'F–M jumper',ea:'f',eb:'m',note:'Jumper JD-VCC↔VCC removed'},
+ {id:'W29',grp:'F',a:'relay:GND(JD)',b:'bb:F-@60',net:'GND',kind:'F–M jumper',ea:'f',eb:'m'},
+ {id:'W30',grp:'F',a:'bb:F+@58',b:'relay:COM1',net:'5V',kind:'22 AWG wire',ea:'m',eb:'s'},
+ {id:'W31',grp:'F',a:'relay:NO1',b:'bb:56g',net:'PUMP',kind:'22 AWG wire',ea:'s',eb:'m'},
+ {id:'P2',grp:'G',part:'r1',text:'R1 10 kΩ from row 40 f to row 44 f'},
+ {id:'P3',grp:'G',part:'r2',text:'R2 20 kΩ from row 44 g to the front GND rail'},
+ {id:'P4',grp:'G',part:'d1',text:'D1 1N4007: anode on the front GND rail, band (cathode) in row 56 i'},
+ {id:'W5',grp:'G',a:'pi:11',b:'bb:50h',net:'FLOAT',kind:'F–M jumper',ea:'f',eb:'m',note:'Use the internal pull-up in code'},
+ {id:'W6',grp:'G',a:'pi:13',b:'bb:44h',net:'FLOW',kind:'F–M jumper',ea:'f',eb:'m',note:'Divided signal, ≤ 3.3 V'},
+ {id:'W32',grp:'G',a:'pump:+',b:'bb:56j',net:'PUMP',kind:'Pump lead, through grommet',ea:'d',eb:'m',tank:'pumpP'},
+ {id:'W33',grp:'G',a:'pump:-',b:'bb:F-@55',net:'GND',kind:'Pump lead, through grommet',ea:'d',eb:'m',tank:'pumpN'},
+ {id:'W34',grp:'G',a:'flow:RED',b:'bb:F+@38',net:'5V',kind:'Sensor lead, through grommet',ea:'d',eb:'m',tank:'flowR'},
+ {id:'W35',grp:'G',a:'flow:BLACK',b:'bb:F-@38',net:'GND',kind:'Sensor lead, through grommet',ea:'d',eb:'m',tank:'flowB'},
+ {id:'W36',grp:'G',a:'flow:YELLOW',b:'bb:40j',net:'FLOW',kind:'Sensor lead, through grommet',ea:'d',eb:'m',tank:'flowY',note:'Raw 5 V pulses, into the divider'},
+ {id:'W37',grp:'G',a:'float:A',b:'bb:50j',net:'FLOAT',kind:'Float lead, through grommet',ea:'d',eb:'m',tank:'floatA'},
+ {id:'W38',grp:'G',a:'float:B',b:'bb:F-@51',net:'GND',kind:'Float lead, through grommet',ea:'d',eb:'m',tank:'floatB'},
+ {id:'W39',grp:'H',a:'bb:F+@59',b:'relay:COM2',net:'5V',kind:'22 AWG wire',ea:'m',eb:'s',opt:1},
+ {id:'W40',grp:'H',a:'relay:NO2',b:'light:+',net:'LIGHT',kind:'22 AWG wire',ea:'s',eb:'s',opt:1},
+ {id:'W41',grp:'H',a:'light:-',b:'bb:F-@61',net:'GND',kind:'22 AWG wire',ea:'s',eb:'m',opt:1}
+];
+const GROUPS={A:'Power rails on the breadboard',B:'I²C bus and ADS1115',C:'Screen (in the lid)',D:'Sensor stake port (in the lid)',E:'Inside the sensor stake (soldered)',F:'Relay module',G:'Wet side: pump, flow sensor, float (through the sealed grommet)',H:'Optional: grow-light output'};
+
+/* ================================================================ THREE SETUP */
+const V=(x,y,z)=>new THREE.Vector3(x,y,z);
+const UP=V(0,1,0), DOWN=V(0,-1,0), PX=V(1,0,0), NX=V(-1,0,0), PZ=V(0,0,1);
+const vp=document.getElementById('vp');
+const renderer=new THREE.WebGLRenderer({antialias:true});
+renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
+renderer.outputEncoding=THREE.sRGBEncoding;
+renderer.toneMapping=THREE.ACESFilmicToneMapping; renderer.toneMappingExposure=1.0;
+renderer.shadowMap.enabled=true; renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+vp.insertBefore(renderer.domElement,vp.firstChild);
+document.getElementById('loading').remove();
+const scene=new THREE.Scene();
+const camera=new THREE.PerspectiveCamera(36,1,.1,600);
+camera.position.set(44,36,50);
+const controls=new THREE.OrbitControls(camera,renderer.domElement);
+controls.target.set(0,10,0); controls.enableDamping=true; controls.dampingFactor=.09; controls.minDistance=6; controls.maxDistance=160;
+scene.add(new THREE.HemisphereLight(0xffffff,0x7d857f,.8));
+const sun=new THREE.DirectionalLight(0xffffff,1.05); sun.position.set(24,48,30); sun.castShadow=true;
+sun.shadow.mapSize.set(2048,2048); Object.assign(sun.shadow.camera,{left:-34,right:34,top:34,bottom:-34,near:1,far:130}); sun.shadow.bias=-.0006; scene.add(sun);
+const fillL=new THREE.DirectionalLight(0xffffff,.35); fillL.position.set(-30,18,-24); scene.add(fillL);
+const groundMat=new THREE.MeshStandardMaterial({color:0xc4cfc8,roughness:1});
+const ground=new THREE.Mesh(new THREE.CircleGeometry(80,72),groundMat); ground.rotation.x=-Math.PI/2; ground.position.y=-.5; ground.receiveShadow=true; scene.add(ground);
+function applyTheme(){ const cs=getComputedStyle(document.documentElement); scene.background=new THREE.Color(cs.getPropertyValue('--stage').trim()||'#dbe4df'); groundMat.color.set(cs.getPropertyValue('--table').trim()||'#c4cfc8'); }
+applyTheme();
+try{ matchMedia('(prefers-color-scheme: dark)').addEventListener('change',applyTheme); }catch(e){}
+new MutationObserver(applyTheme).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
+
+/* materials & helpers */
+function M(c,o){ return new THREE.MeshStandardMaterial(Object.assign({color:c,roughness:.6,metalness:0},o||{})); }
+const shellMat=M('#ebe5d9',{roughness:.85}), potMat=M('#b9693c',{roughness:.9,side:THREE.DoubleSide}), soilMat=M('#5a3f2a',{roughness:1}), stakeMat=M('#3b332d',{roughness:.7}),
+  caseRed=M('#c8102e',{roughness:.45}), caseWhite=M('#f3f3f0',{roughness:.5});
+const XRAY=[shellMat,potMat,soilMat,stakeMat,caseRed,caseWhite];
+const glassMat=new THREE.MeshStandardMaterial({color:0xd9f0f5,transparent:true,opacity:.2,roughness:.05,depthWrite:false,side:THREE.DoubleSide});
+const waterMat=new THREE.MeshStandardMaterial({color:0x3d9be0,transparent:true,opacity:.5,roughness:.1,depthWrite:false});
+const metal=M('#c9ccd0',{metalness:.85,roughness:.32}), gold=M('#d8b24a',{metalness:.9,roughness:.3}), blackP=M('#1b1b1c',{roughness:.5}), whiteP=M('#f1f1ee',{roughness:.5}),
+  darkSlot=M('#2a2622',{roughness:1}), rubber=M('#222222',{roughness:.9}), copperM=M('#c87533',{metalness:.8,roughness:.35}), lantern=new THREE.MeshStandardMaterial({color:0xe6f4f8,transparent:true,opacity:.32,roughness:.15,side:THREE.DoubleSide,depthWrite:false});
+function mesh(geo,mat,x,y,z,parent,shadow){ const m=new THREE.Mesh(geo,mat); m.position.set(x||0,y||0,z||0); if(shadow!==false){m.castShadow=true;m.receiveShadow=true;} if(parent)parent.add(m); return m; }
+function box(w,h,d,mat,x,y,z,parent){ return mesh(new THREE.BoxGeometry(w,h,d),mat,x,y,z,parent); }
+function cyl(rt,rb,h,seg,mat,x,y,z,parent){ return mesh(new THREE.CylinderGeometry(rt,rb,h,seg||16),mat,x,y,z,parent); }
+function cylX(r,len,mat,x,y,z,parent,seg){ const m=cyl(r,r,len,seg||16,mat,x,y,z,parent); m.rotation.z=Math.PI/2; return m; }
+function cylZ(r,len,mat,x,y,z,parent,seg){ const m=cyl(r,r,len,seg||16,mat,x,y,z,parent); m.rotation.x=Math.PI/2; return m; }
+function group(parent,x,y,z){ const g=new THREE.Group(); g.position.set(x||0,y||0,z||0); (parent||scene).add(g); return g; }
+function silkTex(wcm,dcm,bg,fn,ppc){ ppc=ppc||100; const c=document.createElement('canvas'); c.width=Math.max(8,Math.round(wcm*ppc)); c.height=Math.max(8,Math.round(dcm*ppc)); const g=c.getContext('2d'); g.fillStyle=bg; g.fillRect(0,0,c.width,c.height); g.textBaseline='middle'; if(fn)fn(g,ppc,c.width,c.height); const t=new THREE.CanvasTexture(c); t.encoding=THREE.sRGBEncoding; t.anisotropy=8; return t; }
+function T(g,s,x,y,px,col,al,rot){ g.save(); g.translate(x,y); if(rot)g.rotate(rot); g.font='600 '+px+'px "IBM Plex Mono", Consolas, monospace'; g.fillStyle=col||'#fff'; g.textAlign=al||'center'; g.fillText(s,0,0); g.restore(); }
+/* PCB: top face gets a silkscreen canvas. draw(g,ppc,W,H): x px from left (-x), y px from back (-z) */
+function pcb(w,d,t,color,draw,parent,x,y,z){ const side=M(color,{roughness:.55}); const top=draw?new THREE.MeshStandardMaterial({map:silkTex(w,d,color,draw),roughness:.55}):side; return mesh(new THREE.BoxGeometry(w,t,d),[side,side,top,side,side,side],x,y,z,parent); }
+function pinsUp(parent,pts,y0,h,mat){ pts.forEach(p=>box(.064,h,.064,mat||gold,p[0],y0+h/2,p[1],parent)); }
+
+/* part registry */
+const parts={};
+function reg(id,obj,anchor){ parts[id]=parts[id]||{id,pins:{},groups:[]}; parts[id].groups.push(obj); if(anchor)parts[id].anchor=anchor; obj.traverse(o=>{ if(o.isMesh&&!o.userData.part)o.userData.part=id; }); return parts[id]; }
+function pin(id,name,obj,local,dir){ parts[id]=parts[id]||{id,pins:{},groups:[]}; parts[id].pins[name]={obj,local,dir}; }
+function markShell(obj){ obj.traverse(o=>{ if(o.isMesh)o.userData.shell=true; }); }
+
+/* ================================================================ ENCLOSURE */
+const encl=group(scene);
+function shape(pts){ const s=new THREE.Shape(); s.moveTo(pts[0][0],pts[0][1]); for(let i=1;i<pts.length;i++)s.lineTo(pts[i][0],pts[i][1]); return s; }
+function sideWall(pts,x){ const m=mesh(new THREE.ExtrudeGeometry(shape(pts),{depth:.3,bevelEnabled:false}),shellMat,x,0,0,encl); m.rotation.y=-Math.PI/2; return m; }
+sideWall([[-13,0],[13,0],[13,7.7],[2.6,11.7],[-13,11.7]],-12.7);
+sideWall([[2.6,0],[13,0],[13,7.7],[2.6,11.7]],13);
+box(.3,1.5,15.6,shellMat,12.85,.75,-5.2,encl); box(.3,1.2,15.6,shellMat,12.85,11.1,-5.2,encl);
+box(.3,9,2,shellMat,12.85,6,-12,encl); box(.3,9,2.1,shellMat,12.85,6,1.55,encl);
+box(.08,9,11.5,glassMat,12.85,6,-5.25,encl).castShadow=false;
+box(25.4,7.7,.3,shellMat,0,3.85,12.85,encl);
+box(25.4,11.7,.3,shellMat,0,5.85,-12.85,encl);
+box(26,.3,26,shellMat,0,.15,0,encl);
+box(25.4,11.4,.4,shellMat,0,6.0,2.4,encl);
+box(26,.3,.4,shellMat,0,11.85,2.4,encl);
+[[-11,-11],[11,-11],[-11,11],[11,11]].forEach(p=>cyl(.9,.9,.5,20,rubber,p[0],-.25,p[1],encl));
+for(let i=0;i<6;i++) box(.06,.32,4.4,darkSlot,-13.02,2.6+i*.75,8.4,encl);
+const GX=-1, GY=11.1;
+function grommet(x,y,z,axis,parent){ const t=mesh(new THREE.TorusGeometry(.55,.16,10,28),rubber,x,y,z,parent); if(axis==='x')t.rotation.y=Math.PI/2; return t; }
+grommet(GX,GY,2.4,'z',encl); grommet(-13.05,1.22,4.45,'x',encl); grommet(13.05,1.56,11.2,'x',encl);
+const logo=mesh(new THREE.PlaneGeometry(6,1.5),new THREE.MeshStandardMaterial({map:silkTex(6,1.5,'#ebe5d9',(g)=>{T(g,'nabta',300,78,96,'#1b7a52');}),roughness:.85}),0,4.3,13.01,encl,false);
+markShell(encl); reg('enclosure',encl,[encl,V(-10,8,10)]);
+
+/* tank container + water (static) */
+const tankG=group(scene);
+box(23,.3,13.8,glassMat,0,.45,-5.3,tankG); box(.15,10.5,13.8,glassMat,-11.5,5.55,-5.3,tankG); box(.15,10.5,13.8,glassMat,11.5,5.55,-5.3,tankG);
+box(23,10.5,.15,glassMat,0,5.55,-12.2,tankG); box(23,10.5,.15,glassMat,0,5.55,1.6,tankG);
+tankG.children.forEach(c=>c.castShadow=false);
+const water=box(22.7,1,13.5,waterMat,0,1,-5.3,tankG); water.castShadow=false;
+const TANK_AREA=22.7*13.5; /* cm² */
+reg('tank',tankG,[tankG,V(7,7,-9)]);
+
+/* light port on right wall */
+const lightG=group(encl);
+box(.7,.9,1.0,M('#2f8f4e'),12.35,4.2,9.5,lightG); [9.25,9.75].forEach(z=>cyl(.12,.12,.06,10,metal,12.35,4.68,z,lightG));
+const sock=cylX(.45,.3,blackP,13.12,4.2,9.5,lightG);
+pin('light','+',lightG,V(12.0,4.35,9.25),NX); pin('light','-',lightG,V(12.0,4.35,9.75),NX);
+reg('light',lightG,[lightG,V(12.3,5.4,9.5)]);
+
+/* ================================================================ RASPBERRY PI 5 */
+const piG=group(scene,-9.3,.3,7.6);
+box(6.3,.2,9.4,caseRed,0,.1,0,piG); box(.2,2.2,9.4,caseRed,3.05,1.2,0,piG);
+box(.2,2.2,.9,caseRed,-3.05,1.2,-4.25,piG); box(.2,2.2,6.9,caseRed,-3.05,1.2,1.25,piG); box(.2,1.1,1.4,caseRed,-3.05,1.75,-3.1,piG);
+box(6.3,2.2,.2,caseRed,0,1.2,-4.6,piG); box(6.3,2.2,.2,caseRed,0,1.2,4.6,piG);
+pcb(5.6,8.5,.16,'#1f6b3b',(g)=>{ T(g,'Raspberry Pi 5',230,700,30,'#e8f0ea'); T(g,'Model B · 4GB',230,740,22,'#cfe0d4'); T(g,'GPIO',470,520,20,'#e8f0ea','center',-Math.PI/2); T(g,'1',496,83,20,'#ffffff');
+  g.strokeStyle='#e8f0ea'; g.lineWidth=2; g.strokeRect(503,71,23,23); },piG,0,.68,0);
+box(1.5,.2,1.5,metal,.5,.86,-1.0,piG); box(1.2,.13,1.0,blackP,-1.4,.83,-1.0,piG); box(.9,.1,.9,blackP,-.3,.81,1.5,piG);
+box(1.45,1.6,1.75,metal,.15,1.56,3.6,piG); box(1.45,1.6,1.75,metal,1.85,1.56,3.6,piG); box(1.6,1.35,2.1,metal,-1.75,1.44,3.45,piG);
+box(.35,.32,.9,metal,-2.75,.92,-3.15,piG); box(.3,.3,.75,metal,-2.75,.91,-1.85,piG); box(.3,.3,.75,metal,-2.75,.91,-.6,piG);
+box(.5,.25,5.08,blackP,2.473,.885,-1.01,piG);
+const piPinPts=[];
+for(let n=1;n<=40;n++){ const r=Math.floor((n-1)/2), x=n%2?2.346:2.6, z=-3.423+r*.254; piPinPts.push([x,z]); pin('pi',String(n),piG,V(x,1.61,z),UP); }
+pinsUp(piG,piPinPts,.76,.85);
+const piLid=group(piG);
+box(5.1,.25,9.4,caseWhite,-.6,2.425,0,piLid); box(1.2,.25,1.0,caseWhite,2.55,2.425,-4.2,piLid); box(1.2,.25,3.0,caseWhite,2.55,2.425,3.2,piLid); box(.2,.25,5.4,caseWhite,3.05,2.425,-1.0,piLid);
+const fan=group(piLid,.4,2.1,-1.0); cyl(1.45,1.45,.06,32,blackP,0,.12,0,fan);
+const fanRot=group(fan); cyl(.45,.45,.25,20,blackP,0,0,0,fanRot); for(let i=0;i<7;i++){ const b=box(1.0,.04,.38,M('#2b2b2c'),.65,0,0,fanRot); const pv=new THREE.Group(); pv.rotation.y=i*Math.PI*2/7; b.rotation.x=.45; pv.add(b); fanRot.add(pv); }
+reg('pi',piG,[piG,V(0,3.4,0)]);
+/* USB-C power cable */
+const usbG=group(scene); box(1.1,.55,.95,blackP,-12.85,1.22,4.45,usbG);
+mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3([V(-13.4,1.22,4.45),V(-15,1.22,4.45),V(-17,.7,4.8),V(-18.5,-.28,6),V(-26,-.28,10)]),48,.2,8),rubber,0,0,0,usbG);
+reg('psu',usbG,[usbG,V(-16,2.4,4.6)]);
+
+/* ================================================================ BREADBOARD */
+const bbG=group(scene,2.85,.3,5.75);
+const COLZ={a:-1.397,b:-1.143,c:-.889,d:-.635,e:-.381,f:.381,g:.635,h:.889,i:1.143,j:1.397};
+const RAILZ={'W+':-2.29,'W-':-2.03,'F-':2.03,'F+':2.29};
+const rowX=n=>-8+(n-1)*.254;
+const railXs=[]; for(let k=0;k<50;k++){ railXs.push(-7.49+(Math.floor(k/5)*6+k%5)*.254); }
+function railX(row){ const x=rowX(row); let best=railXs[0]; railXs.forEach(r=>{ if(Math.abs(r-x)<Math.abs(best-x))best=r; }); return best; }
+function bbLocal(n){ const m=n.match(/^([WF][+-])@(\d+)$/); if(m) return V(railX(+m[2]),.85,RAILZ[m[1]]); const r=n.match(/^(\d+)([a-j])$/); return V(rowX(+r[1]),.85,COLZ[r[2]]); }
+const bbTop=new THREE.MeshStandardMaterial({map:silkTex(16.5,5.5,'#f3f2ec',(g,p)=>{
+  const zp=z=>(z+2.75)*p, xp=x=>(x+8.25)*p;
+  [[-2.5,'#e03131'],[-1.82,'#1c7ed6'],[1.82,'#1c7ed6'],[2.5,'#e03131']].forEach(l=>{ g.fillStyle=l[1]; g.fillRect(xp(-7.7),zp(l[0])-1.5,xp(7.6)-xp(-7.7),3); });
+  g.fillStyle='#d9d8d0'; g.fillRect(xp(-8.1),zp(0)-9,xp(8)-xp(-8.1),18);
+  for(let n=1;n<=63;n++){ if(n===1||n%5===0){ T(g,String(n),xp(rowX(n)),zp(-1.68),11,'#666'); T(g,String(n),xp(rowX(n)),zp(1.68),11,'#666'); } }
+  Object.keys(COLZ).forEach(c=>{ T(g,c,xp(-8.12),zp(COLZ[c]),11,'#666'); T(g,c,xp(7.98),zp(COLZ[c]),11,'#666'); });
+  T(g,'+',xp(-8.05),zp(-2.29),14,'#e03131'); T(g,'−',xp(-8.05),zp(-2.03),14,'#1c7ed6'); T(g,'−',xp(-8.05),zp(2.03),14,'#1c7ed6'); T(g,'+',xp(-8.05),zp(2.29),14,'#e03131');
+},60),roughness:.7});
+const bbSide=M('#efeee8',{roughness:.7});
+mesh(new THREE.BoxGeometry(16.5,.85,5.5),[bbSide,bbSide,bbTop,bbSide,bbSide,bbSide],0,.425,0,bbG);
+(function(){ const holes=[]; for(let n=1;n<=63;n++) Object.values(COLZ).forEach(z=>holes.push([rowX(n),z])); Object.values(RAILZ).forEach(z=>railXs.forEach(x=>holes.push([x,z])));
+  const im=new THREE.InstancedMesh(new THREE.BoxGeometry(.1,.01,.1),M('#3a3a3a'),holes.length); const o=new THREE.Object3D();
+  holes.forEach((h,i)=>{ o.position.set(h[0],.852,h[1]); o.updateMatrix(); im.setMatrixAt(i,o.matrix); }); bbG.add(im); })();
+reg('bb',bbG,[bbG,V(4,1.6,0)]);
+
+/* ADS1115 on rows 10-19 hole c */
+const adsG=group(bbG,(rowX(10)+rowX(19))/2,0,-.189);
+const ADS_PINS=['VDD','GND','SCL','SDA','ADDR','ALRT','A0','A1','A2','A3'];
+box(2.54,.25,.25,blackP,0,.98,-.7,adsG);
+pinsUp(adsG,ADS_PINS.map((n,i)=>[(i-4.5)*.254,-.7]),.85,.65);
+pcb(2.8,1.7,.16,'#3d2f7a',(g)=>{ ADS_PINS.forEach((n,i)=>T(g,n,140+(i-4.5)*25.4,42,11,'#fff','left',Math.PI/2)); T(g,'ADS1115',140,145,18,'#fff'); },adsG,0,1.28,0);
+box(.5,.1,.5,blackP,.1,1.41,.25,adsG);
+reg('ads',adsG,[bbG,V(-4.57,2.2,-.2)]);
+ADS_PINS.forEach((n,i)=>pin('ads',n,bbG,bbLocal(INFO.ads.rows[n]+'c'),UP));
+
+/* axial parts (resistors, diode) on the breadboard */
+function axial(id,aName,bName,bodyMat,len,r,bands,bandAtB){
+  const g=group(bbG); const A=bbLocal(aName), B=bbLocal(bName), h=.55;
+  const Aup=V(A.x,.85+h,A.z), Bup=V(B.x,.85+h,B.z); const dir=Bup.clone().sub(Aup).normalize(); const mid=Aup.clone().lerp(Bup,.5);
+  const ea=mid.clone().addScaledVector(dir,-len/2), eb=mid.clone().addScaledVector(dir,len/2);
+  [[A,Aup,ea],[B,Bup,eb]].forEach(L=>{ const cp=new THREE.CurvePath(); cp.add(new THREE.LineCurve3(L[0].clone().setY(.6),L[1])); cp.add(new THREE.LineCurve3(L[1],L[2])); mesh(new THREE.TubeGeometry(cp,12,.025,6),metal,0,0,0,g); });
+  const body=cyl(r,r,len,14,bodyMat,mid.x,mid.y,mid.z,g); body.quaternion.setFromUnitVectors(UP,dir);
+  bands.forEach(b=>{ const p=mid.clone().addScaledVector(dir,b[0]*len); const bm=cyl(r*1.04,r*1.04,len*.09,14,M(b[1]),p.x,p.y,p.z,g); bm.quaternion.setFromUnitVectors(UP,dir); });
+  reg(id,g,[bbG,mid.clone().add(V(0,.6,0))]); return g;
+}
+const RB='#d9c08d';
+axial('r1','40f','44f',M(RB),.62,.12,[[-.32,'#7a4a24'],[-.16,'#111'],[0,'#f08c00'],[.3,'#c9a227']]);
+axial('r2','44g','F-@45',M(RB),.62,.12,[[-.32,'#d62828'],[-.16,'#111'],[0,'#f08c00'],[.3,'#c9a227']]);
+axial('d1','F-@57','56i',M('#151515'),.5,.14,[[.36,'#b9bcc0']]);
+
+/* ================================================================ RELAY MODULE */
+const relayG=group(scene,-2.7,.3,10.7);
+[[-2.2,-1.7],[2.2,-1.7],[-2.2,1.7],[2.2,1.7]].forEach(p=>cyl(.12,.12,.3,8,metal,p[0],.15,p[1],relayG));
+pcb(5.0,3.9,.16,'#1b5fa6',(g)=>{
+  ['GND','IN1','IN2','VCC'].forEach((s,i)=>T(g,s,48,157+i*25.4,14,'#fff','left'));
+  ['JD-VCC','VCC','GND'].forEach((s,i)=>T(g,s,48,305+i*25.4,13,'#fff','left'));
+  [['NO1',-1.65],['COM1',-1.15],['NC1',-.65],['NC2',.65],['COM2',1.15],['NO2',1.65]].forEach(t=>T(g,t[0],412,(t[1]+1.95)*100,12,'#fff','right'));
+  T(g,'2 Relay Module',250,374,14,'#d0e1f5'); T(g,'PWR',95,30,12,'#fff'); T(g,'IN1',150,95,11,'#fff'); T(g,'IN2',150,295,11,'#fff');
+},relayG,0,.38,0);
+[-.95,.95].forEach((z,i)=>{ const rb=mesh(new THREE.BoxGeometry(1.9,1.55,1.5),[M('#2c6fd6'),M('#2c6fd6'),new THREE.MeshStandardMaterial({map:silkTex(1.9,1.5,'#2c6fd6',(g)=>{T(g,'SONGLE',95,30,16,'#fff');T(g,'SRD-05VDC-SL-C',95,62,11,'#fff');T(g,'10A 250VAC',95,92,11,'#fff');T(g,'CH'+(i+1),95,124,13,'#fff');}),roughness:.5}),M('#2c6fd6'),M('#2c6fd6'),M('#2c6fd6')],.45,1.235,z,relayG); });
+const termPos={NO1:-1.65,COM1:-1.15,NC1:-.65,NC2:.65,COM2:1.15,NO2:1.65};
+[-1.15,1.15].forEach(z=>box(.75,1.0,1.5,M('#1e7fc8'),2.1,.96,z,relayG));
+Object.keys(termPos).forEach(k=>{ cyl(.16,.16,.05,12,metal,2.1,1.48,termPos[k],relayG); pin('relay',k,relayG,V(2.48,.82,termPos[k]),PX); });
+box(.5,.25,1.016,blackP,-2.3,.585,0,relayG); pinsUp(relayG,[-.381,-.127,.127,.381].map(z=>[-2.3,z]),.46,.85);
+['GND','IN1','IN2','VCC'].forEach((n,i)=>pin('relay',n,relayG,V(-2.3,1.31,[-.381,-.127,.127,.381][i]),UP));
+box(.5,.25,.762,blackP,-2.3,.585,1.354,relayG); pinsUp(relayG,[1.1,1.354,1.608].map(z=>[-2.3,z]),.46,.85);
+['JD-VCC','VCC(JD)','GND(JD)'].forEach((n,i)=>pin('relay',n,relayG,V(-2.3,1.31,[1.1,1.354,1.608][i]),UP));
+box(.28,.5,.55,M('#f2c230'),-1.55,.71,1.55,relayG);
+[-1.0,.9].forEach(z=>box(.65,.35,.45,whiteP,-1.3,.63,z,relayG));
+const ledP=box(.18,.12,.12,M('#ff3b3b',{emissive:'#ff2020',emissiveIntensity:1.2}),-1.5,.52,-1.65,relayG);
+const ledCh=[ -0.62, 1.22 ].map(z=>box(.18,.12,.12,M('#2bd24d',{emissive:'#00ff40',emissiveIntensity:0}),-1.95,.52,z,relayG));
+reg('relay',relayG,[relayG,V(0,2.4,0)]);
+
+/* ================================================================ DC JACK */
+const jackG=group(scene,10.6,.3,11.2);
+[[-.8,-.6],[.8,-.6],[-.8,.6],[.8,.6]].forEach(p=>cyl(.1,.1,.25,8,metal,p[0],.125,p[1],jackG));
+pcb(2.0,1.6,.16,'#167a3a',(g)=>{T(g,'+',30,55,18,'#fff');T(g,'−',30,105,18,'#fff');T(g,'DC IN',120,140,12,'#fff');},jackG,0,.33,0);
+box(1.4,1.1,.9,blackP,.4,.96,0,jackG); cylX(.25,.1,M('#111'),1.12,.96,0,jackG);
+box(.7,.8,1.0,M('#2f8f4e'),-.6,.81,0,jackG); [-.25,.25].forEach(z=>cyl(.12,.12,.05,10,metal,-.6,1.23,z,jackG));
+pin('jack','+',jackG,V(-.96,.7,-.25),NX); pin('jack','-',jackG,V(-.96,.7,.25),NX);
+const plug=group(scene); box(1.4,.6,.6,blackP,12.5,1.26,11.2,plug);
+mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3([V(13.2,1.26,11.2),V(14.8,1.26,11.2),V(16.6,.6,11.6),V(18,-.28,12.6),V(26,-.28,16)]),48,.17,8),rubber,0,0,0,plug);
+reg('jack',jackG,[jackG,V(0,2.1,0)]); reg('jack',plug);
+
+/* ================================================================ TANK DEVICES */
+const pumpG=group(scene,-7,.6,-2);
+cylX(1.15,3.6,M('#202022',{roughness:.4}),.2,1.15,0,pumpG,24); cylX(1.16,.5,whiteP,2.2,1.15,0,pumpG,24); cylX(1.0,.5,M('#3a3a3a'),-1.8,1.15,0,pumpG,24);
+for(let i=0;i<6;i++) box(.06,.5,1.6,M('#111'),-2.08,1.15,-.6+i*.24,pumpG);
+cyl(.3,.3,1.3,14,whiteP,-1.5,2.75,0,pumpG); [-1,1].forEach(z=>[-1,1].forEach(x=>cyl(.25,.3,.15,12,M('#dfe7e9',{transparent:true,opacity:.8}),x*1.2,.07,z*.6,pumpG)));
+pin('pump','+',pumpG,V(2.47,1.35,-.18),PX); pin('pump','-',pumpG,V(2.47,1.35,.18),PX);
+reg('pump',pumpG,[pumpG,V(0,3.4,0)]);
+
+const flowG=group(scene,-6,9.3,.8);
+cylX(.82,2.0,M('#18191b',{roughness:.35}),0,0,0,flowG,24); box(1.0,.55,.9,M('#18191b'),0,.75,0,flowG);
+cylX(.3,.9,whiteP,-1.45,0,0,flowG); cylX(.3,.9,whiteP,1.45,0,0,flowG);
+mesh(new THREE.PlaneGeometry(1.6,.5),new THREE.MeshBasicMaterial({map:silkTex(1.6,.5,'#18191b',(g)=>{T(g,'YF-S401  →',80,25,18,'#ddd');})}),0,.15,.83,flowG,false);
+box(.4,.6,.7,shellMat,0,0,.55+.2,flowG);
+pin('flow','RED',flowG,V(-.14,1.03,0),UP); pin('flow','BLACK',flowG,V(0,1.03,0),UP); pin('flow','YELLOW',flowG,V(.14,1.03,0),UP);
+reg('flow',flowG,[flowG,V(0,1.9,0)]);
+
+const floatG=group(scene,4,0,.75);
+cyl(.15,.15,4.2,12,whiteP,0,4.85,0,floatG); cyl(.32,.32,.25,6,metal,0,6.9,0,floatG); box(.6,.15,.95,shellMat,0,6.95,.42,floatG);
+cyl(.22,.22,.12,12,blackP,0,2.85,0,floatG);
+const floatRing=cyl(.75,.75,1.1,24,M('#f4f4f1',{roughness:.4}),0,4,0,floatG);
+pin('float','A',floatG,V(-.07,7.03,0),UP); pin('float','B',floatG,V(.07,7.03,0),UP);
+reg('float',floatG,[floatG,V(0,7.9,0)]);
+
+/* ================================================================ BAY LID (tilted) with OLED + stake port */
+const ALPHA=Math.atan2(4,10.4), ROOF_L=Math.hypot(10.4,4);
+const roofHinge=group(scene,0,12,2.6);
+const roofTilt=group(roofHinge); roofTilt.rotation.x=ALPHA;
+const roofSlab=box(26,.3,ROOF_L,shellMat,0,-.15,ROOF_L/2,roofTilt);
+for(let i=0;i<6;i++) box(3.6,.04,.18,darkSlot,-9.3,.01,3.0+i*.75,roofTilt);
+/* OLED texture */
+const oledCan=document.createElement('canvas'); oledCan.width=256; oledCan.height=128;
+const oledTex=new THREE.CanvasTexture(oledCan); oledTex.encoding=THREE.sRGBEncoding;
+const oledMat=new THREE.MeshBasicMaterial({map:oledTex});
+box(3.3,.05,2.1,M('#1a1a1a'),-4,.02,5.2,roofTilt);
+const win=mesh(new THREE.PlaneGeometry(2.3,1.15),oledMat,-4,.06,5.2,roofTilt,false); win.rotation.x=-Math.PI/2;
+markShell(roofTilt);
+const oledG=group(roofTilt,-4,-.3,5.2);
+pcb(2.7,2.8,.12,'#1f4f9e',null,oledG,0,-.08,0);
+box(2.6,.1,1.5,blackP,0,0,.1,oledG); const od=mesh(new THREE.PlaneGeometry(2.2,1.1),oledMat,0,.052,.1,oledG,false); od.rotation.x=-Math.PI/2;
+box(1.016,.25,.25,blackP,0,-.27,-1.2,oledG); pinsUp(oledG,[-.381,-.127,.127,.381].map(x=>[x,-1.2]),-.75,.6);
+['GND','VCC','SCL','SDA'].forEach((n,i)=>pin('oled',n,oledG,V([-.381,-.127,.127,.381][i],-.75,-1.2),DOWN));
+reg('oled',oledG,[oledG,V(0,-1.2,0)]);
+/* GX16 stake port */
+const portG=group(roofTilt,3,0,1.6);
+cyl(.9,.9,.12,24,metal,0,.06,0,portG); cyl(.72,.72,.85,24,metal,0,.5,0,portG); cyl(.8,.8,1.35,24,M('#5a5f66',{metalness:.5,roughness:.4}),0,1.62,0,portG);
+cyl(.68,.68,1.1,24,M('#9aa0a6',{metalness:.7,roughness:.35}),0,-.85,0,portG); cyl(.78,.78,.18,6,metal,0,-.39,0,portG);
+for(let k=0;k<5;k++){ const a=Math.PI/2+k*Math.PI*2/5, x=.32*Math.cos(a), z=-.32*Math.sin(a); cyl(.06,.06,.3,8,gold,x,-1.55,z,portG); pin('port',String(k+1),portG,V(x,-1.7,z),DOWN); }
+pin('port','top',portG,V(0,2.3,0),UP);
+reg('port',portG,[portG,V(0,2.8,0)]);
+reg('enclosure',roofTilt);
+
+/* ================================================================ TANK LID + POT + PLANT + STAKE (moves when opened) */
+const lidG=group(scene);
+(function(){ const s=shape([[-13,-2.2],[13,-2.2],[13,13],[-13,13]]); const h1=new THREE.Path(); h1.absarc(0,5.4,6.3,0,Math.PI*2,true); s.holes.push(h1); const h2=new THREE.Path(); h2.absarc(-3.5,-1.55,.4,0,Math.PI*2,true); s.holes.push(h2);
+  const m=mesh(new THREE.ExtrudeGeometry(s,{depth:.3,bevelEnabled:false,curveSegments:48}),shellMat,0,11.7,0,lidG); m.rotation.x=-Math.PI/2; markShell(m); m.userData.part='enclosure'; })();
+const capG=group(lidG,9.5,12,-10.3); cyl(1.1,1.15,.55,28,M('#3d6f8f'),0,.27,0,capG); for(let i=0;i<14;i++){ const a=i/14*Math.PI*2; box(.08,.45,.12,M('#2e5a75'),Math.cos(a)*1.13,.27,Math.sin(a)*1.13,capG).rotation.y=-a; }
+reg('tank',capG);
+const potG=group(lidG,0,10.5,-5.4);
+const potPts=[[0,0],[5.8,0],[7.2,12.6],[7.55,12.6],[7.55,13.2],[6.95,13.2],[6.85,12.6],[5.55,.45],[0,.45]].map(p=>new THREE.Vector2(p[0],p[1]));
+mesh(new THREE.LatheGeometry(potPts,56),potMat,0,0,0,potG);
+mesh(new THREE.LatheGeometry([[5.95,1.5],[6.75,1.5],[6.75,1.9],[6.0,1.9]].map(p=>new THREE.Vector2(p[0],p[1])),56),potMat,0,0,0,potG);
+const soil=cyl(6.72,5.55,10.85,48,soilMat,0,5.875,0,potG);
+markShell(potG);
+const ring=mesh(new THREE.TorusGeometry(3.6,.17,10,64),M('#f4f7f8',{transparent:true,opacity:.85,roughness:.2}),0,11.47,0,potG); ring.rotation.x=Math.PI/2;
+/* spearmint: square stems, opposite leaf pairs turning 90° at each node, serrated lance-shaped leaves */
+const leafMat=M('#4f9a3d',{roughness:.65,side:THREE.DoubleSide}), stemMat=M('#5c8f3a',{roughness:.7});
+function leafGeo(len,wid){ const s=new THREE.Shape(); s.moveTo(0,0); const N=12, R=[], L=[];
+  for(let i=1;i<N;i++){ const t=i/N; const w=wid*Math.pow(Math.sin(Math.PI*Math.pow(t,.75)),.9)*(i%2?1:.86); R.push([w,t*len]); }
+  R.forEach(p=>s.lineTo(p[0],p[1])); s.lineTo(0,len); R.slice().reverse().forEach(p=>s.lineTo(-p[0],p[1])); s.lineTo(0,0); return new THREE.ShapeGeometry(s); }
+const plantG=group(potG,-.4,11.3,-.3);
+(function(){ let seed=7; const rnd=()=>{ seed=(seed*16807)%2147483647; return seed/2147483647; };
+  const stems=[[0,0,12],[1.0,.5,10],[-1.0,.6,11],[.3,-1.1,9.5],[-.6,-.8,8.5],[1.2,-.6,7.5]];
+  stems.forEach((st,si)=>{ const sg=group(plantG,st[0],0,st[1]); sg.rotation.z=-st[0]*.07+(rnd()-.5)*.1; sg.rotation.x=st[1]*.07+(rnd()-.5)*.1; const h=st[2];
+    cyl(.09,.13,h,4,stemMat,0,h/2,0,sg);
+    const nodes=Math.floor(h/1.3); for(let k=1;k<=nodes;k++){ const y=k*1.3; const sz=1-(k/nodes)*.55; const phi=k*Math.PI/2+si;
+      [0,Math.PI].forEach(off=>{ const pv=group(sg,0,y,0); pv.rotation.y=phi+off; const lf=mesh(leafGeo(2.7*sz+.3,.75*sz+.12),leafMat,0,0,0,pv,false); lf.rotation.x=-(Math.PI/2-(.35+(k/nodes)*.5)); lf.castShadow=true; }); }
+    for(let j=0;j<4;j++){ const pv=group(sg,0,h,0); pv.rotation.y=j*Math.PI/2+si; const lf=mesh(leafGeo(1.0,.32),leafMat,0,0,0,pv,false); lf.rotation.x=-.5; }
+  }); })();
+reg('pot',potG,[potG,V(-6.5,13.6,0)]);
+/* sensor stake */
+const stakeG=group(potG,3.6,0,2.6);
+const soilBlade=group(stakeG);
+mesh(new THREE.BoxGeometry(2.3,9.8,.16),[M('#141414'),M('#141414'),M('#141414'),M('#141414'),new THREE.MeshStandardMaterial({map:silkTex(2.3,9.8,'#141414',(g,p,W,H)=>{
+  g.strokeStyle='#e9e9e9'; g.lineWidth=3; g.setLineDash([10,7]); g.beginPath(); g.moveTo(8,262); g.lineTo(W-8,262); g.stroke(); g.setLineDash([]);
+  T(g,'▲ max depth',115,285,15,'#e9e9e9'); T(g,'Capacitive Soil',115,330,15,'#e9e9e9'); T(g,'Moisture Sensor v1.2',115,352,13,'#e9e9e9');
+  g.fillStyle='#262626'; g.fillRect(40,420,150,520); T(g,'AOUT VCC GND',115,24,13,'#e9e9e9');
+}),roughness:.5}),M('#141414')],0,9.1,0,soilBlade);
+box(.5,.12,.4,blackP,0,12.6,.13,soilBlade); box(.9,.5,.45,whiteP,0,13.65,.3,soilBlade);
+pinsUp(soilBlade,[[-.25,.3],[0,.3],[.25,.3]],13.9,.25);
+pin('soil1','AOUT',soilBlade,V(-.25,14.15,.3),UP); pin('soil1','VCC',soilBlade,V(0,14.15,.3),UP); pin('soil1','GND',soilBlade,V(.25,14.15,.3),UP);
+reg('soil1',soilBlade,[stakeG,V(1.9,8.6,0)]);
+const housing=box(3.0,3.4,1.7,stakeMat,0,13.3,0,stakeG);
+const collar=mesh(new THREE.TorusGeometry(1.75,.14,8,32),stakeMat,0,11.55,0,stakeG); collar.rotation.x=Math.PI/2;
+cyl(.55,.55,2.8,16,stakeMat,0,16.4,0,stakeG); [15.3,15.95,16.6,17.25].forEach(y=>{ const r=mesh(new THREE.TorusGeometry(.6,.07,8,20),stakeMat,0,y,0,stakeG); r.rotation.x=Math.PI/2; });
+cyl(1.55,1.55,.2,6,stakeMat,0,17.7,0,stakeG);
+mesh(new THREE.CylinderGeometry(1.95,1.5,3.3,6,1,true),lantern,0,19.45,0,stakeG,false);
+for(let i=0;i<6;i+=2){ const a=i*Math.PI/3+Math.PI/6; const v=box(.06,1.6,.5,darkSlot,Math.cos(a)*1.66,18.9,Math.sin(a)*1.66,stakeG); v.rotation.y=-a; }
+cyl(2.35,2.1,.55,6,stakeMat,0,21.38,0,stakeG); cyl(.5,.5,.06,24,M('#bfe3f2',{transparent:true,opacity:.7,roughness:.05}),0,21.68,0,stakeG);
+markShell(stakeG); soilBlade.traverse(o=>{ o.userData.shell=false; });
+const spliceG=group(stakeG,0,14.45,-.45);
+pcb(1.6,.6,.1,'#c9a66b',null,spliceG,0,0,0);
+['3V3','GND','SDA','SCL','SOIL'].forEach((n,i)=>{ cyl(.07,.07,.04,10,copperM,-.6+i*.3,.07,0,spliceG); pin('splice',n,spliceG,V(-.6+i*.3,.09,0),UP); });
+reg('splice',spliceG,[stakeG,V(-1.8,14.4,0)]);
+pin('stake','cable',stakeG,V(0,13.3,.86),PZ);
+const shtG=group(stakeG,0,18.55,0);
+pcb(1.4,1.0,.1,'#1e4fa0',(g)=>{T(g,'SHT31',70,60,16,'#fff');['VIN','GND','SCL','SDA'].forEach((s,i)=>T(g,s,70+(i-1.5)*25.4,18,8,'#fff'));},shtG,0,0,0);
+box(.25,.06,.25,whiteP,0,.08,.15,shtG); pinsUp(shtG,[-.381,-.127,.127,.381].map(x=>[x,-.4]),-.4,.4);
+['VIN','GND','SCL','SDA'].forEach((n,i)=>pin('sht',n,shtG,V([-.381,-.127,.127,.381][i],-.42,-.4),DOWN));
+reg('sht',shtG,[stakeG,V(2.3,18.6,0)]);
+const bhG=group(stakeG,0,20.55,0);
+pcb(1.85,1.4,.1,'#5b3f8f',(g)=>{T(g,'GY-302',92,110,15,'#fff');['VCC','GND','SCL','SDA','ADDR'].forEach((s,i)=>T(g,s,92+(i-2)*25.4,16,7,'#fff'));},bhG,0,0,0);
+box(.42,.14,.3,whiteP,0,.11,.1,bhG); pinsUp(bhG,[-.508,-.254,0,.254,.508].map(x=>[x,-.55]),-.4,.4);
+['VCC','GND','SCL','SDA','ADDR'].forEach((n,i)=>pin('bh',n,bhG,V([-.508,-.254,0,.254,.508][i],-.42,-.55),DOWN));
+reg('bh',bhG,[stakeG,V(2.5,20.9,0)]);
+reg('stake',stakeG,[stakeG,V(0,22.6,0)]);
+
+/* ================================================================ WATER TUBE */
+const tubeMat=M('#eef3f4',{transparent:true,opacity:.75,roughness:.2});
+const T1pts=[V(-8.5,3.4,-2),V(-8.6,5.4,-1.4),V(-9.4,8.3,.2),V(-8.9,9.3,.8),V(-7.85,9.3,.8)];
+const T1=new THREE.CatmullRomCurve3(T1pts,false,'centripetal');
+const tube1=mesh(new THREE.TubeGeometry(T1,60,.22,10),tubeMat,0,0,0,scene);
+const T2static=[V(-4.15,9.3,.8),V(-3.6,9.9,1.2),V(-3.5,10.9,1.5)];
+const T2lid=[V(-3.5,12.6,1.55),V(-3.5,23.4,1.75),V(-3.15,24.85,.95),V(-2.35,23.5,-.8),V(-1.62,22.14,-2.2)];
+let T2=null, tube2=null;
+reg('tube',tube1);
+
+/* ================================================================ WIRES */
+const wireRoot=group(scene);
+const LEAD={f:.7,m:1.5,s:.12,d:.08};
+const housingGeoF=new THREE.BoxGeometry(.26,1.3,.26), housingGeoM=new THREE.BoxGeometry(.26,1.2,.26), pinGeo=new THREE.BoxGeometry(.06,.32,.06);
+function resolve(ep){ const i=ep.indexOf(':'), p=ep.slice(0,i), n=ep.slice(i+1); let obj,loc,dir;
+  if(p==='bb'){ obj=bbG; loc=bbLocal(n); dir=UP; } else { const pp=parts[p]&&parts[p].pins[n]; if(!pp) throw new Error('No pin '+ep); obj=pp.obj; loc=pp.local; dir=pp.dir; }
+  obj.updateWorldMatrix(true,false); return {p:loc.clone().applyMatrix4(obj.matrixWorld),d:dir.clone().transformDirection(obj.matrixWorld)}; }
+function W(x,y,z){ return ()=>V(x,y,z); }
+function inObj(obj,x,y,z){ return ()=>{ obj.updateWorldMatrix(true,false); return V(x,y,z).applyMatrix4(obj.matrixWorld); }; }
+const G=(o,z)=>W(GX+o,GY,z);
+const TANKVIA={
+  pumpP:[W(-3.9,1.6,-2.3),W(-2.6,5.2,.4),W(-1.95,10.35,1.15),W(-1.5,11.42,1.85),G(-.24,2.4),G(-.24,3.3)],
+  pumpN:[W(-3.9,1.6,-1.9),W(-2.5,5.2,.55),W(-1.85,10.35,1.2),W(-1.4,11.42,1.85),G(-.16,2.4),G(-.16,3.3)],
+  flowR:[W(-6.14,11.15,1.2),W(-4.2,11.42,1.8),G(-.08,2.4),G(-.08,3.3)],
+  flowB:[W(-6.0,11.15,1.2),W(-4.1,11.42,1.8),G(0,2.4),G(0,3.3)],
+  flowY:[W(-5.86,11.15,1.2),W(-4.0,11.42,1.8),G(.08,2.4),G(.08,3.3)],
+  floatA:[W(3.93,10.3,1.15),W(2.3,11.42,1.85),G(.16,2.4),G(.16,3.3)],
+  floatB:[W(4.07,10.3,1.2),W(2.4,11.42,1.85),G(.24,2.4),G(.24,3.3)]
+};
+/* the stake cable: in the pot (lid space) then down to the port on the bay lid */
+WIRES.find(w=>w.id==='C1').via=[inObj(lidG,3.65,24.5,-.3),inObj(lidG,3.7,24.45,1.85),inObj(lidG,3.6,21.6,3.1)];
+WIRES.forEach((w,i)=>{
+  if(w.part) return;
+  if(w.tank) w.via=TANKVIA[w.tank];
+  if(w.stem!==undefined){ const s=w.stem; w.via=[inObj(stakeG,s,15.2,-.15),inObj(stakeG,s*.8,17.5,0)]; }
+  w._jit=(i%5)*.3;
+  w.mat=M(NET[w.net],{roughness:.45,transparent:!!w.opt,opacity:w.opt?.55:1});
+  w.mesh=new THREE.Mesh(new THREE.BufferGeometry(),w.mat); w.mesh.castShadow=false; w.mesh.userData.wire=w.id; wireRoot.add(w.mesh);
+  w.ends=[]; [['a',w.ea||'m'],['b',w.eb||'m']].forEach(e=>{ const t=e[1]; if(t==='f'||t==='m'){ const h=new THREE.Mesh(t==='f'?housingGeoF:housingGeoM,blackP); wireRoot.add(h); let pn=null; if(t==='m'){ pn=new THREE.Mesh(pinGeo,gold); wireRoot.add(pn);} w.ends.push({k:e[0],t,h,pn}); } });
+});
+function buildWire(w){
+  const A=resolve(w.a), B=resolve(w.b), la=LEAD[w.ea||'m'], lb=LEAD[w.eb||'m'];
+  const a0=A.p.clone().addScaledVector(A.d,la), b0=B.p.clone().addScaledVector(B.d,lb);
+  const pts=[a0,a0.clone().addScaledVector(A.d,w.r>.1?1.2:.55)];
+  if(w.via) w.via.forEach(f=>pts.push(f()));
+  else { const mid=a0.clone().lerp(b0,.5); const d=a0.distanceTo(b0); mid.y=Math.max(a0.y,b0.y)+(w.arc!=null?w.arc:Math.min(3.0,.45+d*.2)+w._jit); pts.push(mid); }
+  pts.push(b0.clone().addScaledVector(B.d,w.r>.1?2.2:.55),b0);
+  const curve=new THREE.CatmullRomCurve3(pts,false,'centripetal');
+  const segs=Math.min(180,Math.ceil(curve.getLength()*4)+10);
+  w.mesh.geometry.dispose(); w.mesh.geometry=new THREE.TubeGeometry(curve,segs,w.r||.065,6,false);
+  w.ends.forEach(e=>{ const P=e.k==='a'?A:B; if(e.t==='f'){ e.h.position.copy(P.p).addScaledVector(P.d,.05); } else { e.h.position.copy(P.p).addScaledVector(P.d,.9); e.pn.position.copy(P.p).addScaledVector(P.d,.14); e.pn.quaternion.setFromUnitVectors(UP,P.d); } e.h.quaternion.setFromUnitVectors(UP,P.d); });
+}
+function buildTube2(){
+  const pts=T2static.map(p=>p.clone()).concat(T2lid.map(p=>{ lidG.updateWorldMatrix(true,false); return p.clone().applyMatrix4(lidG.matrixWorld); }));
+  T2=new THREE.CatmullRomCurve3(pts,false,'centripetal');
+  if(!tube2){ tube2=mesh(new THREE.BufferGeometry(),tubeMat,0,0,0,scene); tube2.userData.part='tube'; }
+  tube2.geometry.dispose(); tube2.geometry=new THREE.TubeGeometry(T2,120,.22,10);
+}
+function rebuildAll(){ scene.updateMatrixWorld(true); WIRES.forEach(w=>{ if(!w.part) buildWire(w); }); buildTube2(); }
+
+/* ================================================================ OPEN / CLOSE */
+let openP=0, openTarget=null;
+function setOpen(p){ openP=Math.max(0,Math.min(1,p)); const e=openP<.5?2*openP*openP:1-Math.pow(-2*openP+2,2)/2;
+  roofHinge.rotation.x=-e*1.86; lidG.position.set(0,e*15,-e*2.5); piLid.position.y=e*4.5;
+  rebuildAll(); document.getElementById('openR').value=Math.round(openP*100); document.getElementById('openBtn').textContent=openP>.5?'Close case':'Open case'; }
+setOpen(0);
+
+/* ================================================================ X-RAY / TOGGLES */
+let xray=false;
+function setXray(on){ xray=on; XRAY.forEach(m=>{ m.transparent=on; m.opacity=on?.14:1; m.depthWrite=!on; m.needsUpdate=true; }); document.getElementById('t-xray').setAttribute('aria-pressed',on); }
+document.getElementById('t-xray').onclick=()=>setXray(!xray);
+document.getElementById('t-wires').onclick=e=>{ wireRoot.visible=!wireRoot.visible; e.currentTarget.setAttribute('aria-pressed',wireRoot.visible); };
+let showLabels=true;
+document.getElementById('t-labels').onclick=e=>{ showLabels=!showLabels; e.currentTarget.setAttribute('aria-pressed',showLabels); labelLayer.hidden=!showLabels; };
+const openR=document.getElementById('openR');
+openR.addEventListener('input',()=>{ openTarget=null; setOpen(openR.value/100); });
+document.getElementById('openBtn').onclick=()=>{ openTarget=openP>.5?0:1; };
+
+/* ================================================================ CAMERA VIEWS */
+const VIEWS={ iso:[V(44,36,50),V(0,10,0)], front:[V(0,16,62),V(0,10,0)], back:[V(0,22,-62),V(0,10,0)], left:[V(-62,18,2),V(0,9,0)], right:[V(62,18,2),V(0,9,0)], top:[V(0,72,.01),V(0,8,0)],
+  bay:[V(9,26,30),V(0,3,7.5)], stake:[V(16,27,14),V(3.6,19,-2.8)] };
+let camAnim=null; const reduceMotion=matchMedia('(prefers-reduced-motion: reduce)').matches;
+function goView(k){ const v=VIEWS[k]; if(k==='bay'&&openP<.5&&!xray){ setXray(true); } if(k==='stake'&&!xray){ setXray(true); }
+  if(reduceMotion){ camera.position.copy(v[0]); controls.target.copy(v[1]); return; }
+  camAnim={t:0,p0:camera.position.clone(),t0:controls.target.clone(),p1:v[0],t1:v[1]}; }
+document.querySelectorAll('[data-view]').forEach(b=>b.onclick=()=>goView(b.dataset.view));
+
+/* ================================================================ LABELS, HOVER, PICK */
+const labelLayer=document.getElementById('labels'), tip=document.getElementById('tip');
+const LABEL_PARTS=['pi','bb','ads','relay','jack','oled','port','pump','flow','float','tank','soil1','sht','bh','stake','pot','light','psu'];
+const labelEls={};
+LABEL_PARTS.forEach(id=>{ const el=document.createElement('div'); el.className='lbl'; el.textContent=INFO[id].short; el.onclick=()=>select(id); labelLayer.appendChild(el); labelEls[id]=el; });
+const ray=new THREE.Raycaster(), ndc=new THREE.Vector2();
+function pick(cx,cy){ const r=renderer.domElement.getBoundingClientRect(); ndc.set((cx-r.left)/r.width*2-1,-(cy-r.top)/r.height*2+1); ray.setFromCamera(ndc,camera);
+  const hits=ray.intersectObjects(scene.children,true);
+  for(const h of hits){ const o=h.object; if(!o.visible) continue; let vis=true; o.traverseAncestors(a=>{ if(!a.visible)vis=false; }); if(!vis) continue;
+    if(o.userData.wire){ return {wire:o.userData.wire}; } if(xray&&o.userData.shell) continue; if(o.userData.part) return {part:o.userData.part}; if(o===ground) return null; }
+  return null; }
+let downXY=null, hoverQ=null;
+renderer.domElement.addEventListener('pointerdown',e=>{ downXY=[e.clientX,e.clientY]; });
+renderer.domElement.addEventListener('pointerup',e=>{ if(!downXY) return; const d=Math.hypot(e.clientX-downXY[0],e.clientY-downXY[1]); downXY=null; if(d>5) return;
+  const h=pick(e.clientX,e.clientY); if(h&&h.part) select(h.part); else if(h&&h.wire) selectWire(h.wire); });
+renderer.domElement.addEventListener('pointermove',e=>{ hoverQ=[e.clientX,e.clientY]; });
+renderer.domElement.addEventListener('pointerleave',()=>{ hoverQ=null; tip.hidden=true; });
+function doHover(){ if(!hoverQ||downXY){ return; } const h=pick(hoverQ[0],hoverQ[1]); const r=vp.getBoundingClientRect();
+  if(h){ let t=''; if(h.part) t=INFO[h.part]?INFO[h.part].name:h.part; else { const w=WIRES.find(x=>x.id===h.wire); t=w.id+' · '+describe(w.a)+' → '+describe(w.b); }
+    tip.textContent=t; tip.style.left=(hoverQ[0]-r.left)+'px'; tip.style.top=(hoverQ[1]-r.top)+'px'; tip.hidden=false; } else tip.hidden=true; hoverQ=null; }
+const selBox=new THREE.BoxHelper(undefined,0x1b7a52); selBox.visible=false; scene.add(selBox);
+let selected=null;
+function select(id){ selected=id; const P=parts[id]; if(P&&P.groups[0]){ selBox.setFromObject(P.groups[0]); selBox.visible=true; }
+  Object.keys(labelEls).forEach(k=>labelEls[k].classList.toggle('sel',k===id)); renderInspector(id); }
+function selectWire(wid){ const w=WIRES.find(x=>x.id===wid); highlightWire(wid); const other=w.a.split(':')[0]!=='bb'?w.a.split(':')[0]:w.b.split(':')[0]; if(parts[other]&&INFO[other]) select(other); }
+let hlWire=null;
+function highlightWire(id){ if(hlWire){ hlWire.mat.emissive.set(0x000000); } hlWire=null; if(!id) return; const w=WIRES.find(x=>x.id===id); if(!w||!w.mat) return; w.mat.emissive.set(0x22ff99); w.mat.emissiveIntensity=.55; hlWire=w; }
+
+/* ================================================================ DESCRIBE + INSPECTOR */
+function pinLabel(p,n){ if(p==='relay'){ if(n==='GND(JD)')return 'GND (JD-VCC side)'; } return n; }
+function describe(ep){ const i=ep.indexOf(':'), p=ep.slice(0,i), n=ep.slice(i+1);
+  if(p==='pi') return 'Pi pin '+n+' ('+PI_NAMES[+n]+')';
+  if(p==='bb'){ const m=n.match(/^([WF][+-])@(\d+)$/); if(m) return 'Breadboard '+RAILNAME[m[1]]+' (by row '+m[2]+')'; const r=n.match(/^(\d+)([a-j])$/); return 'Breadboard row '+r[1]+' hole '+r[2]; }
+  if(p==='stake') return 'Stake cable exit'; if(p==='port'&&n==='top') return 'Stake port (plug)';
+  return (INFO[p]?INFO[p].short:p)+' '+pinLabel(p,n); }
+function sw(net){ const c=net==='GND'?'var(--gnd)':NET[net]; return '<span class="sw" style="background:'+c+'"></span>'; }
+function esc(s){ return String(s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c])); }
+function renderInspector(id){
+  const I=INFO[id]||{name:id}; const out=[]; document.getElementById('inspEmpty').hidden=true;
+  out.push('<h3>'+esc(I.name)+'</h3><div class="where">'+esc(I.where||'')+'</div><p>'+esc(I.does||'')+'</p>');
+  const rows=[];
+  if(id==='ads'){ Object.keys(I.rows).forEach(n=>{ const row=I.rows[n]; const ws=WIRES.filter(w=>!w.part&&[w.a,w.b].some(e=>new RegExp('^bb:'+row+'[a-e]$').test(e))); rows.push([n+' · row '+row, ws.length?ws.map(w=>sw(w.net)+w.id+' → '+esc(describe(w.a.startsWith('bb:'+row)?w.b:w.a))).join('<br>'):'<span style="color:var(--muted)">not used</span>']); }); }
+  else if(id==='bb'){ ['W+','W-','F+','F-'].forEach(r=>{ const ws=WIRES.filter(w=>!w.part&&[w.a,w.b].some(e=>e.startsWith('bb:'+r+'@'))); rows.push([RAILNAME[r], ws.map(w=>sw(w.net)+w.id).join(' ')]); });
+    rows.push(['Row 3 / 4','SDA / SCL bus: Pi, ADS1115, OLED, stake port']); rows.push(['Row 40–44','Flow divider (R1, R2) → Pi pin 13']); rows.push(['Row 50','Float switch → Pi pin 11']); rows.push(['Row 56','Pump +: relay NO1, D1 band, pump red']); }
+  else { const P=parts[id]; if(P) Object.keys(P.pins).forEach(n=>{ if(id==='port'&&n==='top')return; const ep=id+':'+n; const ws=WIRES.filter(w=>!w.part&&(w.a===ep||w.b===ep));
+      rows.push([pinLabel(id,n)+(id==='pi'?' · '+PI_NAMES[+n]:''), ws.length?ws.map(w=>sw(w.net)+w.id+' → '+esc(describe(w.a===ep?w.b:w.a))).join('<br>'):'<span style="color:var(--muted)">not used</span>']); });
+    if(id==='pi') rows.splice(0,rows.length,...rows.filter(r=>!/not used/.test(r[1])));
+  }
+  if(rows.length) out.push('<table><thead><tr><th>Pin</th><th>Goes to</th></tr></thead><tbody>'+rows.map(r=>'<tr><td class="pn">'+r[0]+'</td><td>'+r[1]+'</td></tr>').join('')+'</tbody></table>');
+  if(id==='pi') out.push('<p class="note">Only the used pins are listed. All other pins stay free.</p>');
+  const bkey=id==='tube'?'tube':id; const b=BOM[bkey];
+  if(b) out.push('<div class="buy"><span>'+esc(b[0])+' · <b class="mono">'+b[1]+' TND</b> · '+esc(b[2])+'</span><a href="'+b[3]+'" target="_blank" rel="noopener">Shop page</a></div>');
+  document.getElementById('insp').innerHTML=out.join('');
+}
+
+/* ================================================================ STATIC SCENE */
+const $=id=>document.getElementById(id);
+const waterTop=.6+1800/TANK_AREA;
+water.scale.y=waterTop-.6; water.position.y=.6+(waterTop-.6)/2;
+floatRing.position.y=5.6;
+ledCh.forEach(l=>l.material.color.set('#2a7a3a'));
+function drawOLED(){ const g=oledCan.getContext('2d'); g.fillStyle='#03070b'; g.fillRect(0,0,256,128);
+  g.font='600 21px "IBM Plex Mono", Consolas, monospace'; g.textBaseline='alphabetic';
+  g.fillStyle='#ffd43b'; g.fillText('NABTA',8,24);
+  g.fillStyle='#74c0fc'; g.fillText('Soil',8,58); g.fillText('Temp  Humidity',8,86); g.fillText('Pump',8,114);
+  oledTex.needsUpdate=true; }
+
+/* ================================================================ LOOP */
+function resize(){ const w=vp.clientWidth, h=vp.clientHeight; renderer.setSize(w,h,false); camera.aspect=w/h; camera.updateProjectionMatrix(); }
+new ResizeObserver(resize).observe(vp); resize();
+const clock=new THREE.Clock();
+const tmpV=new THREE.Vector3();
+function updateLabels(){ if(!showLabels) return; const w=vp.clientWidth, h=vp.clientHeight;
+  LABEL_PARTS.forEach(id=>{ const P=parts[id], el=labelEls[id]; if(!P||!P.anchor){ el.hidden=true; return; } const a=P.anchor; a[0].updateWorldMatrix(true,false); tmpV.copy(a[1]).applyMatrix4(a[0].matrixWorld).project(camera);
+    if(tmpV.z>1||tmpV.x<-1.1||tmpV.x>1.1||tmpV.y<-1.1||tmpV.y>1.1){ el.hidden=true; return; } el.hidden=false; el.style.left=((tmpV.x+1)/2*w)+'px'; el.style.top=((1-tmpV.y)/2*h-10)+'px'; }); }
+function loop(){ requestAnimationFrame(loop); const dt=Math.min(.1,clock.getDelta()), time=clock.elapsedTime;
+  if(openTarget!==null){ const step=dt/1.4*(openTarget>openP?1:-1); let p=openP+step; if((step>0&&p>=openTarget)||(step<0&&p<=openTarget)){ p=openTarget; openTarget=null; } setOpen(p); if(selected&&parts[selected]) selBox.setFromObject(parts[selected].groups[0]); }
+  if(camAnim){ camAnim.t=Math.min(1,camAnim.t+dt/.8); const e=1-Math.pow(1-camAnim.t,3); camera.position.lerpVectors(camAnim.p0,camAnim.p1,e); controls.target.lerpVectors(camAnim.t0,camAnim.t1,e); if(camAnim.t>=1) camAnim=null; }
+  fanRot.rotation.y+=dt*14;
+  controls.update(); doHover(); updateLabels(); renderer.render(scene,camera); }
+drawOLED(); loop();
+
+/* ================================================================ 2D WIRING DIAGRAM */
+(function(){
+  const P=18, out=[]; const add=s=>out.push(s);
+  const C=n=>(n==='GND'||n==='GND2')?'var(--gnd)':(n==='SOIL1'||n==='SOIL2')?NET.SOIL:NET[n];
+  const NX_={'3V3':230,GND:250,SDA:270,SCL:290,FLOAT:330,FLOW:345,IN1:360,IN2:375,SOIL1:400,SOIL2:415,'5V':775,GND2:795,PUMP:815,LIGHT:830};
+  const pts={}; const pushPt=(net,x,y,dash)=>{ (pts[net]=pts[net]||[]).push({x,y,dash}); };
+  const txt=(x,y,s,o)=>{ o=o||{}; add('<text x="'+x+'" y="'+y+'" font-size="'+(o.fs||11)+'" text-anchor="'+(o.a||'start')+'" fill="'+(o.c||'var(--ink)')+'"'+(o.w?' font-weight="'+o.w+'"':'')+(o.fam?' style="font-family:'+o.fam+'"':'')+'>'+esc(s)+'</text>'); };
+  /* header */
+  const HX=70, HY=110, py=n=>HY+Math.floor((n-1)/2)*P;
+  const PI_NET={1:'3V3',17:'3V3',9:'GND',25:'GND',3:'SDA',5:'SCL',11:'FLOAT',13:'FLOW',29:'IN1',31:'IN2'};
+  txt(HX-30,HY-52,'Raspberry Pi 5',{fs:15,w:600,fam:'var(--f-display)'}); txt(HX-30,HY-36,'GPIO header, seen from above',{fs:10.5,c:'var(--muted)'}); txt(HX-30,HY-23,'(board is to the right of the header)',{fs:10.5,c:'var(--muted)'});
+  add('<rect x="'+(HX-11)+'" y="'+(HY-11)+'" width="44" height="'+(19*P+22)+'" rx="4" fill="var(--chip)" stroke="var(--muted)"/>');
+  for(let n=1;n<=40;n++){ const odd=n%2===1, x=odd?HX+22:HX, y=py(n), net=PI_NET[n];
+    add('<circle cx="'+x+'" cy="'+y+'" r="6" fill="'+(net?C(net):'var(--card)')+'" stroke="var(--muted)"/>');
+    add('<text x="'+x+'" y="'+(y+3)+'" font-size="7" text-anchor="middle" fill="'+(net?'#fff':'var(--muted)')+'">'+n+'</text>');
+    if(!odd) txt(HX-17,y+4,PI_NAMES[n],{fs:10,a:'end',c:'var(--muted)'});
+    else if(net){ txt(HX+34,y-4,PI_NAMES[n],{fs:9.5,c:'var(--ink)',w:600}); pushPt(net,HX+28,y); }
+    else txt(HX+34,y+4,PI_NAMES[n],{fs:9.5,c:'var(--muted)'}); }
+  add('<rect x="'+(HX-30)+'" y="'+(py(39)+30)+'" width="150" height="40" rx="5" fill="none" stroke="var(--line)"/>');
+  txt(HX-22,py(39)+46,'Power: official 27 W',{fs:10}); txt(HX-22,py(39)+60,'USB-C supply → Pi only',{fs:10});
+  /* modules */
+  const MX=470, MW=210, RX=870, RW=150; const modPins={};
+  function mod(key,x,w,y,title,sub,L,R,o){ o=o||{}; const n=Math.max(L.length,(R||[]).length); const h=n*P+10;
+    txt(x,y-20,title,{fs:13.5,w:600,fam:'var(--f-display)'}); if(sub) txt(x,y-6,sub,{fs:9.5,c:'var(--muted)'});
+    add('<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" rx="5" fill="var(--card)" stroke="var(--ink-2)"'+(o.dash?' stroke-dasharray="5 4"':'')+'/>');
+    const res={};
+    L.forEach((p,i)=>{ const yy=y+5+P/2+i*P; res[p[0]]={x,y:yy}; txt(x+8,yy+4,p[0],{fs:11,c:p[1]?'var(--ink)':'var(--muted)'}); if(p[2]) txt(x+64,yy+4,p[2],{fs:9.5,c:'var(--muted)'});
+      if(p[1]&&p[1]!=='DIV') pushPt(p[1],x,yy,o.dash||p[3]); });
+    (R||[]).forEach((p,i)=>{ const yy=y+5+P/2+i*P; res[p[0]]={x:x+w,y:yy}; txt(x+w-8,yy+4,p[0],{fs:11,a:'end',c:p[1]?'var(--ink)':'var(--muted)'}); if(p[1]) pushPt(p[1],x+w,yy,o.dash||p[3]); });
+    modPins[key]=res; return y+h; }
+  let y=74;
+  const stakeTop=y-40;
+  y=mod('bh',MX,MW,y,'BH1750 (GY-302)','light · in the stake cap',[['VCC','3V3'],['GND','GND'],['SCL','SCL'],['SDA','SDA'],['ADDR',null,'open → 0x23']])+44;
+  y=mod('sht',MX,MW,y,'SHT31','temp + humidity · in the lantern',[['VIN','3V3'],['GND','GND'],['SCL','SCL'],['SDA','SDA']],null)+44;
+  y=mod('soil1',MX,MW,y,'Soil sensor 1 (capacitive)','Pot A · blade in the soil',[['AOUT','SOIL1'],['VCC','3V3'],['GND','GND']])+14;
+  const stakeBot=y;
+  add('<rect x="'+(MX-14)+'" y="'+stakeTop+'" width="'+(MW+28)+'" height="'+(stakeBot-stakeTop)+'" rx="8" fill="none" stroke="var(--copper)" stroke-dasharray="6 4"/>');
+  txt(MX+MW+20,stakeTop+14,'SENSOR STAKE',{fs:10,c:'var(--copper)',w:600}); txt(MX+MW+20,stakeTop+28,'5-core cable,',{fs:9.5,c:'var(--copper)'}); txt(MX+MW+20,stakeTop+41,'GX16 port pins 1–5',{fs:9.5,c:'var(--copper)'});
+  y+=40;
+  y=mod('oled',MX,MW,y,'OLED 0.96" SSD1306','I²C 0x3C · lid window',[['GND','GND'],['VCC','3V3'],['SCL','SCL'],['SDA','SDA']])+44;
+  y=mod('ads',MX,MW,y,'ADS1115','breadboard rows 10–19 · 0x48',[['VDD','3V3'],['GND','GND'],['SCL','SCL'],['SDA','SDA'],['ADDR','GND','→ 0x48'],['ALRT',null],['A0','SOIL1'],['A1','SOIL2',null,true],['A2',null],['A3',null]])+44;
+  y=mod('soil2',MX,MW,y,'Soil sensor 2 (optional)','Pot B · study only',[['AOUT','SOIL2'],['VCC','3V3'],['GND','GND']],null,{dash:true})+48;
+  const relayY=y;
+  y=mod('relay',MX,MW,y,'Relay module, 2 channels','active LOW · JD-VCC jumper REMOVED',[['GND','GND'],['IN1','IN1'],['IN2','IN2'],['VCC','3V3']],[['JD-VCC','5V'],['GND (JD)','GND2'],['COM1','5V'],['NO1','PUMP'],['NC1',null],['COM2','5V',null,true],['NO2','LIGHT',null,true],['NC2',null]])+44;
+  y=mod('float',MX,MW,y,'P35 float switch','in the tank · closed = water OK',[['lead A','FLOAT'],['lead B','GND']])+44;
+  const flowY0=y;
+  y=mod('flow',MX+60,MW-60,y,'YF-S401 flow sensor','after the pump · ≈5,880 pulses per L',[['YEL','DIV']],[['RED','5V'],['BLK','GND2']])+30;
+  /* flow divider */
+  const fy=modPins.flow.YEL.y, nodeX=440;
+  add('<line x1="'+(MX+60)+'" y1="'+fy+'" x2="'+(MX+46)+'" y2="'+fy+'" style="stroke:'+NET.FLOW+'" stroke-width="2"/>');
+  add('<rect x="'+(nodeX+6)+'" y="'+(fy-5)+'" width="'+(MX+46-nodeX-6)+'" height="10" rx="2" fill="var(--card)" stroke="var(--ink-2)"/>'); txt((nodeX+MX+52)/2,fy-9,'R1 10k',{fs:9.5,a:'middle'});
+  add('<line x1="'+nodeX+'" y1="'+fy+'" x2="'+(nodeX+6)+'" y2="'+fy+'" style="stroke:'+NET.FLOW+'" stroke-width="2"/>');
+  add('<line x1="'+nodeX+'" y1="'+fy+'" x2="'+nodeX+'" y2="'+(fy+8)+'" style="stroke:var(--gnd)" stroke-width="2"/>');
+  add('<rect x="'+(nodeX-5)+'" y="'+(fy+8)+'" width="10" height="26" rx="2" fill="var(--card)" stroke="var(--ink-2)"/>'); txt(nodeX+9,fy+25,'R2 20k',{fs:9.5});
+  add('<line x1="'+nodeX+'" y1="'+(fy+34)+'" x2="'+nodeX+'" y2="'+(fy+44)+'" style="stroke:var(--gnd)" stroke-width="2"/>');
+  pushPt('FLOW',nodeX,fy); pushPt('GND',nodeX,fy+44);
+  txt(nodeX-4,fy+60,'5 V × 20/30 = 3.3 V at the Pi',{fs:9.5,c:'var(--muted)',a:'middle'});
+  /* right column */
+  let ry=relayY-10;
+  ry=mod('jack',RX,RW,ry,'DC jack module','← 5 V 2 A adapter',[['+','5V'],['−','GND2']])+50;
+  const pumpTop=ry; ry=mod('pump',RX,RW,ry,'Mini pump 3–6 V','submersible, in the tank',[['+','PUMP'],['−','GND2']])+50;
+  ry=mod('light',RX,RW,ry,'Grow light (not chosen)','LIGHT socket, right wall',[['+','LIGHT'],['−','GND2']],null,{dash:true})+30;
+  /* diode across pump */
+  const pp=modPins.pump['+'].y, pn=modPins.pump['−'].y, dx=850;
+  add('<polygon points="'+(dx-6)+','+(pn-4)+' '+(dx+6)+','+(pn-4)+' '+dx+','+(pp+5)+'" fill="var(--ink-2)"/><line x1="'+(dx-7)+'" y1="'+(pp+4)+'" x2="'+(dx+7)+'" y2="'+(pp+4)+'" stroke="var(--ink-2)" stroke-width="2.4"/>');
+  txt(RX+RW+8,pp+12,'D1 1N4007',{fs:9.5,c:'var(--muted)'}); txt(RX+RW+8,pp+24,'band → pump +',{fs:9.5,c:'var(--muted)'});
+  pushPt('_dP',dx,pp); pushPt('_dN',dx,pn);
+  /* notes */
+  txt(MX-6,modPins.relay.VCC.y+30,'Coils on the 5 V adapter; inputs on Pi 3.3 V',{fs:9.5,c:'var(--muted)'});
+  /* nets: buses and lanes */
+  const H=Math.max(y,ry)+40;
+  const gndY=H-24;
+  pushPt('GND',250,gndY); pushPt('GND2',795,gndY);
+  const dashNets={SOIL2:1,LIGHT:1};
+  Object.keys(pts).forEach(net=>{ if(net[0]==='_') return; const X=NX_[net]; const list=pts[net]; const col=C(net); const ys=list.map(p=>p.y);
+    const y0=Math.min.apply(null,ys), y1=Math.max.apply(null,ys);
+    add('<line x1="'+X+'" y1="'+y0+'" x2="'+X+'" y2="'+y1+'" style="stroke:'+col+'" stroke-width="'+(['3V3','GND','SDA','SCL','5V','GND2'].includes(net)?3:2)+'"'+(dashNets[net]?' stroke-dasharray="6 4"':'')+'/>');
+    list.forEach(p=>{ if(p.x!==X) add('<line x1="'+p.x+'" y1="'+p.y+'" x2="'+X+'" y2="'+p.y+'" style="stroke:'+col+'" stroke-width="2"'+(p.dash?' stroke-dasharray="6 4"':'')+'/>'); add('<circle cx="'+X+'" cy="'+p.y+'" r="3.4" style="fill:'+col+'"/>'); }); });
+  add('<line x1="250" y1="'+gndY+'" x2="795" y2="'+gndY+'" style="stroke:var(--gnd)" stroke-width="3"/>');
+  txt(520,gndY-6,'common ground: back GND rail ↔ front GND rail (W16)',{fs:10,c:'var(--muted)',a:'middle'});
+  add('<circle cx="'+dx+'" cy="'+pp+'" r="3.4" style="fill:'+NET.PUMP+'"/><circle cx="'+dx+'" cy="'+pn+'" r="3.4" style="fill:var(--gnd)"/>');
+  /* bus captions */
+  [['3V3',230],['GND',250],['SDA',270],['SCL',290]].forEach(b=>txt(b[1],60,b[0],{fs:9,a:'middle',c:C(b[0]),w:600}));
+  [['5V',775],['GND',795]].forEach(b=>txt(b[1],relayY-34,b[0],{fs:9,a:'middle',c:C(b[0]==='GND'?'GND2':b[0]),w:600}));
+  const svg=document.getElementById('diagram'); svg.setAttribute('viewBox','0 0 1060 '+H); svg.innerHTML=out.join('');
+  /* legend */
+  $('legend').innerHTML=Object.keys(NETNAME).map(k=>'<span><i style="background:'+(k==='GND'?'var(--gnd)':NET[k])+'"></i>'+NETNAME[k]+'</span>').join('');
+})();
+
+/* ================================================================ TABLES */
+(function(){
+  const rows=['<thead><tr><th>ID</th><th>From</th><th>To</th><th>Signal</th><th>Wire type</th><th>Notes</th></tr></thead><tbody>'];
+  let g='';
+  WIRES.forEach(w=>{ if(w.grp!==g){ g=w.grp; rows.push('<tr class="g"><td colspan="6">'+g+' · '+GROUPS[g]+'</td></tr>'); }
+    if(w.part){ rows.push('<tr data-part="'+w.part+'"><td class="id">'+w.id+'</td><td colspan="4">'+esc(w.text)+'</td><td>'+esc(INFO[w.part].does.split('. ')[0])+'.</td></tr>'); return; }
+    rows.push('<tr data-wire="'+w.id+'"'+(w.opt?' class="opt"':'')+'><td class="id">'+w.id+'</td><td>'+esc(describe(w.a))+'</td><td>'+esc(describe(w.b))+'</td><td>'+sw(w.net)+(w.net==='CABLE'?'Cable':NETNAME[w.net])+'</td><td>'+esc(w.kind)+'</td><td>'+esc(w.note||'')+'</td></tr>'); });
+  rows.push('</tbody>'); const tb=$('wireTable'); tb.innerHTML=rows.join('');
+  tb.addEventListener('mouseover',e=>{ const tr=e.target.closest('tr'); if(!tr) return; if(tr.dataset.wire) highlightWire(tr.dataset.wire); });
+  tb.addEventListener('mouseleave',()=>highlightWire(null));
+  tb.addEventListener('click',e=>{ const tr=e.target.closest('tr'); if(!tr) return; if(tr.dataset.part){ select(tr.dataset.part); vp.scrollIntoView({behavior:reduceMotion?'auto':'smooth',block:'center'}); } else if(tr.dataset.wire){ selectWire(tr.dataset.wire); vp.scrollIntoView({behavior:reduceMotion?'auto':'smooth',block:'center'}); } });
+  const pinsUsed=[1,3,5,9,11,13,17,25,29,31];
+  $('pinTable').innerHTML='<thead><tr><th>Pin</th><th>Name</th><th>Goes to</th></tr></thead><tbody>'+pinsUsed.map(n=>{ const w=WIRES.find(x=>x.a==='pi:'+n); return '<tr><td class="mono">'+n+'</td><td class="mono">'+sw(w.net)+PI_NAMES[n]+'</td><td>'+esc(describe(w.b))+'</td></tr>'; }).join('')+'</tbody>';
+})();
+
+})();
+</script>
+
+</body>
+</html>

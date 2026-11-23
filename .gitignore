@@ -1,0 +1,28 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+.ipynb_checkpoints/
+
+# Node / Expo (app/ has its own .gitignore too)
+node_modules/
+.expo/
+
+# LaTeX build files
+*.aux
+*.out
+*.toc
+*.blg
+*.synctex.gz
+*.fdb_latexmk
+*.fls
+
+# Sensor logs live on the Pi, not in the repo
+pi/logs/
+
+# Office lock files and OS junk
+~$*
+.DS_Store
+Thumbs.db
+desktop.ini

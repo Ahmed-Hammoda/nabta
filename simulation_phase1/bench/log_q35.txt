@@ -1,0 +1,88 @@
+  qwen3.5:0.8b v0_baseline:A 25/184 water ok 22/25
+  qwen3.5:0.8b v0_baseline:A 50/184 water ok 44/50
+  qwen3.5:0.8b v0_baseline:A 75/184 water ok 67/75
+  qwen3.5:0.8b v0_baseline:A 100/184 water ok 86/100
+  qwen3.5:0.8b v0_baseline:A 125/184 water ok 100/125
+  qwen3.5:0.8b v0_baseline:A 150/184 water ok 125/150
+  qwen3.5:0.8b v0_baseline:A 175/184 water ok 146/175
+saved results\qwen3.5_0.8b__v0_baseline_A.jsonl
+  qwen3.5:0.8b v0_baseline:B 25/184 water ok 16/25
+  qwen3.5:0.8b v0_baseline:B 50/184 water ok 34/50
+  qwen3.5:0.8b v0_baseline:B 75/184 water ok 52/75
+  qwen3.5:0.8b v0_baseline:B 100/184 water ok 75/100
+  qwen3.5:0.8b v0_baseline:B 125/184 water ok 86/125
+  qwen3.5:0.8b v0_baseline:B 150/184 water ok 110/150
+  qwen3.5:0.8b v0_baseline:B 175/184 water ok 129/175
+saved results\qwen3.5_0.8b__v0_baseline_B.jsonl
+  qwen3.5:0.8b v1_numbers:A 25/184 water ok 22/25
+  qwen3.5:0.8b v1_numbers:A 50/184 water ok 43/50
+  qwen3.5:0.8b v1_numbers:A 75/184 water ok 64/75
+  qwen3.5:0.8b v1_numbers:A 100/184 water ok 86/100
+  qwen3.5:0.8b v1_numbers:A 125/184 water ok 98/125
+  qwen3.5:0.8b v1_numbers:A 150/184 water ok 123/150
+  qwen3.5:0.8b v1_numbers:A 175/184 water ok 143/175
+saved results\qwen3.5_0.8b__v1_numbers_A.jsonl
+  qwen3.5:0.8b v1_numbers:B 25/184 water ok 14/25
+  qwen3.5:0.8b v1_numbers:B 50/184 water ok 30/50
+  qwen3.5:0.8b v1_numbers:B 75/184 water ok 48/75
+  qwen3.5:0.8b v1_numbers:B 100/184 water ok 70/100
+  qwen3.5:0.8b v1_numbers:B 125/184 water ok 85/125
+  qwen3.5:0.8b v1_numbers:B 150/184 water ok 109/150
+  qwen3.5:0.8b v1_numbers:B 175/184 water ok 128/175
+saved results\qwen3.5_0.8b__v1_numbers_B.jsonl
+  qwen3.5:0.8b v2_schema:A 25/184 water ok 13/25
+  qwen3.5:0.8b v2_schema:A 50/184 water ok 24/50
+  qwen3.5:0.8b v2_schema:A 75/184 water ok 33/75
+  qwen3.5:0.8b v2_schema:A 100/184 water ok 41/100
+  qwen3.5:0.8b v2_schema:A 125/184 water ok 46/125
+  qwen3.5:0.8b v2_schema:A 150/184 water ok 71/150
+  qwen3.5:0.8b v2_schema:A 175/184 water ok 83/175
+saved results\qwen3.5_0.8b__v2_schema_A.jsonl
+  qwen3.5:0.8b v2_schema:B 25/184 water ok 18/25
+  qwen3.5:0.8b v2_schema:B 50/184 water ok 36/50
+  qwen3.5:0.8b v2_schema:B 75/184 water ok 54/75
+  qwen3.5:0.8b v2_schema:B 100/184 water ok 72/100
+  qwen3.5:0.8b v2_schema:B 125/184 water ok 79/125
+  qwen3.5:0.8b v2_schema:B 150/184 water ok 104/150
+  qwen3.5:0.8b v2_schema:B 175/184 water ok 125/175
+saved results\qwen3.5_0.8b__v2_schema_B.jsonl
+  qwen3.5:0.8b v3_fewshot:A 25/184 water ok 14/25
+  qwen3.5:0.8b v3_fewshot:A 50/184 water ok 28/50
+  qwen3.5:0.8b v3_fewshot:A 75/184 water ok 45/75
+  qwen3.5:0.8b v3_fewshot:A 100/184 water ok 65/100
+  qwen3.5:0.8b v3_fewshot:A 125/184 water ok 85/125
+  qwen3.5:0.8b v3_fewshot:A 150/184 water ok 103/150
+  qwen3.5:0.8b v3_fewshot:A 175/184 water ok 116/175
+saved results\qwen3.5_0.8b__v3_fewshot_A.jsonl
+  qwen3.5:0.8b v3_fewshot:B 25/184 water ok 25/25
+  qwen3.5:0.8b v3_fewshot:B 50/184 water ok 50/50
+  qwen3.5:0.8b v3_fewshot:B 75/184 water ok 75/75
+  qwen3.5:0.8b v3_fewshot:B 100/184 water ok 100/100
+  qwen3.5:0.8b v3_fewshot:B 125/184 water ok 125/125
+  qwen3.5:0.8b v3_fewshot:B 150/184 water ok 150/150
+  qwen3.5:0.8b v3_fewshot:B 175/184 water ok 174/175
+saved results\qwen3.5_0.8b__v3_fewshot_B.jsonl
+  qwen3.5:0.8b v4_reasoning:A 25/184 water ok 12/25
+  qwen3.5:0.8b v4_reasoning:A 50/184 water ok 26/50
+  qwen3.5:0.8b v4_reasoning:A 75/184 water ok 42/75
+  qwen3.5:0.8b v4_reasoning:A 100/184 water ok 61/100
+  qwen3.5:0.8b v4_reasoning:A 125/184 water ok 81/125
+  qwen3.5:0.8b v4_reasoning:A 150/184 water ok 98/150
+  qwen3.5:0.8b v4_reasoning:A 175/184 water ok 113/175
+saved results\qwen3.5_0.8b__v4_reasoning_A.jsonl
+  qwen3.5:0.8b v4_reasoning:B 25/184 water ok 15/25
+  qwen3.5:0.8b v4_reasoning:B 50/184 water ok 31/50
+  qwen3.5:0.8b v4_reasoning:B 75/184 water ok 48/75
+  qwen3.5:0.8b v4_reasoning:B 100/184 water ok 69/100
+  qwen3.5:0.8b v4_reasoning:B 125/184 water ok 90/125
+  qwen3.5:0.8b v4_reasoning:B 150/184 water ok 111/150
+  qwen3.5:0.8b v4_reasoning:B 175/184 water ok 129/175
+saved results\qwen3.5_0.8b__v4_reasoning_B.jsonl
+  qwen3.5:0.8b v5_levels_rules:B 25/184 water ok 25/25
+  qwen3.5:0.8b v5_levels_rules:B 50/184 water ok 50/50
+  qwen3.5:0.8b v5_levels_rules:B 75/184 water ok 75/75
+  qwen3.5:0.8b v5_levels_rules:B 100/184 water ok 100/100
+  qwen3.5:0.8b v5_levels_rules:B 125/184 water ok 125/125
+  qwen3.5:0.8b v5_levels_rules:B 150/184 water ok 150/150
+  qwen3.5:0.8b v5_levels_rules:B 175/184 water ok 175/175
+saved results\qwen3.5_0.8b__v5_levels_rules_B.jsonl

@@ -1,0 +1,28 @@
+                                nabta-base        nabta-base   kept?
+1. DECISION (255 cases, prompt ft)
+  water %                              0.0               0.0   
+  alerts %                            28.2              28.2   
+  both %                               0.0               0.0   
+  levels %                             0.0               0.0   
+  overwater                              0                 0   
+  missed                                40                40   
+  fault rows watered                  0/10              0/10   
+  unplugged -> SENSOR_ERROR             0/8               0/8   
+  false faults (normal rows)               0                 0   
+  s/answer                             1.2               1.2   
+2. EXPLAIN (e3, 184 cases)
+  all pass %                          97.8              97.8   yes
+  same_action %                      100.0             100.0   yes
+  no_invented_numbers %              100.0             100.0   yes
+  all_alerts_mentioned %             100.0             100.0   yes
+  no_fake_alert %                     99.5              99.5   yes
+  short %                             98.4              98.4   yes
+3a. CHAT v2 (240)
+  all pass %                          85.8              85.8   yes
+3b. CHAT v3.1 (240)
+  all pass %                          96.2              96.2   yes
+
+Reference (no fine-tuning, best prompts, same 255 cases, from results/summary.txt):
+  lfm3:1.7b p5      water 91.8 %  alerts 49.4 %  both 47.8 %  overwater 2  missed 18  fault rows watered 0/10
+  qwen3.5:0.8b p2   water 75.1 %  alerts 29.8 %  both 23.7 %  overwater 42 missed 19  fault rows watered 0/10
+Note: the base model with prompt 'ft' has no rules in its prompt, so its decision score is not a fair 'before'.

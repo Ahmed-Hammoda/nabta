@@ -1,0 +1,648 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>:root{box-sizing:border-box}body{margin:0;font:14px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
+</head>
+<body>
+<title>Nabta Wiring</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: an electronics bench. 3D bench on the left, a wiring sheet on the right (groups, selected part, every wire). */
+:root{
+  --bg:#eef0ec; --panel:#f8f9f6; --ink:#1b2420; --muted:#5d6a63; --line:#d3d9d2; --accent:#1f6e52; --on-accent:#f4faf6;
+  --stage:#dfe4de; --table:#cfd6cc;
+  --g-logic:#d23b3b; --g-power:#ee8a1e; --g-signal:#7d47c2; --g-load:#2a2a2a;
+  --display:"Archivo","Segoe UI",sans-serif; --body:"IBM Plex Sans","Segoe UI",sans-serif; --mono:"IBM Plex Mono",Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#111613; --panel:#171e1a; --ink:#e4ebe6; --muted:#9aa8a0; --line:#2c3730; --accent:#62c39a; --on-accent:#0c1611;
+  --stage:#1a221d; --table:#27302a; --g-load:#bdbdbd; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#111613; --panel:#171e1a; --ink:#e4ebe6; --muted:#9aa8a0; --line:#2c3730; --accent:#62c39a; --on-accent:#0c1611;
+  --stage:#1a221d; --table:#27302a; --g-load:#bdbdbd; color-scheme:dark}
+html,body{height:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:14px;line-height:1.45}
+.app{display:grid;grid-template-columns:minmax(0,1fr) 380px;height:100%}
+.stage{position:relative;min-width:0;background:var(--stage);overflow:hidden}
+#view{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none;cursor:grab}
+#view:active{cursor:grabbing}
+.head{position:absolute;top:14px;left:max(16px,env(safe-area-inset-left,0px));pointer-events:none;max-width:70%}
+.head h1{font-family:var(--display);font-size:26px;font-weight:700;line-height:1.1;margin:0;text-wrap:balance;letter-spacing:-.01em}
+.head p{margin:4px 0 0;color:var(--muted);font-size:13px}
+.views{position:absolute;bottom:14px;left:max(16px,env(safe-area-inset-left,0px));right:16px;display:flex;flex-wrap:wrap;gap:4px}
+.panel{background:var(--panel);border-left:1px solid var(--line);overflow-y:auto;padding-block:16px;padding-left:16px;padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:18px}
+section{display:flex;flex-direction:column;gap:8px;min-width:0}
+h2{font-family:var(--mono);font-size:11px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:0}
+button{font:inherit;font-size:13px;color:var(--ink);background:var(--panel);border:1px solid var(--line);border-radius:4px;padding:6px 10px;cursor:pointer}
+button:hover{border-color:var(--accent)}
+button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
+.groups{display:grid;grid-template-columns:1fr 1fr;gap:4px}
+.groups button{display:flex;align-items:center;gap:8px;text-align:left}
+.sw{flex:none;width:12px;height:12px;border-radius:2px;border:1px solid var(--line)}
+.card{border:1px solid var(--line);border-radius:4px;padding:10px 12px;display:flex;flex-direction:column;gap:4px}
+.card h3{font-family:var(--display);font-size:17px;font-weight:700;margin:0}
+.card p{margin:0;font-size:13px}
+.card .ft{font-family:var(--mono);font-size:12px;color:var(--muted)}
+.wires{display:flex;flex-direction:column;gap:2px}
+.wires h4{font-family:var(--display);font-size:13px;margin:10px 0 2px;display:flex;align-items:center;gap:8px}
+.wires h4:first-child{margin-top:0}
+.wr{display:grid;grid-template-columns:12px minmax(0,1fr);gap:8px;align-items:start;text-align:left;border-color:transparent;padding:4px 6px;font-size:12.5px}
+.wr .sw{margin-top:3px}
+.wr b{font-weight:600}
+.wr span{color:var(--muted);font-family:var(--mono);font-size:11.5px;display:block}
+.wr[aria-pressed="true"]{background:transparent;color:var(--ink);border-color:var(--accent)}
+.notes{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:6px;font-size:13px}
+.fail{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:24px;text-align:center}
+@media (max-width:820px){
+  html,body{height:auto}
+  .app{display:block;height:auto}
+  .stage{height:64vh;min-height:400px}
+  .panel{border-left:0;border-top:1px solid var(--line);overflow:visible}
+  .head h1{font-size:21px}
+  .head p{display:none}
+}
+</style>
+
+<div class="app">
+  <div class="stage" id="stage">
+    <canvas id="view" aria-label="3D model of the Nabta wiring on a breadboard. Drag to turn, scroll to zoom, click a part or a wire."></canvas>
+    <div class="head">
+      <h1>Nabta Wiring · 1 jar</h1>
+      <p>Drag to turn, scroll or pinch to zoom, right-drag to move. Click any part or wire.</p>
+    </div>
+    <div class="views" role="group" aria-label="Camera view">
+      <button id="v-all" aria-pressed="true">Whole bench</button>
+      <button id="v-pi">Pi header</button>
+      <button id="v-bb">Breadboard</button>
+      <button id="v-relay">Relay</button>
+      <button id="v-water">Tank and jar</button>
+      <button id="v-top">Top</button>
+      <button id="labels" aria-pressed="true">Labels</button>
+    </div>
+  </div>
+
+  <aside class="panel">
+    <section>
+      <h2>Wire groups</h2>
+      <div class="groups" id="groups"></div>
+    </section>
+
+    <section>
+      <h2>Selected</h2>
+      <div class="card" aria-live="polite">
+        <h3 id="selName">Click a part or a wire</h3>
+        <p id="selText">Each wire in the list below lights up on the bench when you click it. Click a part to see every wire that touches it.</p>
+        <p class="ft" id="selFt"></p>
+      </div>
+      <button id="clear">Show all wires</button>
+    </section>
+
+    <section>
+      <h2>Every wire</h2>
+      <div class="wires" id="wireList"></div>
+    </section>
+
+    <section>
+      <h2>Before you power on</h2>
+      <ol class="notes">
+        <li>The 5 V 2.5 A adapter feeds only the pump and the light, through the relay's screw terminals. It never touches the Pi or the breadboard.</li>
+        <li>Keep the JD-VCC jumper on the relay board. Most of these boards switch ON when IN is LOW; we set that in the code.</li>
+        <li>Some breadboards split the side rails in the middle. If yours does, bridge each rail with a short wire.</li>
+        <li>Water is measured by time. Run the pump into a measuring cup for 10 s, divide the mL by 10, and that is the pump's mL per second.</li>
+        <li>For the real pot, move the BH1750 and BME280 next to the leaves on longer wires. The pins stay the same.</li>
+      </ol>
+    </section>
+  </aside>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/controls/OrbitControls.js"></script>
+<script>
+(function(){
+"use strict";
+const $=id=>document.getElementById(id);
+const stage=$("stage"), canvas=$("view");
+const css=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+
+let renderer;
+try{ renderer=new THREE.WebGLRenderer({canvas,antialias:true}); }
+catch(e){
+  const m=document.createElement("div"); m.className="fail";
+  m.textContent="This browser could not start 3D graphics. Open the page in Chrome or Edge on a computer.";
+  stage.appendChild(m); return;
+}
+renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
+renderer.shadowMap.enabled=true; renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+renderer.outputEncoding=THREE.sRGBEncoding;
+
+const scene=new THREE.Scene();
+const camera=new THREE.PerspectiveCamera(34,1,0.5,800);
+const controls=new THREE.OrbitControls(camera,canvas);
+controls.enableDamping=true; controls.dampingFactor=.09;
+controls.maxPolarAngle=Math.PI*.49; controls.minDistance=6; controls.maxDistance=200;
+
+scene.add(new THREE.HemisphereLight(0xffffff,0x7d8a80,.62));
+const sun=new THREE.DirectionalLight(0xffffff,.6);
+sun.position.set(20,70,40); sun.castShadow=true; sun.shadow.mapSize.set(2048,2048);
+Object.assign(sun.shadow.camera,{left:-45,right:50,top:40,bottom:-40,near:10,far:160});
+sun.shadow.bias=-.0005; sun.shadow.normalBias=.3;
+scene.add(sun);
+
+const V=(x,y,z)=>new THREE.Vector3(x,y,z);
+const std=(c,o)=>new THREE.MeshStandardMaterial(Object.assign({color:c,roughness:.7,metalness:.02},o||{}));
+const M={
+  alu:std(0x5d6468,{metalness:.6,roughness:.4}), aluT:std(0x5d6468,{metalness:.5,roughness:.4,transparent:true,opacity:.35,depthWrite:false}),
+  pcb:std(0x1f7a46), pcbBlue:std(0x1d4f9a), pcbPurple:std(0x5b3c9e), black:std(0x1b1d1c), dup:std(0x161616),
+  gold:std(0xd9b44a,{metalness:.8,roughness:.3}), silver:std(0xc4c9cc,{metalness:.7,roughness:.35}),
+  white:std(0xf1f1ec), cream:std(0xe9e3d3), relay:std(0x2763c4), green:std(0x2e9e57),
+  glass:std(0xd9efe8,{transparent:true,opacity:.22,roughness:.1,side:THREE.DoubleSide,depthWrite:false}),
+  tank:std(0xc3e3f5,{transparent:true,opacity:.25,roughness:.1,side:THREE.DoubleSide,depthWrite:false}),
+  water:std(0x2b8fd8,{transparent:true,opacity:.55,roughness:.2,depthWrite:false}),
+  soil:std(0x4a3420,{roughness:1}), stem:std(0x4d7c3a), tube:std(0x9fd3f0,{transparent:true,opacity:.85,roughness:.25}),
+  led:new THREE.MeshStandardMaterial({color:0xffe9f2,emissive:0xffd6ea,emissiveIntensity:1.1}),
+  resBody:std(0xd8c39a), floatM:std(0xe6e6e0), barrel:std(0x222222)
+};
+
+/* ---------- table ---------- */
+const tableMat=std(0xcfd6cc,{roughness:.95});
+const table=new THREE.Mesh(new THREE.PlaneGeometry(140,90),tableMat);
+table.rotation.x=-Math.PI/2; table.position.set(5,0,0); table.receiveShadow=true; scene.add(table);
+function applyTheme(){ scene.background=new THREE.Color(css("--stage")||"#dfe4de"); tableMat.color.set(css("--table")||"#cfd6cc"); }
+applyTheme();
+if(window.matchMedia) window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change",applyTheme);
+new MutationObserver(applyTheme).observe(document.documentElement,{attributes:true,attributeFilter:["data-theme"]});
+
+/* ---------- helpers ---------- */
+const pickables=[];
+function add(geo,mat,x,y,z,key,parent){
+  const m=new THREE.Mesh(geo,mat); m.position.set(x,y,z); m.castShadow=true; m.receiveShadow=true;
+  if(key){m.userData.key=key; pickables.push(m);} (parent||scene).add(m); return m;
+}
+const box=(w,h,d,mat,x,y,z,key,p)=>add(new THREE.BoxGeometry(w,h,d),mat,x,y,z,key,p);
+const cyl=(r,h,mat,x,y,z,key,p,seg)=>add(new THREE.CylinderGeometry(r,r,h,seg||24),mat,x,y,z,key,p);
+
+function texCanvas(wPx,hPx,draw){
+  const c=document.createElement("canvas"); c.width=wPx; c.height=hPx; draw(c.getContext("2d"),wPx,hPx);
+  const t=new THREE.CanvasTexture(c); t.encoding=THREE.sRGBEncoding; t.anisotropy=4; return t;
+}
+const labels=[];
+function label(text,pos,size){
+  size=size||1;
+  const c=document.createElement("canvas"), g=c.getContext("2d");
+  g.font="600 52px IBM Plex Sans, sans-serif";
+  const w=Math.ceil(g.measureText(text).width)+44; c.width=w; c.height=84;
+  g.fillStyle="rgba(22,30,26,.88)"; const r=16;
+  g.beginPath(); g.moveTo(r,0); g.lineTo(w-r,0); g.quadraticCurveTo(w,0,w,r); g.lineTo(w,84-r); g.quadraticCurveTo(w,84,w-r,84);
+  g.lineTo(r,84); g.quadraticCurveTo(0,84,0,84-r); g.lineTo(0,r); g.quadraticCurveTo(0,0,r,0); g.fill();
+  g.font="600 52px IBM Plex Sans, sans-serif"; g.fillStyle="#f2f7f3"; g.textBaseline="middle"; g.fillText(text,22,44);
+  const t=new THREE.CanvasTexture(c); t.encoding=THREE.sRGBEncoding;
+  const s=new THREE.Sprite(new THREE.SpriteMaterial({map:t,depthTest:false,transparent:true}));
+  const h=1.25*size; s.scale.set(h*w/84,h,1); s.position.copy(pos); s.renderOrder=20; s.userData.noPick=true;
+  scene.add(s); labels.push(s); return s;
+}
+
+/* ---------- coordinates ---------- */
+const BB_Y=1.0;
+const holeX=c=>-7.874+(c-1)*0.254;
+const ROWZ={a:-1.397,b:-1.143,c:-0.889,d:-0.635,e:-0.381,f:0.381,g:0.635,h:0.889,i:1.143,j:1.397};
+const RAILZ={"b+":-2.35,"b-":-2.1,"f-":2.1,"f+":2.35};
+const H=(c,r)=>V(holeX(c),BB_Y,ROWZ[r]);
+const RL=(k,c)=>V(holeX(c),BB_Y,RAILZ[k]);
+const PI_TOP=2.65;
+const PIN=n=>{const c=Math.floor((n-1)/2); return V(n%2?-14.70:-14.45,PI_TOP,-3.5+c*0.254)};
+
+/* ---------- Raspberry Pi 4 in aluminium case ---------- */
+(function(){
+  const cx=-17, cz=0;
+  box(6.4,0.5,9.2,M.alu,cx,0.25,cz,"case");
+  box(0.3,1.5,9.2,M.alu,cx-3.05,0.75,cz,"case"); box(0.3,1.5,9.2,M.alu,cx+3.05,0.75,cz,"case");
+  box(6.4,1.5,0.3,M.alu,cx,0.75,cz-4.45,"case"); box(6.4,1.5,0.3,M.alu,cx,0.75,cz+4.45,"case");
+  box(5.6,0.16,8.5,M.pcb,cx,0.95,cz,"pi");
+  box(1.5,0.25,1.5,M.silver,cx-0.4,1.15,cz-0.6,"pi");
+  box(1.1,0.2,1.0,M.black,cx-0.3,1.12,cz+1.4,"pi");
+  box(5.3,1.4,1.6,M.silver,cx-0.1,1.7,cz+3.6,"pi");
+  box(1.0,0.35,0.9,M.silver,cx-2.75,1.2,cz-2.9,"pi");
+  box(0.6,0.3,0.7,M.silver,cx-2.75,1.2,cz-1.6,"pi"); box(0.6,0.3,0.7,M.silver,cx-2.75,1.2,cz-0.6,"pi");
+  box(0.62,0.25,5.1,M.black,-14.575,1.18,-1.08,"header");
+  const pg=new THREE.BoxGeometry(0.064,1.35,0.064);
+  for(let n=1;n<=40;n++){ const p=PIN(n); add(pg,M.gold,p.x,PI_TOP-0.675,p.z,"header"); }
+  const pin1=box(0.3,0.04,0.3,M.white,-14.95,1.32,-3.5,"header"); pin1.castShadow=false;
+  const lid=box(5.0,0.15,9.2,M.aluT,cx-0.7,2.25,cz,"case"); lid.castShadow=false;
+  [-2.2,2.2].forEach(dz=>{
+    box(3,0.7,3,M.black,cx-0.8,2.68,cz+dz,"fan");
+    const hub=cyl(0.45,0.72,M.black,cx-0.8,2.7,cz+dz,"fan"); hub.material=std(0x333333);
+    cyl(1.35,0.05,std(0x2b2b2b),cx-0.8,3.05,cz+dz,"fan");
+  });
+  /* USB-C cable to the Pi supply */
+  const usb=new THREE.CatmullRomCurve3([V(cx-3.4,1.2,-2.9),V(cx-5.5,0.6,-3.4),V(-25,0.4,-8),V(-27,0.8,-12.2)],false,"centripetal");
+  add(new THREE.TubeGeometry(usb,40,0.22,8,false),std(0xf1f1ec),0,0,0,"pisupply");
+  box(3.6,3.0,3.0,M.white,-28,1.5,-13.5,"pisupply");
+  label("Raspberry Pi 4",V(-17,5.2,-1),1);
+  label("Pi supply 5.1 V 3 A",V(-28,4.6,-13.5),.85);
+})();
+
+/* ---------- Breadboard ---------- */
+(function(){
+  const tex=texCanvas(1650,560,(g,w,h)=>{
+    g.fillStyle="#f5f3ec"; g.fillRect(0,0,w,h);
+    const X=x=>(x+8.25)*100, Z=z=>(z+2.8)*100;
+    g.fillStyle="#e3dfd2"; g.fillRect(0,Z(-0.2),w,40);
+    g.fillStyle="#c93c3c"; g.fillRect(X(-8.0),Z(-2.62),1600,5); g.fillRect(X(-8.0),Z(2.58),1600,5);
+    g.fillStyle="#2b5fbf"; g.fillRect(X(-8.0),Z(-1.87),1600,5); g.fillRect(X(-8.0),Z(1.82),1600,5);
+    g.fillStyle="#2a2a2a";
+    for(let c=1;c<=63;c++){
+      const x=X(holeX(c));
+      Object.values(ROWZ).forEach(z=>g.fillRect(x-6,Z(z)-6,12,12));
+      Object.values(RAILZ).forEach(z=>g.fillRect(x-6,Z(z)-6,12,12));
+    }
+    g.fillStyle="#777"; g.font="500 18px IBM Plex Mono, monospace"; g.textAlign="center"; g.textBaseline="middle";
+    for(let c=1;c<=63;c++) if(c===1||c%5===0){ g.fillText(String(c),X(holeX(c)),Z(-1.72)); g.fillText(String(c),X(holeX(c)),Z(1.70)); }
+    Object.entries(ROWZ).forEach(([r,z])=>{ g.fillText(r,X(-8.08),Z(z)); g.fillText(r,X(8.1),Z(z)); });
+    g.font="600 20px IBM Plex Sans, sans-serif"; g.textAlign="left";
+    g.fillStyle="#c93c3c"; g.fillText("+3.3 V",X(-7.9),Z(-2.72)); g.fillText("+5 V",X(-7.9),Z(2.71));
+    g.fillStyle="#2b5fbf"; g.fillText("GND",X(-6.6),Z(-2.72)); g.fillText("GND",X(-6.6),Z(2.71));
+  });
+  const mats=[std(0xeeebe2),std(0xeeebe2),new THREE.MeshStandardMaterial({map:tex,roughness:.85}),std(0xeeebe2),std(0xeeebe2),std(0xeeebe2)];
+  const bb=new THREE.Mesh(new THREE.BoxGeometry(16.5,BB_Y,5.6),mats);
+  bb.position.set(0,BB_Y/2,0); bb.castShadow=true; bb.receiveShadow=true; bb.userData.key="bb"; pickables.push(bb); scene.add(bb);
+  label("Breadboard",V(0,1.6,4.2),.85);
+})();
+
+/* ---------- breakout modules standing in row c ---------- */
+function moduleBoard(key,title,pins,col0,W,Hh,colorHex,mat){
+  const n=pins.length, x0=holeX(col0), cxm=x0+(n-1)*0.127;
+  const tex=texCanvas(Math.round(W*170),Math.round(Hh*170),(g,w,h)=>{
+    g.fillStyle=colorHex; g.fillRect(0,0,w,h);
+    g.fillStyle="#ffffff"; g.font="700 "+Math.round(Math.min(46,w/(title.length*0.62)))+"px IBM Plex Sans, sans-serif";
+    g.textAlign="center"; g.textBaseline="top"; g.fillText(title,w/2,12);
+    g.font="600 22px IBM Plex Mono, monospace";
+    pins.forEach((p,i)=>{
+      const px=((W-n*0.254)/2+0.127+i*0.254)*170;
+      g.fillStyle="#d9b44a"; g.beginPath(); g.arc(px,h-14,8,0,7); g.fill();
+      g.save(); g.translate(px,h-30); g.rotate(-Math.PI/2); g.fillStyle="#ffffff"; g.textAlign="left"; g.textBaseline="middle"; g.fillText(p,0,0); g.restore();
+    });
+  });
+  const face=new THREE.MeshStandardMaterial({map:tex,roughness:.6});
+  const mesh=new THREE.Mesh(new THREE.BoxGeometry(W,Hh,0.16),[mat,mat,mat,mat,face,mat]);
+  mesh.position.set(cxm,BB_Y+0.35+Hh/2,ROWZ.c); mesh.castShadow=true; mesh.userData.key=key; pickables.push(mesh); scene.add(mesh);
+  const pg=new THREE.BoxGeometry(0.064,0.6,0.064);
+  for(let i=0;i<n;i++){ add(pg,M.gold,x0+i*0.254,BB_Y+0.25,ROWZ.c,key); }
+  box(n*0.254,0.22,0.25,M.black,cxm,BB_Y+0.24,ROWZ.c,key);
+  return mesh;
+}
+moduleBoard("bme","BME280",["VIN","GND","SCL","SDA"],3,1.5,1.4,"#5b3c9e",M.pcbPurple);
+moduleBoard("bh","BH1750",["VCC","GND","SCL","SDA","ADDR"],10,1.9,2.6,"#1d4f9a",M.pcbBlue);
+moduleBoard("ads","ADS1115",["VDD","GND","SCL","SDA","ADDR","ALRT","A0","A1","A2","A3"],19,2.9,1.8,"#5b3c9e",M.pcbPurple);
+label("BME280",V(holeX(4.5),4.3,-1.3),.7);
+label("BH1750",V(holeX(12),5.3,-1.3),.7);
+label("ADS1115",V(holeX(23.5),4.6,-1.3),.7);
+
+/* ---------- resistors and diode ---------- */
+function resistor(key,c1,c2,row,bands){
+  const a=H(c1,row), b=H(c2,row), y=BB_Y+0.45, mid=a.clone().lerp(b,.5);
+  const lead=new THREE.CatmullRomCurve3([a,V(a.x,y,a.z),V(mid.x,y,a.z),V(b.x,y,b.z),b],false,"catmullrom",0.01);
+  add(new THREE.TubeGeometry(lead,30,0.025,6,false),M.silver,0,0,0,key);
+  const body=cyl(0.12,0.6,M.resBody,mid.x,y,a.z,key); body.rotation.z=Math.PI/2;
+  bands.forEach((col,i)=>{ const bd=cyl(0.125,0.06,std(col),mid.x-0.18+i*0.12,y,a.z,key); bd.rotation.z=Math.PI/2; });
+}
+
+/* ---------- relay module ---------- */
+const RLY={x:12,z:-7};
+const RP={GND:V(9.7,1.9,-8.0),IN1:V(9.7,1.9,-7.75),IN2:V(9.7,1.9,-7.5),VCC:V(9.7,1.9,-7.25),
+  NO1:V(14.25,2.0,-9.0),COM1:V(14.25,2.0,-8.5),NC1:V(14.25,2.0,-8.0),NO2:V(14.25,2.0,-6.6),COM2:V(14.25,2.0,-6.1),NC2:V(14.25,2.0,-5.6)};
+(function(){
+  const tex=texCanvas(500,380,(g,w,h)=>{
+    g.fillStyle="#1d4f9a"; g.fillRect(0,0,w,h);
+    g.fillStyle="#fff"; g.font="600 22px IBM Plex Mono, monospace"; g.textBaseline="middle";
+    [["GND",-8.0],["IN1",-7.75],["IN2",-7.5],["VCC",-7.25]].forEach(([t,z])=>g.fillText(t,40,(z+8.9)*100));
+    g.textAlign="right";
+    [["NO",-9.0],["COM",-8.5],["NC",-8.0],["NO",-6.6],["COM",-6.1],["NC",-5.6]].forEach(([t,z])=>g.fillText(t,412,(z+8.9)*100));
+    g.textAlign="center"; g.font="700 26px IBM Plex Sans, sans-serif";
+    g.fillText("K1 pump",250,22); g.fillText("K2 light",250,362);
+    g.font="600 18px IBM Plex Mono, monospace"; g.fillText("JD-VCC jumper ON",150,190);
+  });
+  const bm=std(0x1d4f9a);
+  const board=new THREE.Mesh(new THREE.BoxGeometry(5.0,0.16,3.8),[bm,bm,new THREE.MeshStandardMaterial({map:tex,roughness:.6}),bm,bm,bm]);
+  board.position.set(RLY.x,1.0,RLY.z); board.castShadow=true; board.userData.key="relay"; pickables.push(board); scene.add(board);
+  [[-2.3,-1.7],[2.3,-1.7],[-2.3,1.7],[2.3,1.7]].forEach(([dx,dz])=>cyl(0.12,0.92,M.silver,RLY.x+dx,0.46,RLY.z+dz,"relay"));
+  box(1.9,1.5,1.5,M.relay,12,1.83,-8.25,"relay"); box(1.9,1.5,1.5,M.relay,12,1.83,-5.95,"relay");
+  ["GND","IN1","IN2","VCC"].forEach(k=>{const p=RP[k]; add(new THREE.BoxGeometry(0.064,0.8,0.064),M.gold,p.x,1.5,p.z,"relay");});
+  box(0.26,0.25,1.05,M.black,9.7,1.2,-7.625,"relay");
+  box(0.8,0.85,1.6,M.green,14.1,1.5,-8.5,"relay"); box(0.8,0.85,1.6,M.green,14.1,1.5,-6.1,"relay");
+  ["NO1","COM1","NC1","NO2","COM2","NC2"].forEach(k=>{const p=RP[k]; cyl(0.15,0.08,M.silver,p.x-0.15,1.95,p.z,"relay");});
+  label("2-relay module",V(12,4.2,-7),.85);
+})();
+
+/* ---------- 5 V 2.5 A adapter and DC jack terminal ---------- */
+const DC={P:V(11.6,1.25,-14),N:V(12.4,1.25,-14)};
+(function(){
+  box(2.0,0.9,1.4,M.black,12,0.45,-14.6,"dcjack");
+  box(1.4,0.8,0.9,M.green,12,0.85,-14.0,"dcjack");
+  cyl(0.15,0.08,M.silver,11.6,1.27,-14,"dcjack"); cyl(0.15,0.08,M.silver,12.4,1.27,-14,"dcjack");
+  const cab=new THREE.CatmullRomCurve3([V(12,0.5,-15.3),V(13,0.4,-17),V(17,0.4,-18.5),V(20,1.2,-19)],false,"centripetal");
+  add(new THREE.TubeGeometry(cab,40,0.18,8,false),M.black,0,0,0,"adapter");
+  box(4,4.2,3.2,M.black,22,2.1,-19.5,"adapter");
+  label("5 V 2.5 A adapter · pump + light",V(19,5.4,-19.5),.85);
+  label("DC jack + −",V(12,2.3,-15.2),.6);
+})();
+
+/* ---------- tank, pump, float switch ---------- */
+const TK={x:32,z:0};
+(function(){
+  const g=new THREE.Group(); scene.add(g);
+  const wall=(w,h,d,x,y,z)=>{const m=box(w,h,d,M.tank,x,y,z,"tank"); m.castShadow=false; return m;};
+  wall(10,0.2,10,TK.x,0.1,TK.z); wall(0.2,11,10,TK.x-5,5.5,TK.z); wall(0.2,11,10,TK.x+5,5.5,TK.z);
+  wall(10,11,0.2,TK.x,5.5,TK.z-5); wall(10,11,0.2,TK.x,5.5,TK.z+5);
+  const w=box(9.6,7.2,9.6,M.water,TK.x,3.8,TK.z,"tank"); w.castShadow=false;
+  const pump=cyl(1.0,2.6,M.black,30.5,1.1,0,"pump"); pump.rotation.z=Math.PI/2;
+  cyl(0.35,1.0,M.black,31.4,2.4,0,"pump");
+  /* float switch hanging from a bracket on the rim */
+  box(0.3,0.3,1.4,M.white,35,11.15,4.4,"float");
+  cyl(0.12,5.6,M.white,35,8.3,3.9,"float");
+  cyl(0.28,2.6,M.white,35,3.5,3.9,"float");
+  cyl(0.8,1.0,M.floatM,35,4.6,3.9,"float");
+  box(0.25,0.25,0.25,M.black,35,1.95,3.9,"float");
+  label("Water tank",V(TK.x,13.2,-4),.9);
+  label("Float switch",V(36.5,6.5,6),.7);
+  label("Pump",V(29.5,3.6,-2.2),.65);
+})();
+
+/* ---------- diode across the pump wires ---------- */
+(function(){
+  const d=cyl(0.17,1.0,M.black,27.2,12.2,-4.0,"diode"); d.rotation.x=Math.PI/2;
+  const band=cyl(0.18,0.14,M.silver,27.2,12.2,-4.42,"diode"); band.rotation.x=Math.PI/2;
+  label("1N4007",V(26.2,13.6,-4.0),.6);
+})();
+
+/* ---------- tube from the pump to the jar ---------- */
+(function(){
+  const t=new THREE.CatmullRomCurve3([V(31.4,2.9,0),V(31.4,9,0),V(31.2,12.6,0.3),V(28,15,3),V(23,16,6),V(20.2,15,7.1),V(19.4,13.3,7.1)],false,"centripetal");
+  add(new THREE.TubeGeometry(t,90,0.32,10,false),M.tube,0,0,0,"tube");
+})();
+
+/* ---------- jar, soil, probe, mint ---------- */
+const JAR={x:18,z:7};
+const PROBE={VCC:V(15.25,12.6,6),GND:V(15.5,12.6,6),AOUT:V(15.75,12.6,6)};
+(function(){
+  const j=add(new THREE.CylinderGeometry(4.5,4.3,13,40,1,true),M.glass,JAR.x,6.5,JAR.z,"jar"); j.castShadow=false;
+  cyl(4.3,0.2,M.glass,JAR.x,0.1,JAR.z,"jar");
+  cyl(4.35,8.8,M.soil,JAR.x,4.6,JAR.z,"jar");
+  /* soil probe */
+  const tex=texCanvas(180,560,(g,w,h)=>{
+    g.fillStyle="#141414"; g.fillRect(0,0,w,h); g.fillStyle="#e0e0e0"; g.font="600 26px IBM Plex Sans, sans-serif";
+    g.save(); g.translate(w/2,h*0.6); g.rotate(-Math.PI/2); g.textAlign="center"; g.fillText("Capacitive soil v1.2",0,0); g.restore();
+    g.font="600 22px IBM Plex Mono, monospace"; g.textAlign="center"; g.fillText("A V G",w/2,30);
+  });
+  const pm=std(0x141414);
+  const probe=new THREE.Mesh(new THREE.BoxGeometry(1.0,8.4,0.12),[pm,pm,pm,pm,new THREE.MeshStandardMaterial({map:tex}),pm]);
+  probe.position.set(15.5,8.0,6.05); probe.castShadow=true; probe.userData.key="probe"; pickables.push(probe); scene.add(probe);
+  box(0.9,0.35,0.35,M.white,15.5,12.35,6,"probe");
+  /* mint */
+  let s=7; const r=()=>{s=(s*16807)%2147483647; return (s-1)/2147483646};
+  const leafG=new THREE.SphereGeometry(1,10,8), stems=8, per=9;
+  const leaves=new THREE.InstancedMesh(leafG,std(0xffffff,{roughness:.8}),stems*per);
+  leaves.castShadow=true; leaves.userData.key="mint"; pickables.push(leaves);
+  const d=new THREE.Object3D(), col=new THREE.Color(); let k=0;
+  for(let i=0;i<stems;i++){
+    const a=r()*Math.PI*2, b=0.6+r()*2.4, h=7+r()*6, lean=.6+r()*1.2;
+    const bx=JAR.x+0.8+Math.cos(a)*b, bz=JAR.z+Math.sin(a)*b;
+    const base=V(bx,9,bz), top=V(bx+Math.cos(a)*lean,9+h,bz+Math.sin(a)*lean);
+    const st=new THREE.Mesh(new THREE.CylinderGeometry(.08,.12,base.distanceTo(top),6),M.stem);
+    st.position.copy(base).lerp(top,.5); st.quaternion.setFromUnitVectors(V(0,1,0),top.clone().sub(base).normalize());
+    st.userData.key="mint"; pickables.push(st); scene.add(st);
+    for(let l=0;l<per;l++){
+      const t=(l+1)/per, ang=r()*Math.PI*2, sz=0.9+(1-t)*.5+r()*.25;
+      d.position.set(bx+Math.cos(a)*lean*t+Math.cos(ang)*.9, 9+h*t, bz+Math.sin(a)*lean*t+Math.sin(ang)*.9);
+      d.rotation.set((r()-.5)*.8,-ang,(r()-.2)*.5); d.scale.set(sz,sz*.16,sz*.58); d.updateMatrix();
+      leaves.setMatrixAt(k,d.matrix); col.setHSL(.31+r()*.05,.5+r()*.15,.3+r()*.14); leaves.setColorAt(k,col); k++;
+    }
+  }
+  scene.add(leaves);
+  label("Spearmint jar",V(JAR.x+2.5,2,JAR.z+5.6),.8);
+  label("Soil probe",V(13.4,11.5,7.4),.65);
+})();
+
+/* ---------- grow light ---------- */
+const LEDP={P:V(18.25,28.8,1.3),N:V(17.75,28.8,1.3)};
+(function(){
+  box(1.6,0.4,1.6,M.alu,18,0.2,0.8,"led");
+  cyl(0.3,29,M.alu,18,14.7,0.8,"led");
+  box(0.6,0.6,7.2,M.alu,18,29.4,4.4,"led");
+  box(11,0.5,2.6,M.alu,18,29.0,7.2,"led");
+  const strip=box(10.4,0.08,1.0,M.led,18,28.72,7.2,"led"); strip.castShadow=false;
+  const pl=new THREE.PointLight(0xffd6ea,.5,24); pl.position.set(18,27,7.2); scene.add(pl);
+  label("Grow light · USB 5 V strip",V(18,31.2,7.2),.85);
+})();
+
+/* ---------- wires ---------- */
+const COL={red:0xd23b3b,black:0x262626,blue:0x2f6fd6,yellow:0xe5c12e,orange:0xee8a1e,white:0xe9e9e4,green:0x2ca05a,purple:0x8e44ad,grey:0x8a9096,cyan:0x1fb5c9};
+const GROUPS=[
+  ["logic","3.3 V, GND and I²C","--g-logic"],
+  ["power","5 V and GND","--g-power"],
+  ["signal","Signals to GPIO","--g-signal"],
+  ["load","Pump and light power","--g-load"]
+];
+const FLOAT_A=V(34.85,11.4,4.2), FLOAT_B=V(35.15,11.4,4.2);
+const PUMP_P=V(29.2,1.3,-0.25), PUMP_N=V(29.2,1.3,0.25);
+/* [id, group, color, from, to, A, B, parts, note, via, end-styles] */
+const W=[
+ ["w1","logic","red","Pi pin 1 · 3.3 V","Back + rail (3.3 V), column 1",PIN(1),RL("b+",1),["pi","bb"],"Feeds 3.3 V to the three sensors and the soil probe."],
+ ["w2","logic","black","Pi pin 9 · GND","Back − rail, column 2",PIN(9),RL("b-",2),["pi","bb"],"Ground for the 3.3 V side."],
+ ["w3","logic","blue","Pi pin 3 · SDA (GPIO 2)","Hole b6 · BME280 SDA",PIN(3),H(6,"b"),["pi","bme"],"I²C data. It reaches all three sensors through the chain jumpers."],
+ ["w4","logic","yellow","Pi pin 5 · SCL (GPIO 3)","Hole b5 · BME280 SCL",PIN(5),H(5,"b"),["pi","bme"],"I²C clock, chained the same way as SDA."],
+ ["w5","logic","red","BME280 VIN · hole a3","Back + rail (3.3 V)",H(3,"a"),RL("b+",3),["bme","bb"],""],
+ ["w6","logic","black","BME280 GND · hole a4","Back − rail",H(4,"a"),RL("b-",4),["bme","bb"],""],
+ ["w7","logic","yellow","BME280 SCL · hole e5","BH1750 SCL · hole e12",H(5,"e"),H(12,"e"),["bme","bh"],"I²C chain."],
+ ["w8","logic","blue","BME280 SDA · hole e6","BH1750 SDA · hole e13",H(6,"e"),H(13,"e"),["bme","bh"],"I²C chain."],
+ ["w9","logic","red","BH1750 VCC · hole a10","Back + rail (3.3 V)",H(10,"a"),RL("b+",10),["bh","bb"],""],
+ ["w10","logic","black","BH1750 GND · hole a11","Back − rail",H(11,"a"),RL("b-",11),["bh","bb"],""],
+ ["w11","logic","black","BH1750 ADDR · hole a14","Back − rail",H(14,"a"),RL("b-",14),["bh","bb"],"ADDR to GND keeps the BH1750 at address 0x23."],
+ ["w12","logic","yellow","BH1750 SCL · hole d12","ADS1115 SCL · hole d21",H(12,"d"),H(21,"d"),["bh","ads"],"I²C chain."],
+ ["w13","logic","blue","BH1750 SDA · hole d13","ADS1115 SDA · hole d22",H(13,"d"),H(22,"d"),["bh","ads"],"I²C chain."],
+ ["w14","logic","red","ADS1115 VDD · hole a19","Back + rail (3.3 V)",H(19,"a"),RL("b+",19),["ads","bb"],""],
+ ["w15","logic","black","ADS1115 GND · hole a20","Back − rail",H(20,"a"),RL("b-",20),["ads","bb"],""],
+ ["w16","logic","black","ADS1115 ADDR · hole a23","Back − rail",H(23,"a"),RL("b-",23),["ads","bb"],"ADDR to GND keeps the ADS1115 at 0x48, as in garden_logger.py."],
+ ["w17","logic","red","Soil probe VCC","Back + rail (3.3 V), column 30",PROBE.VCC,RL("b+",30),["probe","bb"],"3.3 V keeps the probe output inside the ADS1115 range."],
+ ["w18","logic","black","Soil probe GND","Back − rail, column 31",PROBE.GND,RL("b-",31),["probe","bb"],""],
+ ["w19","signal","cyan","Soil probe AOUT","ADS1115 A0 · hole a25",PROBE.AOUT,H(25,"a"),["probe","ads"],"Channel A0, the one garden_logger.py reads."],
+ ["w20","signal","white","Pi pin 11 · GPIO 17","Hole i55",PIN(11),H(55,"i"),["pi","float"],"Tank level input. The code turns on the Pi's internal pull-up."],
+ ["w21","signal","white","Float switch wire 1","Hole j55",FLOAT_A,H(55,"j"),["float","bb"],"Either float wire can go here; the switch has no polarity.",[V(34.6,14,3.5),V(20,15,2.6)]],
+ ["w22","signal","black","Float switch wire 2","Front − rail, column 56",FLOAT_B,RL("f-",56),["float","bb"],"",[V(35.1,14.2,3.4),V(20.4,15.3,3)]],
+ ["w26","signal","purple","Pi pin 16 · GPIO 23","Relay IN1 (pump)",PIN(16),RP.IN1,["pi","relay"],"Turns relay K1 on to run the pump."],
+ ["w27","signal","grey","Pi pin 18 · GPIO 24","Relay IN2 (light)",PIN(18),RP.IN2,["pi","relay"],"Turns relay K2 on to run the grow light."],
+ ["w28","power","orange","Pi pin 2 · 5 V","Front + rail (5 V), column 1",PIN(2),RL("f+",1),["pi","bb"],"5 V for the relay board only."],
+ ["w29","power","black","Pi pin 14 · GND","Front − rail, column 2",PIN(14),RL("f-",2),["pi","bb"],""],
+ ["w30","power","orange","Relay VCC","Front + rail (5 V), column 60",RP.VCC,RL("f+",60),["relay","bb"],""],
+ ["w31","power","black","Relay GND","Front − rail, column 61",RP.GND,RL("f-",61),["relay","bb"],""],
+ ["w34","power","red","Case fan red","Pi pin 4 · 5 V",V(-16.4,2.9,2.2),PIN(4),["fan","pi"],"Both fans run whenever the Pi is on."],
+ ["w35","power","black","Case fan black","Pi pin 6 · GND",V(-16.4,2.9,2.6),PIN(6),["fan","pi"],""],
+ ["w36","load","red","DC jack +","Relay K1 COM",DC.P,RP.COM1,["dcjack","relay"],"5 V from the 2.5 A adapter, not from the Pi."],
+ ["w37","load","red","Relay K1 COM","Relay K2 COM",RP.COM1,RP.COM2,["relay"],"Shares the adapter's 5 V with both relays."],
+ ["w38","load","red","Relay K1 NO","Pump + (through the diode's striped end)",RP.NO1,PUMP_P,["relay","pump","diode"],"NO = the pump runs only while the relay is on.",[V(20,9,-9.5),V(27.2,12.6,-4.6),V(27.2,12.2,-4.5),V(28.9,11.8,-4.4),V(29.0,3,-1.5)]],
+ ["w39","load","black","Pump −","DC jack −",PUMP_N,DC.N,["pump","diode","dcjack"],"Passes the plain end of the diode.",[V(29.1,3,1.2),V(28.9,11.8,-3.3),V(27.2,12.2,-3.5),V(27.2,12.6,-3.4),V(20,8,-12)]],
+ ["w40","load","red","Relay K2 NO","Grow light +",RP.NO2,LEDP.P,["relay","led"],"",[V(16,3,-4),V(18.4,1.4,0.4),V(18.35,15,0.45),V(18.3,28.4,1.0)]],
+ ["w41","load","black","Grow light −","DC jack −",LEDP.N,DC.N,["led","dcjack"],"",[V(17.7,28.4,1.0),V(17.65,15,0.45),V(17.6,1.4,0.4),V(14,2.5,-10)]]
+];
+
+const wireObjs={};
+const dupG=new THREE.BoxGeometry(0.22,0.7,0.22);
+const isHoleOrPin=p=>p.y<=PI_TOP+0.01&&p.y>=BB_Y-0.01&&(p.x<10);
+W.forEach(w=>{
+  const [id,grp,col,from,to,A,B,parts,note,via]=w;
+  const lift=V(0,0.7,0);
+  let pts;
+  if(via){ pts=[A.clone(),A.clone().add(lift),...via,B.clone().add(lift),B.clone()]; }
+  else{
+    const d=A.distanceTo(B);
+    const h=d<2.2?0.35+0.25*d:Math.min(8,0.9+0.2*d);
+    const m=A.clone().lerp(B,.5); m.y=Math.max(A.y,B.y)+h;
+    pts=[A.clone(),A.clone().add(lift),m,B.clone().add(lift),B.clone()];
+  }
+  const curve=new THREE.CatmullRomCurve3(pts,false,"centripetal");
+  const mat=new THREE.MeshStandardMaterial({color:COL[col],roughness:.45,transparent:true});
+  const r=grp==="load"?0.13:0.075;
+  const mesh=new THREE.Mesh(new THREE.TubeGeometry(curve,Math.max(40,pts.length*16),r,8,false),mat);
+  mesh.castShadow=true; mesh.userData.wire=id; pickables.push(mesh); scene.add(mesh);
+  const ends=[];
+  if(grp!=="load"){
+    [A,B].forEach(p=>{
+      if(p.y<=PI_TOP+0.01){ const e=new THREE.Mesh(dupG,M.dup); e.position.copy(p).add(V(0,0.35,0)); e.userData.wire=id; pickables.push(e); scene.add(e); ends.push(e); }
+    });
+  }
+  wireObjs[id]={def:w,mesh,mat,ends,group:grp};
+});
+
+/* ---------- part info ---------- */
+const INFO={
+  pi:["Raspberry Pi 4 (4 GB)","Runs the logger, the rules and the model. All its wires plug into the 40-pin header on the side facing the breadboard. Pin 1 is the square pad at the back corner (white mark)."],
+  header:["Pi GPIO header","Pins used: 1 (3.3 V), 2 (5 V), 3 (SDA), 4 (5 V fan), 5 (SCL), 6 (GND fan), 9 (GND), 11 (GPIO 17), 14 (GND), 16 (GPIO 23), 18 (GPIO 24). Odd pins are on the inner row, even pins on the edge row."],
+  case:["Aluminium case","The metal case spreads the heat. Its lid has an opening over the header, so the jumper wires still plug in."],
+  fan:["Two case fans","Plug into pin 4 (5 V) and pin 6 (GND). They keep the Pi cool while the model runs."],
+  pisupply:["Pi supply 5.1 V 3 A","Powers only the Pi through USB-C. Check `vcgencmd get_throttled` reads 0x0 while the model runs."],
+  bb:["Breadboard","Holes a–e in one column are joined; so are f–j. The middle gap separates the two halves. The back rails carry 3.3 V and GND; the front rails carry 5 V and GND."],
+  bme:["BME280 (temperature, humidity)","I²C address 0x76. Pins in c3–c6: VIN, GND, SCL, SDA. Powered from 3.3 V."],
+  bh:["BH1750 (light)","I²C address 0x23 because ADDR goes to GND. Pins in c10–c14: VCC, GND, SCL, SDA, ADDR."],
+  ads:["ADS1115 (analog to digital)","Reads the soil probe on A0. I²C address 0x48 because ADDR goes to GND. Pins in c19–c28."],
+  relay:["2-relay module","IN1 (GPIO 23) switches K1 for the pump, IN2 (GPIO 24) switches K2 for the light. Screw terminals: COM gets the adapter's 5 V, NO goes to the load. NC stays empty, so a crash or reboot leaves the pump off."],
+  dcjack:["DC jack to screw terminal","Takes the 5 V 2.5 A adapter's plug. + goes to the relays' COM, − goes straight to the pump and the light."],
+  adapter:["5 V 2.5 A adapter","Only for the pump and the grow light. Keeping them off the Pi's supply stops the pump motor from causing undervoltage."],
+  tank:["Water tank, about 3–4 L","The pump sits on the bottom. Keep the water below the jar's top so it can't siphon."],
+  pump:["Mini pump, USB 5 V","Cut the USB cable: red goes to the relay K1 NO, black to the DC jack −. Water is measured by time: about 120 L/h, so 150 mL takes 4–5 s. Measure your own pump with a cup and set PUMP_SECONDS."],
+  diode:["1N4007 diode","Across the pump: striped end on the pump +, plain end on the pump −. It absorbs the spike when the motor stops."],
+  float:["Float switch (reed)","No power of its own: one wire to GPIO 17 (through hole j55/i55), the other to GND. Mount it so the float drops when about 1 L is left."],
+  tube:["Silicone tube","Pump → over the tank rim → into the jar. Keep the tank water lower than the jar's top so it can't siphon after the pump stops."],
+  jar:["Spearmint jar","The soil probe goes in up to the line on its blade, never deeper."],
+  probe:["Capacitive soil probe","AOUT to ADS1115 A0, VCC to 3.3 V, GND to GND. Calibrated: air = 16,700, water = 7,886.8."],
+  mint:["Spearmint","Watered when the soil index is 70 or below."],
+  led:["Grow light (USB 5 V strip)","Cut the USB cable: + to relay K2 NO, − to the DC jack −. Keep it 10–15 cm above the leaves and away from water."]
+};
+
+/* ---------- panel ---------- */
+const visible={logic:true,power:true,signal:true,load:true};
+const gBox=$("groups");
+GROUPS.forEach(([g,name,tok])=>{
+  const b=document.createElement("button"); b.id="g-"+g; b.setAttribute("aria-pressed","true");
+  b.innerHTML='<i class="sw" style="background:var('+tok+')"></i>'+name;
+  b.addEventListener("click",()=>{visible[g]=!visible[g]; b.setAttribute("aria-pressed",String(visible[g])); syncVis();});
+  gBox.appendChild(b);
+});
+const list=$("wireList"), rowBtns={};
+GROUPS.forEach(([g,name,tok])=>{
+  const h=document.createElement("h4"); h.innerHTML='<i class="sw" style="background:var('+tok+')"></i>'+name; list.appendChild(h);
+  W.filter(w=>w[1]===g).forEach(w=>{
+    const b=document.createElement("button"); b.className="wr"; b.id="row-"+w[0]; b.setAttribute("aria-pressed","false");
+    const c="#"+COL[w[2]].toString(16).padStart(6,"0");
+    b.innerHTML='<i class="sw" style="background:'+c+'"></i><div><b>'+w[3]+'</b><span>→ '+w[4]+'</span></div>';
+    b.addEventListener("click",()=>selectWire(w[0],true));
+    list.appendChild(b); rowBtns[w[0]]=b;
+  });
+});
+
+function syncVis(){
+  Object.values(wireObjs).forEach(o=>{ const v=visible[o.group]; o.mesh.visible=v; o.ends.forEach(e=>e.visible=v); });
+}
+function paint(ids){
+  Object.entries(wireObjs).forEach(([id,o])=>{
+    const on=!ids||ids.includes(id);
+    o.mat.opacity=on?1:.12; o.mat.depthWrite=on;
+    o.mat.emissive.set(ids&&on?COL[o.def[2]]:0x000000); o.mat.emissiveIntensity=ids&&on?.35:0;
+    o.ends.forEach(e=>e.visible=visible[o.group]&&on);
+    rowBtns[id].setAttribute("aria-pressed",String(!!ids&&on));
+  });
+}
+function selectWire(id,fly){
+  const w=wireObjs[id].def;
+  if(!visible[w[1]]){visible[w[1]]=true; $("g-"+w[1]).setAttribute("aria-pressed","true"); syncVis();}
+  paint([id]);
+  $("selName").textContent=w[3]+" → "+w[4];
+  $("selText").textContent=w[8]||"One jumper wire.";
+  $("selFt").textContent="Group: "+GROUPS.find(g=>g[0]===w[1])[1]+" · colour: "+w[2];
+  if(fly){ const m=w[5].clone().lerp(w[6],.5); flyTo({target:m,dist:Math.max(14,w[5].distanceTo(w[6])*1.6)}); }
+}
+function selectPart(key){
+  const info=INFO[key]; if(!info) return;
+  const ids=W.filter(w=>w[7].includes(key)).map(w=>w[0]);
+  paint(ids.length?ids:null);
+  $("selName").textContent=info[0];
+  $("selText").textContent=info[1];
+  $("selFt").textContent=ids.length?ids.length+" wire"+(ids.length>1?"s":"")+" highlighted":"";
+}
+$("clear").addEventListener("click",()=>{paint(null); $("selName").textContent="Click a part or a wire"; $("selText").textContent="Each wire in the list below lights up on the bench when you click it. Click a part to see every wire that touches it."; $("selFt").textContent="";});
+
+/* ---------- camera ---------- */
+const VIEWS={
+  all:{target:V(8,4,-1),dir:V(.18,.62,1),dist:78},
+  pi:{target:V(-14.6,2.4,-1.2),dir:V(.75,.75,.5),dist:13},
+  bb:{target:V(0,1.2,0),dir:V(0,1.05,.85),dist:22},
+  relay:{target:V(12,1.6,-8.5),dir:V(.3,.9,.75),dist:16},
+  water:{target:V(24,9,4),dir:V(.15,.4,1),dist:46},
+  top:{target:V(6,0,-2),dir:V(0,1,.02),dist:82}
+};
+let fly=null;
+function goal(v){ return {pos:v.target.clone().add((v.dir||V(.4,.7,1)).clone().normalize().multiplyScalar(v.dist)),target:v.target.clone()}; }
+function flyTo(v,snap,name){
+  if(name) Object.keys(VIEWS).forEach(k=>$("v-"+k).setAttribute("aria-pressed",String(k===name)));
+  else Object.keys(VIEWS).forEach(k=>$("v-"+k).setAttribute("aria-pressed","false"));
+  if(!v.dir){ const cur=camera.position.clone().sub(controls.target).normalize(); v={target:v.target,dist:v.dist,dir:cur}; }
+  const g=goal(v);
+  const still=window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if(snap||still){camera.position.copy(g.pos);controls.target.copy(g.target);fly=null;controls.update();} else fly=g;
+}
+Object.keys(VIEWS).forEach(k=>$("v-"+k).addEventListener("click",()=>flyTo(VIEWS[k],false,k)));
+controls.addEventListener("start",()=>{fly=null});
+$("labels").addEventListener("click",()=>{const on=$("labels").getAttribute("aria-pressed")!=="true"; $("labels").setAttribute("aria-pressed",String(on)); labels.forEach(l=>l.visible=on);});
+
+/* ---------- picking ---------- */
+const ray=new THREE.Raycaster(), ptr=new THREE.Vector2(); let down=null;
+canvas.addEventListener("pointerdown",e=>{down=[e.clientX,e.clientY]});
+canvas.addEventListener("pointerup",e=>{
+  if(!down) return; const moved=Math.hypot(e.clientX-down[0],e.clientY-down[1]); down=null; if(moved>5) return;
+  const r=canvas.getBoundingClientRect();
+  ptr.set(((e.clientX-r.left)/r.width)*2-1,-((e.clientY-r.top)/r.height)*2+1);
+  ray.setFromCamera(ptr,camera);
+  const hits=ray.intersectObjects(pickables.filter(o=>o.visible&&!(o.userData.wire&&wireObjs[o.userData.wire].mat.opacity<.5)),false);
+  if(!hits.length) return;
+  const u=hits[0].object.userData;
+  if(u.wire) selectWire(u.wire,false); else if(u.key) selectPart(u.key);
+});
+
+/* ---------- render ---------- */
+function resize(){ const w=stage.clientWidth||800,h=stage.clientHeight||600; renderer.setSize(w,h,false); camera.aspect=w/h; camera.updateProjectionMatrix(); }
+new ResizeObserver(resize).observe(stage);
+let last=performance.now();
+function frame(t){
+  const dt=Math.min(.05,(t-last)/1000); last=t; const k=1-Math.pow(.002,dt);
+  if(fly){ camera.position.lerp(fly.pos,k); controls.target.lerp(fly.target,k); if(camera.position.distanceTo(fly.pos)<.05) fly=null; }
+  controls.update(); renderer.render(scene,camera); requestAnimationFrame(frame);
+}
+resize(); flyTo(VIEWS.all,true,"all"); requestAnimationFrame(frame);
+})();
+</script>
+
+</body>
+</html>

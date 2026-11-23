@@ -1,0 +1,22 @@
+{
+  "dry_air": 16700.0,
+  "water": 7886.8,
+  "soil_dry": 16138.0,
+  "soil_moist": 10302.3,
+  "soil_wet": 9385.8,
+  "saved_at": "2026-11-15T12:56:45+01:00",
+  "old_dry_air_water": [
+    17460.4,
+    8007.2
+  ],
+  "updated_at": "2026-11-17: water 7886.8 = 30 s median at the max line (drinking water). dry_air 16700 = lowest air reading seen (air drifts 16,700-18,150), so air always reads 0 and a probe out of the soil is caught as a broken sensor (index 2 or below).",
+  "note": "index = (dry_air - raw) / (dry_air - water) x 100, limited to 0-100",
+  "previous_dry_air_water": [
+    16650.0,
+    7650.0
+  ],
+  "air_measured_range": [
+    16700,
+    18150
+  ]
+}

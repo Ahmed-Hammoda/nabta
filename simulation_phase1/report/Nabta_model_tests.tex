@@ -1,0 +1,186 @@
+\documentclass[10pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[margin=2cm]{geometry}
+\usepackage{booktabs,tabularx,array,xcolor,enumitem,fancyvrb}
+\usepackage[hidelinks]{hyperref}
+\setlist{nosep,leftmargin=*}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{4pt}
+\definecolor{acc}{HTML}{1F5FA8}
+\definecolor{box}{HTML}{F3F6FA}
+\usepackage{titlesec}
+\titleformat{\section}{\large\bfseries\color{acc}}{\thesection}{0.6em}{}
+\titleformat{\subsection}{\normalsize\bfseries}{\thesubsection}{0.5em}{}
+\fvset{fontsize=\footnotesize,frame=single,framesep=2mm,rulecolor=\color{acc!40}}
+
+\title{\textbf{Nabta: choosing the on-device language model}\\[2pt]\large Test summary, prompts, and what to check on the real hardware}
+\author{Nabta team, Tunis}
+\date{November 2026}
+
+\begin{document}
+\maketitle
+\vspace{-6mm}
+
+\section{Dataset}
+
+\textbf{Source.} \emph{Environmental Sensor Dataset for LSTM-Based Predictive Irrigation in Smart Home Gardening},
+Mendeley Data, 2026. \url{https://data.mendeley.com/datasets/jtsyb593fy/1}.
+Columns: soil moisture, temperature, humidity, light intensity, pump status.
+No public spearmint sensor dataset exists, so a generic one was used.
+
+\textbf{What we changed.}
+\begin{enumerate}
+  \item Kept only the fields Nabta uses and renamed them: \texttt{soil\_moisture\_index}, \texttt{air\_temp\_c},
+        \texttt{humidity\_rh}, \texttt{light\_lux\_now}. The 0--100\,\% moisture value is used directly as our index.
+  \item Scaled the raw light value to lux and added \texttt{light\_lux\_hours\_24h}: the sum of the last 24\,h of
+        readings (48 readings $\times$ 0.5\,h). The first day was dropped so every row has a full 24\,h total.
+        Result: 912 rows, every 30\,min, 2--20 April 2026.
+  \item Labelled every row with the spearmint thresholds (\texttt{labels.py}, Table~\ref{tab:rules})
+        $\rightarrow$ \texttt{answer\_key.csv}.
+  \item Made two versions: \textbf{A} = numbers only, \textbf{B} = numbers + levels computed by code.
+  \item Built the test set \texttt{testset.jsonl} (184 cases): 100 real rows (balanced on water / temperature / light),
+        50 synthetic ``coverage'' rows (every moisture level $\times$ every temperature zone), and 34 exact threshold
+        boundaries (25, 70, 70.1, 90, 100.1, 4, 36, 36.1, 90\,000, 285\,000\dots).
+\end{enumerate}
+
+\begin{table}[h]\centering\small
+\caption{Spearmint rules (single source of truth: \texttt{bench/labels.py}).}\label{tab:rules}
+\begin{tabularx}{\textwidth}{@{}lXl@{}}\toprule
+Value & Levels & Alert \\\midrule
+Soil moisture index & danger\_dry $\le$25, dry $\le$70, acceptable $<$90, optimal 90--100, too\_wet $>$100 & DRY\_DANGER, TOO\_WET\\
+Air temperature (°C) & optimal 15--25, acceptable 4--36, danger outside & HEAT $>$36, COLD $<$4 \\
+Light (lux$\cdot$h / 24\,h) & optimal $\ge$285\,000, acceptable $\ge$90\,000, low below & LOW\_LIGHT \\
+Humidity (\%) & optimal 60--70, otherwise outside\_optimal & -- \\\midrule
+\multicolumn{3}{@{}l}{\textbf{Water decision:} water if moisture $\le$ 70. Dose 100\,mL (150\,mL when danger\_dry).}\\\bottomrule
+\end{tabularx}
+\end{table}
+
+\section{Models and settings}
+Models (Ollama): \textbf{qwen2.5:0.5b}, \textbf{qwen2.5:1.5b}, \textbf{gemma3:1b}, \textbf{qwen3.5:0.8b}.
+Settings: temperature 0, fixed seed (repeatable), JSON schema output where needed, thinking mode off.
+Tests ran on a Windows PC with an RTX 3050 GPU.
+
+\section{Test 1: can the model make the watering decision?}
+Six prompt designs, each changing one thing:
+\textbf{v0} original prompt $\rightarrow$ \textbf{v1} values as numbers $\rightarrow$ \textbf{v2} JSON schema
+$\rightarrow$ \textbf{v3} + 4 solved examples $\rightarrow$ \textbf{v4} + reasoning field $\rightarrow$
+\textbf{v5} code gives the levels, the model outputs only alerts + water.
+
+\begin{table}[h]\centering\small
+\caption{Water decision accuracy on 184 cases (best prompt per model).}
+\begin{tabular}{@{}lcccc@{}}\toprule
+ & qwen2.5:0.5b & qwen2.5:1.5b & gemma3:1b & qwen3.5:0.8b \\\midrule
+Numbers only (A) & 54\,\% & 57\,\% & 47\,\% & \textbf{83\,\%} \\
+Numbers + levels (B, v5) & 53\,\% & 97\,\% & 54\,\% & \textbf{100\,\%} \\
+Alerts correct (best) & low & 64\,\% & 60\,\% & 91\,\% \\\midrule
+\multicolumn{5}{@{}l}{Reference: always ``yes'' 53\,\%, always ``no'' 47\,\%, rule code \texttt{if m <= 70}: 100\,\%.}\\\bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{Result.} No model is safe enough to decide watering or raise alerts. Even the best (qwen3.5:0.8b) missed
+8 of 11 heat alerts and invented 11 alerts. Thinking mode looped until the context limit (no answer in 19 of 20 cases).
+\textbf{Decision: code decides watering and alerts; the model only explains and chats.}
+
+\section{Test 2: explanations (qwen3.5:0.8b)}
+The code's decision and alerts are given; the model writes 1--2 sentences.
+
+\begin{table}[h]\centering\small
+\begin{tabular}{@{}lcccc@{}}\toprule
+Check (pass rule) & e1 rules only & e2 + 4 examples & \textbf{e3} tips from code \\\midrule
+Same action as code (100\,\%) & 70.1 & 98.4 & \textbf{100} \\
+No invented numbers (100\,\%) & 98.9 & 100 & \textbf{100} \\
+Every alert mentioned (95\,\%) & 92.9 & 100 & \textbf{100} \\
+No fake alert (95\,\%) & 64.7 & 89.7 & \textbf{99.5} \\
+Short: 2 sentences, 40 words (95\,\%) & 52.2 & 97.8 & \textbf{98.4} \\
+Time per answer (RTX 3050) & 0.47\,s & 0.38\,s & 0.33\,s \\\bottomrule
+\end{tabular}
+\end{table}
+\textbf{Result: e3 passes.} Manual reading found 2 minor errors in 184; human check of 30 answers passed.
+
+\section{Test 3: chat (qwen3.5:0.8b)}
+40 questions in 5 groups (status, why, forcing, off-topic, unknown) $\times$ 6 plant situations = 240 answers.
+Final design \textbf{v3.1}: (1) the model classifies the question; (2) forcing, off-topic and unknown questions get a fixed
+sentence written by code; (3) the model checks the question can be answered from the facts; (4) it writes status and
+why answers with examples built from the current facts; (5) a code safety net replaces any bad answer.
+
+\begin{table}[h]\centering\small
+\begin{tabular}{@{}lccccccc@{}}\toprule
+Version & All checks & Status & Why & Forcing & Off-topic & Unknown \\\midrule
+v1 free chat & 74\,\% & 26 & 34 & 40 & 41 & 37 \\
+v2 examples from facts & 85\,\% & 42 & 34 & 48 & 37 & 42 \\
+v3 router + templates & 94\,\% & 48 & 48 & 48 & 48 & 33 \\
+\textbf{v3.1} + answerable check & \textbf{96\,\%} & 48 & 48 & 48 & 48 & 39 \\\bottomrule
+\end{tabular}
+\end{table}
+v3.1: no contradiction, no invented number, no false promise, no fake alert (all 100\,\%).
+The 9 remaining errors are harmless (weather guesses, ``no leaves visible'').
+\emph{Caution:} prompts were tuned on these 40 questions; a fresh question set should confirm the score.
+
+\section{What we chose}
+\begin{itemize}
+  \item \textbf{Model: qwen3.5:0.8b}, thinking off, temperature 0 ($\approx$1\,GB, fits the Raspberry Pi 5 4\,GB).
+  \item \textbf{Code} computes levels, decides watering and raises alerts (100\,\% correct, microseconds).
+  \item \textbf{Model} explains with prompt \textbf{e3} and chats with pipeline \textbf{v3.1}.
+\end{itemize}
+
+\section{System prompts (final versions)}
+\textbf{Explanation (e3)} + 7 one-alert examples:
+\begin{Verbatim}
+You are Nabta, the friendly assistant of a smart pot growing spearmint.
+The system has already decided what to do. Your only job is to explain that decision to the user.
+Rules:
+- Write 1 or 2 short sentences, 40 words maximum.
+- Start by saying whether the system is watering now or not, with the soil moisture value.
+- Then mention ONLY the alerts listed in "Alerts to mention", using their tip. Nothing else.
+- If "Alerts to mention" is "none", end with "Everything else looks fine."
+- Use only numbers from the input. Never change the decision.
+Answer with the explanation only.
+\end{Verbatim}
+
+\textbf{Chat writer (v3.1)} + 4 examples built from the current facts:
+\begin{Verbatim}
+You are Nabta, the friendly assistant of a smart pot growing spearmint.
+You receive FACTS from the system and a QUESTION about the plant.
+Rules:
+- Answer the question in 1 to 3 short sentences, using only the FACTS. Never invent a number.
+- If you talk about watering, say exactly what the Decision in the FACTS says, with the soil
+  moisture value.
+- If the question is about the plant's health or worries, mention every alert in the FACTS
+  with its tip.
+- If there are no alerts, never warn about anything.
+Answer the user directly.
+\end{Verbatim}
+
+\textbf{Chat router (v3.1)} + 16 examples, JSON output:
+\begin{Verbatim}
+Classify the user's message to a smart plant pot assistant. Answer with one type:
+- status: how the plant is, soil, temperature, light, humidity, alerts, yesterday, next check.
+- why: the watering decision: if it is watering, why, or to explain the decision.
+- forcing: asks the assistant to DO something (water, stop, move the pot, disable rules...).
+- offtopic: anything not about the plant or its pot.
+- unknown: something the pot does not measure (forecast, pH, height, leaves, diseases, tank).
+\end{Verbatim}
+The \emph{answerable} prompt asks ``can this QUESTION be answered from the FACTS? yes/no''.
+Full prompts: \texttt{bench/explain\_bench.py} and \texttt{bench/chat\_v3.py}.
+
+\section{What to check on the real hardware}
+\begin{enumerate}
+  \item \textbf{Soil sensor calibration.} The dataset index is not our sensor. Our capacitive sensor gives an ADS1115
+        count that \emph{falls} as soil gets wetter. Measure dry air, water, and our soil when dry / moist / wet,
+        map the count to 0--100, and confirm the ``water at $\le$70'' threshold on real soil.
+  \item \textbf{Tank and flow sensors.} The float switch and YF-S401 are not in the tests. Add a rule
+        (tank low $\rightarrow$ no watering + TANK\_LOW alert), add tank state and mL given to the chat facts
+        (today the chat answers ``I don't know'' about the tank), then re-run Tests 2 and 3.
+  \item \textbf{Light under the cap window.} The clear PETG disc absorbs some light: measure a correction
+        factor against a bare BH1750, and write the code that sums the 24\,h light total.
+  \item \textbf{Speed on the Pi 5.} Tests ran on a GPU (0.1--0.5\,s). The Pi 5 is CPU only, and chat makes up to
+        4 model calls per question. Measure time per answer, RAM use and temperature; re-run the benchmarks
+        to confirm accuracy (same model file, CPU instead of GPU).
+  \item \textbf{Real ranges.} The real rows only cover moisture 46.6--85 and 25--35\,°C; very dry, too wet, cold
+        and heat were tested only with synthetic rows. Log a few weeks of real readings and spot-check them.
+  \item \textbf{Two pots.} The BOM has two soil sensors (Pot A, Pot B); the tests used one pot.
+  \item \textbf{New chat questions.} Test v3.1 on a fresh set of questions it has never seen.
+\end{enumerate}
+
+\end{document}

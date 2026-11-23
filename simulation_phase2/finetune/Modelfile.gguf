@@ -1,0 +1,10 @@
+# The fine-tuned model: the GGUF file made in Colab (cell 12). Change the file name to the one in nabta_gguf.
+# (Importing safetensors does not work on Windows: Ollama needs the MLX runtime for that.)
+#   ollama create nabta-qwen3.5 -f Modelfile.gguf
+FROM ./nabta_gguf/model-q8_0.gguf
+RENDERER qwen3.5
+PARSER qwen3.5
+PARAMETER presence_penalty 1.5
+PARAMETER temperature 1
+PARAMETER top_k 20
+PARAMETER top_p 0.95

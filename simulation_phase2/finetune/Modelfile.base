@@ -1,0 +1,10 @@
+# Control model: the UNTRAINED Qwen3.5-0.8B imported the same way as the fine-tuned one (GGUF Q8_0).
+# Download Qwen3.5-0.8B-Q8_0.gguf from https://huggingface.co/unsloth/Qwen3.5-0.8B-GGUF into this folder, then:
+#   ollama create nabta-base -f Modelfile.base
+FROM ./Qwen3.5-0.8B-Q8_0.gguf
+RENDERER qwen3.5
+PARSER qwen3.5
+PARAMETER presence_penalty 1.5
+PARAMETER temperature 1
+PARAMETER top_k 20
+PARAMETER top_p 0.95

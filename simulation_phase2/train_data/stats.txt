@@ -1,0 +1,21 @@
+rows: 6600 (train 5940, val 660); dropped 0 duplicates of the test set or of each other
+
+[val]
+  parts:  realistic 227, uniform 247, boundary 156, fault 30
+  water:  yes 328, no 332
+  alerts: DRY_DANGER 121, TOO_WET 40, HEAT_DANGER 77, COLD_DANGER 75, LOW_LIGHT 282, none 215
+  faults: SENSOR_ERROR 31
+  moisture_level: acceptable 190, danger_dry 141, dry 212, optimal 76, too_wet 41
+  temp_level: acceptable 298, danger 152, optimal 210
+  light_level: acceptable 120, low 282, optimal 258
+  humidity_level: optimal 133, outside_optimal 527
+
+[train]
+  parts:  realistic 2173, uniform 2153, boundary 1344, fault 270
+  water:  yes 3005, no 2935
+  alerts: DRY_DANGER 1183, TOO_WET 292, HEAT_DANGER 626, COLD_DANGER 679, LOW_LIGHT 2595, none 1824
+  faults: SENSOR_ERROR 293
+  moisture_level: acceptable 1833, danger_dry 1371, dry 1888, optimal 553, too_wet 295
+  temp_level: acceptable 2715, danger 1305, optimal 1920
+  light_level: acceptable 1008, low 2595, optimal 2337
+  humidity_level: optimal 1317, outside_optimal 4623

@@ -1,0 +1,46 @@
+Nabta system figure V3: photo credits
+====================================
+
+Real photos used in the figure (all openly licensed):
+
+- Raspberry Pi 4 Model B
+    Author:  not named (public-domain dedication)
+    Licence: CC0 (no credit needed)
+    Source:  https://commons.wikimedia.org/wiki/File:Raspberry_Pi_4_B.png
+
+- BME280 breakout
+    Author:  SparkFun
+    Licence: CC BY 2.0
+    Source:  https://commons.wikimedia.org/wiki/File:SparkFun_Atmospheric_Sensor_Breakout_-_BME280_13676.jpg
+
+- ADS1115 module
+    Author:  Pradeep717
+    Licence: CC BY-SA 4.0
+    Source:  https://commons.wikimedia.org/wiki/File:16bit_ADC_Card.jpg
+
+- Capacitive soil moisture sensor v1.2
+    Author:  tvluke_
+    Licence: cc0 1.0
+    Source:  https://www.flickr.com/photos/169136682@N02/46692273015
+
+NOT openly licensed (replace before publishing):
+- BH1750 (GY-302) light sensor
+    Source:  product photo from the CoThings shop (cothings.net), GY-302 BH1750 module
+    The shop logo and price tag were cropped out, but the photo is still theirs.
+    Use it only for drafts, or ask the shop for permission, or (best) take your
+    own photo of your module and paste it over the layer "PHOTO BH1750 (GY-302)".
+
+Still 3D renders from your own model (no openly licensed photo was found):
+- YF-S401 flow sensor
+- 8-channel relay module
+- jar, spearmint, sensor stake, LED strip, tank, pump
+
+Notes
+- The BME280 photo shows a SparkFun BME280 breakout, not the purple GY-BME280 board.
+  It is the same sensor chip. Replace it with a photo of your own module if you can.
+- CC BY and CC BY-SA photos need a credit line in the figure caption or the acknowledgements.
+  CC BY-SA also asks that an adapted figure is shared under the same licence, which some
+  journals do not accept. Your own photos of your own parts avoid this completely.
+- In the PSD every picture is its own layer (group 04), named PHOTO ... or RENDER ...,
+  so you can paste your own photo over it.
+- In V3 the photos are in group 05 "Parts (photos)".
