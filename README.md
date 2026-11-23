@@ -4,6 +4,10 @@ Nabta looks after one jar of spearmint. Sensors measure the soil, light, air tem
 
 **The rules decide; the model only explains.** In our tests the rules were right in every case. The best small model deciding on its own was not reliable enough to control the pump.
 
+![Nabta system diagram](docs/diagrams/Nabta_System_Diagram_v3.png)
+
+*Photo credits: [`docs/diagrams/Nabta_System_Diagram_v3_photo_credits.txt`](docs/diagrams/Nabta_System_Diagram_v3_photo_credits.txt)*
+
 ## What is in this repo
 
 | Folder | What it holds |
