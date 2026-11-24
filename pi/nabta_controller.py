@@ -43,7 +43,7 @@ LIGHT_ENABLED = False
 PUMP_PIN = 24               # BCM 24 = pin 18 -> relay IN2 (K2, pump)   (tested: the pump runs)
 LIGHT_PIN = 23              # BCM 23 = pin 16 -> relay IN1 (K1, grow light, not connected yet)
 RELAY_ACTIVE_LOW = True     # tested: this board switches ON when IN is LOW (inputs idle HIGH)
-PUMP_SECONDS = 8            # one dose: measure it (cup test) and set it
+PUMP_SECONDS = 6            # one dose = 150 mL (cup test 24 Nov 2026: 6 s = 150 mL, about 25 mL/s)
 DOSE_ML = 150
 WAIT_HOURS = 3              # no second watering within 3 h (the water needs time to reach the probe)
 MAX_PER_DAY = 3

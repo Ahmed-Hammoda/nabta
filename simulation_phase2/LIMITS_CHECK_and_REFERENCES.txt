@@ -204,3 +204,9 @@ REFERENCES
 Reliability: R1, R2, R3, R6, R7, R12 and R13 are primary, trusted sources. R4, R9 and R10
 are secondary or technical notes. R5, R8 and R11 are single studies; check their full
 author lists before citing them in the paper.
+
+=====================================================================
+UPDATE 24 Nov 2026
+=====================================================================
+Rules v3 (pump, grow light, water tank), the water amount per watering and the 16 h light day were
+checked against more sources: see WATER_AND_LIGHT_CHECK.md (references W1-W16).
