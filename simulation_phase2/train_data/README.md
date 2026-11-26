@@ -32,7 +32,7 @@ Built by `../code/make_train_data.py` (fixed seeds, so it can be rebuilt exactly
 |---|---|---|
 | realistic | about 2,400 | The v3 30-day simulator with **other seeds** (2027–2029), grow light and tank included; rare rows (water, faults, alerts, light switches) kept first |
 | uniform | about 2,400 | Random values over every input's full range (hour 0–23, light on 40 %, tank low 10 %) |
-| boundary | about 1,800 | On and just around every limit: soil 2/25/70/90/98, temp 4/15/25/36, humidity 60/70, light 90,000/285,000, dark 2,000 lux, hours 6 and 22, tank low with dry soil |
+| boundary | about 1,800 | On and just around every limit: soil 2/25/70/90/98, temp 4/15/25/36, humidity 60/70, light 90,000/225,000, dark 2,000 lux, hours 6 and 22, tank low with dry soil |
 | fault | about 300 | Broken sensor: soil 2 or below, impossible temperature or humidity, negative light |
 
 Rows equal to a row of the v3 test set (`../dataset_v3`) are removed, so that test stays unseen.

@@ -10,6 +10,7 @@ Each explanation is checked automatically, and 30 are exported for a human check
 import argparse, csv, json, os, random, re, time, urllib.request
 
 URL = "http://127.0.0.1:11434/api/chat"
+KEEP_ALIVE = "30m"     # how long Ollama keeps the model loaded after a call (the controller sets 2h)
 
 SYSTEM = """You are Nabta, the friendly assistant of a smart pot growing spearmint.
 The system has already decided what to do. Your only job is to explain that decision to the user.
@@ -190,7 +191,7 @@ def messages(prompt, case):
 
 
 def ask(model, msgs, think):
-    body = {"model": model, "stream": False, "keep_alive": "30m", "messages": msgs,
+    body = {"model": model, "stream": False, "keep_alive": KEEP_ALIVE, "messages": msgs,
             "options": {"temperature": 0, "seed": 1, "num_predict": 150}}
     if think is not None:
         body["think"] = think

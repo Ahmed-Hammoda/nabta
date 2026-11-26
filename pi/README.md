@@ -72,7 +72,7 @@ but pulling the plug can still damage the SD card.
   (cup test), set it, then `PUMP_ENABLED = True` and restart the controller.
 
 ## Grow light (relay IN1, GPIO 23, pin 16)
-- On only 06:00–22:00, when it is dark (below 2,000 lux) and the 24 h light total is below 285,000 lux-h.
+- On only 06:00–22:00, when it is dark (below 2,000 lux) and the 24 h light total is below 225,000 lux-h.
   Once on, it stays on until the total is reached or 22:00.
 - Plug the strip into the USB socket wired to relay K1, then set `LIGHT_ENABLED = True`.
 - This relay board switches ON when IN is LOW (`RELAY_ACTIVE_LOW = True`, tested).

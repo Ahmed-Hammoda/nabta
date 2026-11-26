@@ -31,10 +31,13 @@ import rules_v2
 import rules_v3 as rules
 import explain_bench as eb
 import nabta_paths as paths
+eb.KEEP_ALIVE = "2h"        # keep the model loaded between the 30-min decisions (cold load ~98 s)
 
 STATE = paths.STATE
 MODEL = "qwen3.5:0.8b"
-USE_MODEL = False           # False = code sentences only (no load on the Pi). True when the Pi has cooling.
+USE_MODEL = True            # the model writes the explanation (Pi has a fan + 3 A supply since 23 Nov 2026)
+EXPLAIN_CHECKS = ["c1_same_action", "c2_no_invented_numbers", "c4_all_alerts_mentioned", "c5_no_fake_alert",
+                  "c6_short"]     # the phase 1 checks: if one fails, the code sentence is shown instead
 MAX_GAP_MIN = 45            # the previous reading counts only if it is at most 45 min older
 
 # ---- relays (2-relay module). Tested on the Pi 24 Nov 2026: the pump is on relay 2. OFF while testing ----
@@ -43,8 +46,8 @@ LIGHT_ENABLED = False
 PUMP_PIN = 24               # BCM 24 = pin 18 -> relay IN2 (K2, pump)   (tested: the pump runs)
 LIGHT_PIN = 23              # BCM 23 = pin 16 -> relay IN1 (K1, grow light, not connected yet)
 RELAY_ACTIVE_LOW = True     # tested: this board switches ON when IN is LOW (inputs idle HIGH)
-PUMP_SECONDS = 6            # one dose = 150 mL (cup test 24 Nov 2026: 6 s = 150 mL, about 25 mL/s)
-DOSE_ML = 150
+PUMP_SECONDS = 3            # one dose = 75 mL (cup test: 25 mL/s; dose from FAO-56 p = 0.40, see WATER_AND_LIGHT_CHECK.md)
+DOSE_ML = 75
 WAIT_HOURS = 3              # no second watering within 3 h (the water needs time to reach the probe)
 MAX_PER_DAY = 3
 BLOCK_WHEN_TANK_LOW = True  # 4th safety rule: never run the pump when the float says the tank is low
@@ -185,24 +188,36 @@ def code_sentence(x, k):
         s = f"No watering needed: the soil moisture is {m}."
     tips = " ".join(eb.TIPS[a][0].upper() + eb.TIPS[a][1:] + "." for a in k["alerts"]
                     if not (a == "TANK_LOW" and m <= 70))
-    light = "The grow light is on." if k["light"] == "on" else ""
-    return " ".join(p for p in (s, tips, light) if p)
+    return " ".join(p for p in (s, tips, light_sentence(k)) if p)
+
+
+def light_sentence(k):
+    return "The grow light is on." if k.get("light") == "on" else ""
 
 
 def message(x, k):
-    """Fixed text for a fault; otherwise qwen3.5:0.8b with the tested prompt e3."""
+    """Fixed text for a fault or a low tank; otherwise qwen3.5:0.8b (tested prompt e3), checked by code.
+    The light sentence is always added by code (the explainer was not tested on the grow light)."""
     if k["faults"]:
         f = k["faults"][0]
         return rules_v2.FAULT_MESSAGE[f].format(reason=k["fault_reason"]), "fixed (fault)", 0.0
+    if "TANK_LOW" in k["alerts"] and x["soil_moisture_index"] <= 70:
+        return code_sentence(x, k), "code (tank low)", 0.0          # the model was not tested on this case
     if not USE_MODEL:
         return code_sentence(x, k), "code (model off)", 0.0
+    case = {"input": {c: x[c] for c in COLS}, "key": k}
     try:
-        text, secs = eb.ask(MODEL, eb.messages("e3", {"input": x, "key": k}), False)
-        if text:
-            return text, MODEL, secs
+        text, secs = eb.ask(MODEL, eb.messages("e3", case), False)
     except Exception as e:  # noqa: BLE001 - Ollama not running, model missing, timeout
         print("[warn] model not available:", e, file=sys.stderr)
-    return code_sentence(x, k), "code (model not available)", 0.0
+        return code_sentence(x, k), "code (model not available)", 0.0
+    if not text:
+        return code_sentence(x, k), "code (empty answer)", secs
+    failed = [c for c in EXPLAIN_CHECKS if not eb.check(text, case).get(c)]
+    if failed:
+        print("[info] explanation failed", failed, ":", text, file=sys.stderr)
+        return code_sentence(x, k), "code (check failed: " + ", ".join(failed) + ")", secs
+    return " ".join(p for p in (text, light_sentence(k)) if p), MODEL, secs
 
 
 def handle(row, prev, state):

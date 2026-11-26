@@ -21,7 +21,7 @@ Each number is tagged:
 | Dose and frequency | No source gives mL for a pot. Grower guides: water when the top 2–3 cm is dry, about every 3–5 days indoors, less in winter; check the soil, not a calendar [W8, W9] | Sensor-based watering matches; dose: see section 2 |
 | Glass jar without drainage | Guides: moist, not waterlogged; standing water rots roots [W8, W9]. Peppermint is sensitive to waterlogging; another mint is more tolerant [W10] | Main risk: gravel layer, watch for standing water |
 | Grow light 16 h (06:00–22:00) | Spearmint LED studies used 16 h [W11]; Moroccan mint with extra LED light in a 16 h day: +13–19 % leaves and weight [W12]; grower guide 14–16 h [W13] | Confirmed |
-| Light "optimal" ≥ 285,000 lux-h (≈ 19 mol/m²/day) | Mint grows best at about 15–16 mol/day [R3, R4]; herb guides 10–14 mol/day for mint [W14, W15] | Too high: suggest 225,000 lux-h (≈ 15 mol). Not changed yet (team decision) |
+| Light "optimal" ≥ 285,000 lux-h (≈ 19 mol/m²/day) | Mint grows best at about 15–16 mol/day [R3, R4]; herb guides 10–14 mol/day for mint [W14, W15] | Too high: **changed to 225,000 lux-h (≈ 15 mol) on 24 Nov 2026** |
 | LOW_LIGHT < 90,000 lux-h (≈ 6 mol) | Lowest values recommended for mint about 6–10 mol/day [W15] | Reasonable |
 | Humidity 60–70 % | Only a study on another mint species [R5] | Weak, low risk (no watering depends on it) |
 | How to water | Overhead sprinklers can damage the leaves' oil glands; water the soil [W3] | Our tube waters the soil: correct |
@@ -41,7 +41,7 @@ want many leaves, so the soil is kept moist; it is not dried on purpose.
 | Allowed use before watering | p = 0.40 for mint | [S] FAO-56 Table 22 [R7] |
 | **Dose per watering** | 0.40 × 200 mL ≈ **80 mL** | [EST] |
 | Pump flow | 6 s = 150 mL → 25 mL/s (cup test 24 Nov 2026) | measured |
-| **Pump time** | **3 s ≈ 75 mL** (now set to 6 s = 150 mL; probably too much for this jar) | [EST] |
+| **Pump time** | **3 s ≈ 75 mL** (applied on 24 Nov 2026; was 6 s = 150 mL) | [EST] |
 
 ### Water used per day
 Water use = Kc × ET₀ × jar surface (1 mm of water over 87 cm² = 8.7 mL).

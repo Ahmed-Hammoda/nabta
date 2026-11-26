@@ -8,12 +8,13 @@ If the latest decision has a sensor fault, status and why questions get the faul
 
     python3 nabta_chat.py          (type your question, empty line or Ctrl+C to quit)
 """
-import csv, os, sys
+import csv, os, re, sys
 from datetime import datetime
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 import rules_v2
+import rules_v3                 # also teaches the explainer words for TANK_LOW
 import chat_bench, chat_v3
 import nabta_paths as paths     # logs/<YYYY-MM>/decisions.csv and log_30min.csv
 
@@ -58,7 +59,33 @@ def load_facts():
     return d
 
 
+TANK_Q = re.compile(r"\btank\b|\brefill|\breservoir\b|water level|out of water", re.I)
+LIGHT_Q = re.compile(r"grow ?light|\blamp\b|\bled\b|\blights?\b", re.I)
+
+
+def tank_answer(d):
+    t = (d.get("tank_low") or "").strip()
+    if t in ("1", "1.0"):
+        return "The water tank is almost empty (float switch). Please refill it: I won't water until it is refilled."
+    if t in ("0", "0.0"):
+        return "The water tank is OK: the float switch shows enough water."
+    return "I don't know the tank level yet: the float switch reading is missing."
+
+
+def light_answer(d):
+    on = d.get("light_decision") == "on"
+    lh, lvl = d.get("light_lux_hours_24h") or "?", d.get("light_level") or "?"
+    return (f"The grow light is {'on' if on else 'off'}. In the last 24 hours the plant got {lh} lux-hours "
+            f"(light level: {lvl}). The light runs only from 06:00 to 22:00, when it is dark and the plant has had "
+            f"less than {rules_v3.LIGHT_TARGET:,} lux-hours.")
+
+
 def answer(q, d):
+    # tank and grow-light questions: answered by code from the latest decision (the model was not tested on them)
+    if TANK_Q.search(q):
+        return tank_answer(d), "code (tank)"
+    if LIGHT_Q.search(q):
+        return light_answer(d), "code (light)"
     rt = chat_v3.route(MODEL, q)
     fault = d["faults"] != "none"
     if fault and rt in ("status", "why"):

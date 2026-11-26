@@ -2,22 +2,22 @@ rows: 6900 (train 6210, val 690); dropped 0 duplicates of the test set or of eac
 
 [val]
   parts:  realistic 243, uniform 241, boundary 171, fault 35
-  water:  yes 254, no 436
-  light:  on 245, off 445  (switched vs. light_on: 206)
-  alerts: DRY_DANGER 121, TOO_WET 32, HEAT_DANGER 81, COLD_DANGER 89, LOW_LIGHT 266, TANK_LOW 107, none 208
-  faults: SENSOR_ERROR 38
-  moisture_level: acceptable 229, danger_dry 148, dry 226, optimal 55, too_wet 32
-  temp_level: acceptable 305, danger 170, optimal 215
-  light_level: acceptable 148, low 266, optimal 276
-  humidity_level: optimal 127, outside_optimal 563
+  water:  yes 235, no 455
+  light:  on 220, off 470  (switched vs. light_on: 186)
+  alerts: DRY_DANGER 116, TOO_WET 30, HEAT_DANGER 76, COLD_DANGER 84, LOW_LIGHT 252, TANK_LOW 127, none 220
+  faults: SENSOR_ERROR 40
+  moisture_level: acceptable 227, danger_dry 145, dry 230, optimal 58, too_wet 30
+  temp_level: acceptable 315, danger 160, optimal 215
+  light_level: acceptable 120, low 252, optimal 318
+  humidity_level: optimal 125, outside_optimal 565
 
 [train]
   parts:  realistic 2157, uniform 2159, boundary 1629, fault 265
-  water:  yes 2248, no 3962
-  light:  on 2235, off 3975  (switched vs. light_on: 1916)
-  alerts: DRY_DANGER 1255, TOO_WET 271, HEAT_DANGER 685, COLD_DANGER 705, LOW_LIGHT 2578, TANK_LOW 1180, none 1652
-  faults: SENSOR_ERROR 286
-  moisture_level: acceptable 1934, danger_dry 1429, dry 2059, optimal 512, too_wet 276
-  temp_level: acceptable 2904, danger 1390, optimal 1916
-  light_level: acceptable 1248, low 2578, optimal 2384
-  humidity_level: optimal 1248, outside_optimal 4962
+  water:  yes 2265, no 3945
+  light:  on 2115, off 4095  (switched vs. light_on: 1926)
+  alerts: DRY_DANGER 1264, TOO_WET 257, HEAT_DANGER 688, COLD_DANGER 710, LOW_LIGHT 2625, TANK_LOW 1161, none 1621
+  faults: SENSOR_ERROR 284
+  moisture_level: acceptable 1960, danger_dry 1436, dry 2050, optimal 502, too_wet 262
+  temp_level: acceptable 2882, danger 1398, optimal 1930
+  light_level: acceptable 1016, low 2625, optimal 2569
+  humidity_level: optimal 1268, outside_optimal 4942

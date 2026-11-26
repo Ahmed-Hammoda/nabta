@@ -17,7 +17,7 @@ Parts:
   realistic  rows from the v3 30-day simulator run with other seeds (2027, 2028, 2029)
   uniform    random values over the whole range of every input
   boundary   values at and right around every limit (soil 70, 25, 98, 90, 2 / temp 36, 4, 15, 25 /
-             humidity 60, 70 / light 90000, 285000 / dark 2000 lux / hours 6 and 22 / tank low)
+             humidity 60, 70 / light 90000, 225000 / dark 2000 lux / hours 6 and 22 / tank low)
   fault      broken sensor: soil 2 or below, impossible temperature / humidity, negative light
 
 Output (../train_data/):
@@ -96,6 +96,7 @@ def near(limit, spread):
 
 
 def boundary():
+    T = rules_v3.LIGHT_TARGET
     out = []
     for _ in range(N["boundary"]):
         ln, lh = lux_pair()
@@ -106,14 +107,14 @@ def boundary():
         if which == "t": t = near(rnd.choice([36, 4, 15, 25]), 1)
         if which == "h": h = near(rnd.choice([60, 70]), 1)
         if which == "l":                                   # 24 h total around the low / target limits
-            lh = max(0.0, near(rnd.choice([90000, 285000, 285000]), 2000))
+            lh = max(0.0, near(rnd.choice([90000, T, T]), 2000))
             hour = rnd.randrange(6, 22)
         if which == "dark":                                # light off, daytime: is it dark enough?
             ln, light_on, hour = max(0.0, near(2000, 50)), 0, rnd.randrange(6, 22)
-            lh = rnd.uniform(0, 284000) if rnd.random() < 0.8 else rnd.uniform(285000, 500000)
+            lh = rnd.uniform(0, T - 1000) if rnd.random() < 0.8 else rnd.uniform(T, 500000)
         if which == "hour":                                # around 06:00 and 22:00
             hour = rnd.choice([5, 6, 6, 21, 21, 22, 23, 0])
-            lh = rnd.uniform(0, 284000) if rnd.random() < 0.8 else lh
+            lh = rnd.uniform(0, T - 1000) if rnd.random() < 0.8 else lh
         if which == "tank":                                # tank low, often when the soil needs water
             tank_low = 1
             m = rnd.uniform(3, 70) if rnd.random() < 0.7 else m
